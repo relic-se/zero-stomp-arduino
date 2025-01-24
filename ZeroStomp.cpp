@@ -346,19 +346,19 @@ void ZeroStomp::update() {
     int32_t l, r;
     while (index < count) {
         // Process samples through buffer
-        l = (int32_t)b[index];
         if (_isStereo) {
-            r = (int32_t)b[index + 1];
+            l = (int32_t)b[index + 1];
+            r = (int32_t)b[index];
         } else {
-            r = l;
+            l = r = (int32_t)b[index];
         }
         updateAudio(&l, &r);
 
         // Hard clip samples and update buffer
-        b[index++] = (int16_t)min(max(l, -32767), 32768);
         if (_isStereo) {
             b[index++] = (int16_t)min(max(r, -32767), 32768);
         }
+        b[index++] = (int16_t)min(max(l, -32767), 32768);
     }
     _i2s.write((const uint8_t *)_buffer, count * sizeof(int16_t));
 
