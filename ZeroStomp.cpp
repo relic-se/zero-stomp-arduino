@@ -35,7 +35,7 @@ bool ZeroStomp::begin() {
     /// Clear display buffer
     _display.clearDisplay();
 
-    #if SPLASH
+    #ifndef NO_SPLASH
 
     /// Draw splash bitmap
     _display.drawBitmap(
@@ -435,4 +435,68 @@ void ZeroStomp::update() {
         updateControl();
         _control_timer = 0;
     }
+};
+
+bool ZeroStomp::prepareTitle(size_t len) {
+    if (!_active) {
+        return false;
+    }
+
+    // Clear area
+    _display.fillRect(
+        0, 0,
+        DISPLAY_WIDTH, TITLE_PAD * 2 + CHAR_HEIGHT, 0
+    );
+
+    // Draw border
+    #if TITLE_BORDER > 0
+    _display.fillRect(
+        0, TITLE_PAD * 2 + CHAR_HEIGHT,
+        DISPLAY_WIDTH, TITLE_BORDER, 1
+    );
+    #endif
+
+    /// Draw string
+    _display.setTextSize(1);
+    _display.setTextColor(SSD1306_WHITE);
+    _display.setCursor(
+        (DISPLAY_WIDTH - STR_WIDTH(len)) / 2,
+        TITLE_PAD
+    );
+
+    return true;
+};
+
+bool ZeroStomp::drawTitle(const String &s, bool update) {
+    if (!prepareTitle(s.length())) {
+        return false;
+    }
+    
+    if (!_display.println(s)) {
+        return false;
+    }
+
+    if (update) {
+        // Update display
+        _display.display();
+    }
+
+    return true;
+};
+
+bool ZeroStomp::drawTitle(const char c[], bool update) {
+    if (!prepareTitle(strlen(c))) {
+        return false;
+    }
+    
+    if (!_display.println(c)) {
+        return false;
+    }
+
+    if (update) {
+        // Update display
+        _display.display();
+    }
+
+    return true;
 };

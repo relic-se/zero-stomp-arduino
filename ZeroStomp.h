@@ -30,6 +30,9 @@ public:
 
     int16_t getAdcValue(uint8_t index);
 
+    bool drawTitle(const String &s, bool update = true);
+    bool drawTitle(const char c[], bool update = true);
+
     void update();
 
 protected:
@@ -40,6 +43,8 @@ protected:
     bool updateLevel();
 
     int getAdcPin(uint8_t index);
+
+    bool prepareTitle(size_t len);
 
 private:
     WM8960 _codec;
