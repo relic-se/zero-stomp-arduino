@@ -18,10 +18,12 @@ size_t buffer_pos;
 uint32_t buffer_rate = 1 << DELAY_SUBBITS;
 uint16_t decay = 1 << 15; // 0 - 65536, defaults to half
 
+uint16_t knob_mix, knob_rate, knob_decay;
+
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
-  Serial.println("Zero Stomp - Loopback");
+  Serial.println("Zero Stomp - Delay");
 
   // Fill buffers with silence
   memset((void *)buffer[0], 0, DELAY_SIZE * sizeof(int16_t));
@@ -32,6 +34,11 @@ void setup(void) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
+
+  device.setTitle(F("Delay"));
+  device.setLabel(0, F("Mix"));
+  device.setLabel(1, F("Time"));
+  device.setLabel(2, F("Decay"));
 }
 
 void loop() {
@@ -64,8 +71,8 @@ void updateAudio(int32_t *l, int32_t *r) {
 }
 
 void updateControl() {
-  device.setMix(device.getAdcValue(0) >> 4);
+  device.setMix(device.getValue(0) >> 4);
   // TODO: Logarithmic
-  buffer_rate = map(device.getAdcValue(1), 0, 4096, MAX_RATE, MIN_RATE);
-  decay = map(device.getAdcValue(2), 0, 4096, 0, 65535);
+  buffer_rate = map(device.getValue(1), 0, 4096, MAX_RATE, MIN_RATE);
+  decay = map(device.getValue(2), 0, 4096, 0, 65535);
 }

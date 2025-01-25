@@ -5,7 +5,7 @@ setBitsPerSample    KEYWORD2
 setBufferSize       KEYWORD2
 setMix              KEYWORD2
 setLevel            KEYWORD2
-getAdcValue         KEYWORD2
+getValue            KEYWORD2
 update              KEYWORD2
 
 updateAudio         KEYWORD3

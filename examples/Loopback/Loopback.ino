@@ -15,6 +15,8 @@ void setup(void) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
+
+  device.setTitle("Loopback");
 }
 
 void loop() {

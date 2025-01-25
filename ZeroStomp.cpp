@@ -26,6 +26,8 @@ bool ZeroStomp::begin() {
     }
 
     analogReadResolution(12);
+    memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
+    memset((void *)_knob, 0xFF, KNOB_COUNT * sizeof(uint16_t));
 
     // Display
     if (!_display.begin(SSD1306_SWITCHCAPVCC)) {
@@ -212,6 +214,7 @@ bool ZeroStomp::begin() {
     _i2s.begin();
 
     _buffer = (uint8_t *)malloc(_buffer_size);
+    memset((void *)_buffer, 0, _buffer_size);
     _control_timer = 0;
 
     _running = true;
@@ -382,21 +385,29 @@ bool ZeroStomp::updateLevel() {
     return true;
 };
 
-int ZeroStomp::getAdcPin(uint8_t index) {
-    switch (index) {
-        case 1:
-            return PIN_ADC_1;
-        case 2:
-            return PIN_ADC_2;
-        case 3:
-            return PIN_ADC_EXPR;
-        default:
-            return PIN_ADC_0;
+uint16_t ZeroStomp::getValue(uint8_t index) {
+    if (!_active || index >= KNOB_COUNT) {
+        return 0;
     }
-}
 
-int16_t ZeroStomp::getAdcValue(uint8_t index) {
-    return analogRead(getAdcPin(index));
+    if (_adc[index] == 0xFFFF) {
+        _adc[index] = analogRead(PIN_ADC_0 + index);
+        drawKnob(index);
+    }
+
+    return _adc[index];
+};
+
+uint16_t ZeroStomp::getExpressionValue() {
+    if (!_active) {
+        return 0;
+    }
+
+    if (_adc[KNOB_COUNT] == 0xFFFF) {
+        _adc[KNOB_COUNT] = analogRead(PIN_ADC_EXPR);
+    }
+
+    return _adc[KNOB_COUNT];
 };
 
 void ZeroStomp::update() {
@@ -432,7 +443,15 @@ void ZeroStomp::update() {
 
     _control_timer += (_isStereo ? count >> 1 : count);
     if (_control_timer >= CONTROL_RATE) {
+        // Reset knobs
+        memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
+
+        // Run user code
         updateControl();
+
+        // Update display
+        _display.display();
+
         _control_timer = 0;
     }
 };
@@ -467,7 +486,7 @@ bool ZeroStomp::prepareTitle(size_t len) {
     return true;
 };
 
-bool ZeroStomp::drawTitle(const String &s, bool update) {
+bool ZeroStomp::setTitle(const String &s, bool update) {
     if (!prepareTitle(s.length())) {
         return false;
     }
@@ -477,14 +496,13 @@ bool ZeroStomp::drawTitle(const String &s, bool update) {
     }
 
     if (update) {
-        // Update display
         _display.display();
     }
 
     return true;
 };
 
-bool ZeroStomp::drawTitle(const char c[], bool update) {
+bool ZeroStomp::setTitle(const char c[], bool update) {
     if (!prepareTitle(strlen(c))) {
         return false;
     }
@@ -494,9 +512,104 @@ bool ZeroStomp::drawTitle(const char c[], bool update) {
     }
 
     if (update) {
-        // Update display
         _display.display();
     }
 
+    return true;
+};
+
+bool ZeroStomp::prepareKnobLabel(uint8_t index, size_t len) {
+    if (!_active) {
+        return false;
+    }
+
+    index %= KNOB_COUNT;
+
+    // Clear area
+    _display.fillRect(
+        DISPLAY_WIDTH / KNOB_COUNT * index, LABEL_Y,
+        DISPLAY_WIDTH / KNOB_COUNT, CHAR_HEIGHT, 0
+    );
+
+    /// Draw string
+    _display.setTextSize(1);
+    _display.setTextColor(SSD1306_WHITE);
+    _display.setCursor(
+        (DISPLAY_WIDTH / KNOB_COUNT / 2 * (index * 2 + 1)) - (STR_WIDTH(len) / 2),
+        LABEL_Y
+    );
+
+    return true;
+};
+
+bool ZeroStomp::setLabel(uint8_t index, const String &s, bool update) {
+    if (!prepareKnobLabel(index, s.length())) {
+        return false;
+    }
+    
+    if (!_display.println(s)) {
+        return false;
+    }
+
+    if (update) {
+        _display.display();
+    }
+
+    return true;
+};
+
+bool ZeroStomp::setLabel(uint8_t index, const char c[], bool update) {
+    if (!prepareKnobLabel(index, strlen(c))) {
+        return false;
+    }
+    
+    if (!_display.println(c)) {
+        return false;
+    }
+
+    if (update) {
+        _display.display();
+    }
+
+    return true;
+};
+
+bool ZeroStomp::drawKnob(uint8_t index) {
+    if (!_active) {
+        return false;
+    }
+
+    index %= KNOB_COUNT;
+
+    // Prevent redrawing knob
+    if (_adc[index] != 0xFFFF && _knob[index] != _adc[index]) {
+        _knob[index] = _adc[index];
+
+        // Calculate center position of knob
+        int16_t center_x = DISPLAY_WIDTH / KNOB_COUNT / 2 * (index * 2 + 1);
+
+        // Clear area
+        _display.fillRect(
+            center_x - KNOB_OUTER_RADIUS, KNOB_Y - KNOB_OUTER_RADIUS,
+            KNOB_OUTER_RADIUS * 2, KNOB_OUTER_RADIUS * 2, 0
+        );
+
+        // Draw outer circle
+        _display.drawCircle(
+            center_x, KNOB_Y,
+            KNOB_OUTER_RADIUS, 1
+        );
+
+        // Draw inner circle
+        // TODO: Optimization with integer calculation?
+        float theta_r = ((float)_knob[index] / 4096.0 * -1.5 - 0.25) * PI;
+        int16_t knob_x = center_x + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * sin(theta_r));
+        int16_t knob_y = KNOB_Y + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * cos(theta_r));
+        _display.drawCircle(
+            knob_x, knob_y,
+            KNOB_INNER_RADIUS, 1
+        );
+    }
+    
     return true;
 };

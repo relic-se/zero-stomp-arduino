@@ -17,6 +17,12 @@ void setup(void) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
+
+  device.setTitle(F("Bit Crusher"));
+
+  device.setLabel(0, F("Mix"));
+  device.setLabel(1, F("Bits"));
+  device.setLabel(2, F("Level"));
 }
 
 void loop() {
@@ -31,11 +37,11 @@ void updateAudio(int32_t *l, int32_t *r) {
 
 void updateControl() {
   // Update wet/dry mix through codec
-  device.setMix(device.getAdcValue(0) >> 4);
+  device.setMix(device.getValue(0) >> 4);
 
   // Calculate bit mask
-  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(device.getAdcValue(1), 0, 4096, 0, 14)) - 1);
+  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(device.getValue(1), 0, 4096, 0, 14)) - 1);
 
   // Update output level through codec
-  device.setLevel(device.getAdcValue(2) >> 4);
+  device.setLevel(device.getValue(2) >> 4);
 }

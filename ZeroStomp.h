@@ -28,10 +28,14 @@ public:
     void setMix(uint8_t value);
     void setLevel(uint8_t value);
 
-    int16_t getAdcValue(uint8_t index);
+    uint16_t getValue(uint8_t index);
+    uint16_t getExpressionValue();
 
-    bool drawTitle(const String &s, bool update = true);
-    bool drawTitle(const char c[], bool update = true);
+    bool setTitle(const String &s, bool update = true);
+    bool setTitle(const char c[], bool update = true);
+
+    bool setLabel(uint8_t index, const String &s, bool update = true);
+    bool setLabel(uint8_t index, const char c[], bool update = true);
 
     void update();
 
@@ -42,9 +46,10 @@ protected:
     bool updateMix();
     bool updateLevel();
 
-    int getAdcPin(uint8_t index);
-
     bool prepareTitle(size_t len);
+    bool prepareKnobLabel(uint8_t index, size_t len);
+
+    bool drawKnob(uint8_t index);
 
 private:
     WM8960 _codec;
@@ -64,6 +69,8 @@ private:
     size_t _control_timer = 0;
 
     Adafruit_SSD1306 _display;
+    uint16_t _adc[KNOB_COUNT + 1];
+    uint16_t _knob[KNOB_COUNT];
 
 };
 
