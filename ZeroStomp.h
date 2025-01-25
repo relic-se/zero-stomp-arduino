@@ -6,10 +6,12 @@
 #define _ZERO_STOMP_H
 
 #include "Arduino.h"
+#include "config.h"
+#include "display.h"
+
 #include <SparkFun_WM8960_Arduino_Library.h> 
 #include <I2S.h>
 #include <Adafruit_SSD1306.h>
-#include "config.h"
 
 class ZeroStomp
 {

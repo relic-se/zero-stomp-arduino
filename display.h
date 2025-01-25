@@ -7,6 +7,9 @@
 
 #include "Arduino.h"
 
+// Prevent default splash
+#define SSD1306_NO_SPLASH
+
 #define CHAR_HEIGHT 7
 #define CHAR_WIDTH 5
 #define STR_WIDTH(len) (len * (CHAR_WIDTH + 1) - 1)
