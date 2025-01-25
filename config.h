@@ -89,11 +89,11 @@
 #endif
 
 #ifndef PIN_DISPLAY_SCK
-#define PIN_DISPLAY_SCK 14
+#define PIN_DISPLAY_SCK 14 // Not required when using hardware SPI
 #endif
 
 #ifndef PIN_DISPLAY_TX
-#define PIN_DISPLAY_TX 15
+#define PIN_DISPLAY_TX 15 // Not required when using hardware SPI
 #endif
 
 #ifndef DISPLAY_WIDTH
@@ -102,6 +102,10 @@
 
 #ifndef DISPLAY_HEIGHT
 #define DISPLAY_HEIGHT 64
+#endif
+
+#ifndef DISPLAY_SPI
+#define DISPLAY_SPI SPI1
 #endif
 
 // ADC

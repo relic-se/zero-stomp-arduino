@@ -4,10 +4,15 @@
 
 #include "ZeroStomp.h"
 #include "config.h"
+#include "display.h"
 #include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_GFX.h>
 
 ZeroStomp::ZeroStomp(uint32_t sample_rate, uint8_t channels, uint8_t bits_per_sample, size_t buffer_size) :
-    _codec(), _i2s(INPUT_PULLUP) {
+    _codec(),
+    _i2s(INPUT_PULLUP),
+    _display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &DISPLAY_SPI, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_CS) {
     setSampleRate(sample_rate);
     setChannels(channels);
     setBitsPerSample(bits_per_sample);
@@ -20,6 +25,68 @@ bool ZeroStomp::begin() {
     }
 
     analogReadResolution(12);
+
+    // Display
+    if (!_display.begin(SSD1306_SWITCHCAPVCC)) {
+        return false;
+    }
+
+    /// Clear display buffer
+    _display.clearDisplay();
+
+    #if SPLASH
+
+    /// Draw splash bitmap
+    _display.drawBitmap(
+        0, 0,
+        splash_bmp, DISPLAY_WIDTH, DISPLAY_HEIGHT, 1
+    );
+
+    /// Draw title
+    _display.setTextSize(1);
+    _display.setTextColor(SSD1306_BLACK);
+    _display.setCursor(DISPLAY_WIDTH - STR_WIDTH(TITLE1_LEN) - TITLE_PAD, TITLE_PAD);
+    _display.println(TITLE1_STR);
+    _display.setCursor(DISPLAY_WIDTH - STR_WIDTH(TITLE2_LEN) - TITLE_PAD, TITLE_PAD + CHAR_HEIGHT + 1);
+    _display.println(TITLE2_STR);
+
+    /// Update display
+    _display.display();
+    delay(SPLASH_DURATION / 3);
+
+    /// Draw animation frame bitmap
+    _display.fillRect(
+        SPLASH_ANIM_X, SPLASH_ANIM_Y,
+        SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 0
+    );
+    _display.drawBitmap(
+        SPLASH_ANIM_X, SPLASH_ANIM_Y,
+        splash_anim_bmp, SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 1
+    );
+
+    /// Update display
+    _display.display();
+    delay(SPLASH_DURATION / 3);
+
+    /// Redraw splash
+    _display.fillRect(
+        SPLASH_ANIM_X, SPLASH_ANIM_Y,
+        SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 0
+    );
+    _display.drawBitmap(
+        SPLASH_ANIM_X, SPLASH_ANIM_Y,
+        splash_reset_bmp, SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 1
+    );
+
+    /// Update display
+    _display.display();
+    delay(SPLASH_DURATION / 3);
+
+    /// Clear display
+    _display.clearDisplay();
+    _display.display();
+
+    #endif
 
     // MIDI UART
     Serial1.setRX(PIN_UART_RX);

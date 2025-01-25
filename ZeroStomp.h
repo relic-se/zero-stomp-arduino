@@ -8,6 +8,7 @@
 #include "Arduino.h"
 #include <SparkFun_WM8960_Arduino_Library.h> 
 #include <I2S.h>
+#include <Adafruit_SSD1306.h>
 #include "config.h"
 
 class ZeroStomp
@@ -54,6 +55,8 @@ private:
     uint8_t *_buffer;
     size_t _buffer_size;
     size_t _control_timer = 0;
+
+    Adafruit_SSD1306 _display;
 
 };
 
