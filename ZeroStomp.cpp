@@ -432,7 +432,7 @@ void ZeroStomp::update() {
 
     // TODO: Support 24-bit and 32-bit samples
 
-    size_t count = _i2s.read((const uint8_t *)_buffer, _buffer_size) * sizeof(uint32_t) / sizeof(int16_t);
+    size_t count = _i2s.read(_buffer, _buffer_size) * sizeof(uint32_t) / sizeof(int16_t);
     int16_t *b = (int16_t *)_buffer;
     size_t index = 0;
     int32_t l, r;
