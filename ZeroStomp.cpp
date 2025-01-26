@@ -215,7 +215,7 @@ bool ZeroStomp::begin() {
 
     _buffer = (uint8_t *)malloc(_buffer_size);
     memset((void *)_buffer, 0, _buffer_size);
-    _control_timer = 0;
+    _control_timer = CONTROL_RATE; // Initiate first control update
 
     _running = true;
     return true;
@@ -417,6 +417,19 @@ void ZeroStomp::update() {
         return;
     }
 
+    if (_control_timer >= CONTROL_RATE) {
+        // Reset knobs
+        memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
+
+        // Run user code
+        updateControl();
+
+        // Update display
+        _display.display();
+
+        _control_timer = 0;
+    }
+
     // TODO: Support 24-bit and 32-bit samples
 
     size_t count = _i2s.read((const uint8_t *)_buffer, _buffer_size) * sizeof(uint32_t) / sizeof(int16_t);
@@ -442,18 +455,6 @@ void ZeroStomp::update() {
     _i2s.write((const uint8_t *)_buffer, count * sizeof(int16_t));
 
     _control_timer += (_isStereo ? count >> 1 : count);
-    if (_control_timer >= CONTROL_RATE) {
-        // Reset knobs
-        memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
-
-        // Run user code
-        updateControl();
-
-        // Update display
-        _display.display();
-
-        _control_timer = 0;
-    }
 };
 
 bool ZeroStomp::prepareTitle(size_t len) {
