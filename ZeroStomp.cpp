@@ -215,7 +215,7 @@ bool ZeroStomp::begin() {
 
     _buffer = (uint8_t *)malloc(_buffer_size);
     memset((void *)_buffer, 0, _buffer_size);
-    _control_timer = CONTROL_RATE; // Initiate first control update
+    _control_timer = _sample_rate / CONTROL_RATE; // Initiate first control update
 
     _running = true;
     return true;
@@ -417,7 +417,7 @@ void ZeroStomp::update() {
         return;
     }
 
-    if (_control_timer >= CONTROL_RATE) {
+    if (_control_timer >= _sample_rate / CONTROL_RATE) {
         // Reset knobs
         memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
 

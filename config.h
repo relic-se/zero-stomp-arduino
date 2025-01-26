@@ -129,7 +129,7 @@
 // Program
 
 #ifndef CONTROL_RATE
-#define CONTROL_RATE 2400 // 20hz at 48Khz
+#define CONTROL_RATE 20 // hz
 #endif
 
 #endif
