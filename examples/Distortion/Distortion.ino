@@ -18,8 +18,6 @@ void setup(void) {
     while (1) { };
   }
 
-  device.setMix(255);
-
   device.setTitle(F("Distortion"));
 
   device.setLabel(0, F("Gain"));
