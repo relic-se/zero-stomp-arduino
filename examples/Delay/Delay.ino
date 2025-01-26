@@ -70,7 +70,7 @@ void updateAudio(int32_t *l, int32_t *r) {
   buffer_pos = (buffer_pos + buffer_rate) % (DELAY_SIZE << DELAY_SUBBITS);
 }
 
-void updateControl() {
+void updateControl(uint16_t samples) {
   device.setMix(device.getValue(0) >> 4);
   // TODO: Logarithmic
   buffer_rate = map(device.getValue(1), 0, 4096, MAX_RATE, MIN_RATE);

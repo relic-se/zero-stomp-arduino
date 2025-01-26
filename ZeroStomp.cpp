@@ -422,7 +422,7 @@ void ZeroStomp::update() {
         memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
 
         // Run user code
-        updateControl();
+        updateControl(_control_timer);
 
         // Update display
         _display.display();

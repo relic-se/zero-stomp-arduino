@@ -76,6 +76,6 @@ private:
 
 // User Functions
 void updateAudio(int32_t *l, int32_t *r);
-void updateControl();
+void updateControl(uint16_t samples);
 
 #endif

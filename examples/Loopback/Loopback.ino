@@ -27,6 +27,6 @@ void updateAudio(int32_t *l, int32_t *r) {
   // Audio processing goes here
 }
 
-void updateControl() {
+void updateControl(uint16_t samples) {
   // Control updates go here
 }

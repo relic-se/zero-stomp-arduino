@@ -43,7 +43,7 @@ void updateAudio(int32_t *l, int32_t *r) {
   *r = min(max(*r, -clip), clip);
 }
 
-void updateControl() {
+void updateControl(uint16_t samples) {
   gain = device.getValue(0);
   clip = ((4096 - device.getValue(1)) << 2) - 1;
 

@@ -35,7 +35,7 @@ void updateAudio(int32_t *l, int32_t *r) {
   *r &= bitmask;
 }
 
-void updateControl() {
+void updateControl(uint16_t samples) {
   // Update wet/dry mix through codec
   device.setMix(device.getValue(0) >> 4);
 
