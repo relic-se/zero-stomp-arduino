@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
+#include "ZeroAudio.h"
 #include "config.h"
 #include "display.h"
 
@@ -420,6 +421,9 @@ void ZeroStomp::update() {
     if (_control_timer >= _sample_rate / CONTROL_RATE) {
         // Reset knobs
         memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
+
+        // Update values needed for processing filters
+        control_tick(_sample_rate, _control_timer);
 
         // Run user code
         updateControl(_control_timer);
