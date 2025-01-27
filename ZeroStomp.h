@@ -66,7 +66,7 @@ private:
 
     uint8_t *_buffer;
     size_t _buffer_size;
-    size_t _control_timer = 0;
+    uint32_t _control_timer = 0;
 
     Adafruit_SSD1306 _display;
     uint16_t _adc[KNOB_COUNT + 1];
@@ -76,8 +76,16 @@ private:
 
 // User Functions
 void updateAudio(int32_t *l, int32_t *r);
-void updateControl(uint16_t samples);
+void updateControl(uint32_t samples);
 
 extern ZeroStomp zeroStomp;
+
+extern void loop();
+
+#ifndef SINGLE_CORE
+extern bool core1_separate_stack;
+extern void setup1();
+extern void loop1();
+#endif
 
 #endif

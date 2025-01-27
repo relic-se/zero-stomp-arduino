@@ -13,6 +13,31 @@
 
 ZeroStomp zeroStomp;
 
+void loop() {
+    #ifdef SINGLE_CORE
+    zeroStomp.update();
+    #else
+    while (rp2040.fifo.available()) {
+        updateControl(rp2040.fifo.pop());
+    }
+    #endif
+};
+
+#ifndef SINGLE_CORE
+
+bool core1_separate_stack = true;
+
+void setup1() {
+    // Wait for ready
+    while (!rp2040.fifo.pop()) { };
+};
+
+void loop1() {
+    zeroStomp.update();
+};
+
+#endif
+
 ZeroStomp::ZeroStomp() :
     _codec(),
     _i2s(INPUT_PULLUP),
@@ -224,6 +249,12 @@ bool ZeroStomp::begin() {
     control_tick(_sample_rate, _control_timer);
 
     _running = true;
+
+    #ifndef SINGLE_CORE
+    // Notify that device is ready
+    rp2040.fifo.push(true);
+    #endif
+
     return true;
 };
 
@@ -417,8 +448,6 @@ uint16_t ZeroStomp::getExpressionValue() {
 };
 
 void ZeroStomp::update() {
-    // TODO: Run audio processing on second core
-
     if (!_running) {
         return;
     }
@@ -431,7 +460,12 @@ void ZeroStomp::update() {
         control_tick(_sample_rate, _control_timer);
 
         // Run user code
+        #ifndef SINGLE_CORE
+        // Trigger control update on core0
+        rp2040.fifo.push(_control_timer);
+        #else
         updateControl(_control_timer);
+        #endif
 
         // Update display
         _display.display();

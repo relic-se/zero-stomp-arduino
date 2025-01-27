@@ -17,14 +17,10 @@ void setup(void) {
   zeroStomp.setTitle("Loopback");
 }
 
-void loop() {
-  zeroStomp.update();
-}
-
 void updateAudio(int32_t *l, int32_t *r) {
   // Audio processing goes here
 }
 
-void updateControl(uint16_t samples) {
+void updateControl(uint32_t samples) {
   // Control updates go here
 }

@@ -39,10 +39,6 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Decay"));
 }
 
-void loop() {
-  zeroStomp.update();
-}
-
 int32_t updateDelay(int32_t sample, int16_t *b) {
   // Get current echo value from buffer
   int32_t echo = (int32_t)b[buffer_pos >> DELAY_SUBBITS];
@@ -68,7 +64,7 @@ void updateAudio(int32_t *l, int32_t *r) {
   buffer_pos = (buffer_pos + buffer_rate) % (DELAY_SIZE << DELAY_SUBBITS);
 }
 
-void updateControl(uint16_t samples) {
+void updateControl(uint32_t samples) {
   zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
   // TODO: Logarithmic
   buffer_rate = map(zeroStomp.getValue(1), 0, 4096, MAX_RATE, MIN_RATE);
