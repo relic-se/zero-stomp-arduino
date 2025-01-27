@@ -6,6 +6,7 @@ setBufferSize       KEYWORD2
 setMix              KEYWORD2
 setLevel            KEYWORD2
 getValue            KEYWORD2
+getExpressionValue  KEYWORD2
 update              KEYWORD2
 
 updateAudio         KEYWORD3

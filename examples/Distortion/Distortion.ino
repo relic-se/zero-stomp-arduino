@@ -36,7 +36,7 @@ void updateAudio(int32_t *l, int32_t *r) {
 }
 
 void updateControl(uint32_t samples) {
-  gain = zeroStomp.getValue(0);
+  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096);
   clip = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
 
   // Update output level through codec

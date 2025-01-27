@@ -36,7 +36,7 @@ void updateAudio(int32_t *l, int32_t *r) {
 
 void updateControl(uint32_t samples) {
   // Frequency
-  filter.frequency = mapFloat(zeroStomp.getValue(0), 0, 4096, 20, 20000);
+  filter.frequency = mapFloat(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 20, 20000);
 
   // Resonance
   filter.Q = mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_Q, MAX_Q);

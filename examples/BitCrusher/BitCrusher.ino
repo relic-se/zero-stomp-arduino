@@ -34,7 +34,7 @@ void updateControl(uint32_t samples) {
   zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
 
   // Calculate bit mask
-  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(zeroStomp.getValue(1), 0, 4096, 0, 14)) - 1);
+  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(min(zeroStomp.getValue(1) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 0, 14)) - 1);
 
   // Update output level through codec
   zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
