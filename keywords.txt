@@ -37,3 +37,16 @@ PIN_ADC_1           LITERAL1
 PIN_ADC_2           LITERAL1
 PIN_ADC_EXPR        LITERAL1
 CONTROL_RATE        LITERAL1
+
+mixDown             KEYWORD2
+
+mapFloat            KEYWORD2
+
+ZeroFilter          KEYWORD1
+mode                KEYWORD2
+frequency           KEYWORD2
+Q                   KEYWORD2
+update              KEYWORD2
+assign              KEYWORD2
+process             KEYWORD2
+reset               KEYWORD2
