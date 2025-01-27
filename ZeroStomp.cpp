@@ -241,7 +241,7 @@ bool ZeroStomp::begin() {
     _i2s.setBuffers(NUM_DMA_BUFFERS, _buffer_size / sizeof(uint32_t));
     _i2s.begin();
 
-    _buffer = (uint8_t *)malloc(_buffer_size);
+    _buffer = (uint32_t *)malloc(_buffer_size);
     memset((void *)_buffer, 0, _buffer_size);
     _control_timer = _sample_rate / CONTROL_RATE; // Initiate first control update
 
@@ -475,29 +475,40 @@ void ZeroStomp::update() {
 
     // TODO: Support 24-bit and 32-bit samples
 
-    size_t count = _i2s.read(_buffer, _buffer_size) * sizeof(uint32_t) / sizeof(int16_t);
-    int16_t *b = (int16_t *)_buffer;
-    size_t index = 0;
+    // Fill buffers
+    size_t count, index;
     int32_t l, r;
-    while (index < count) {
-        // Process samples through buffer
-        if (_isStereo) {
-            l = (int32_t)b[index + 1];
-            r = (int32_t)b[index];
-        } else {
-            l = r = (int32_t)b[index];
-        }
-        updateAudio(&l, &r);
+    while (_i2s.available()) {
+        // Read single buffer
+        count = _i2s.read((uint8_t *)_buffer, _buffer_size);
+        index = 0;
+        while (index < count) {
+            // Get samples from buffer
+            l = (int16_t)((_buffer[index] >> 16) & 0xffff);
+            r = (int16_t)((_buffer[index] >> 0) & 0xffff);
 
-        // Hard clip samples and update buffer
-        if (_isStereo) {
-            b[index++] = (int16_t)min(max(r, -32767), 32768);
+            // Process samples through user code
+            if (_isStereo) {
+                updateAudio(&l, &r);
+            } else {
+                updateAudio(&l, &l);
+                updateAudio(&r, &r);
+            }
+
+            // Apply hard clip
+            l = (int16_t)min(max(l, -32767), 32768);
+            r = (int16_t)min(max(r, -32767), 32768);
+
+            // Update buffer
+            _buffer[index] = (uint32_t)(((int16_t)l << 16) | ((int16_t)r & 0xffff));
+
+            // Increment to next 32-bit word
+            index++;
         }
-        b[index++] = (int16_t)min(max(l, -32767), 32768);
+        _i2s.write((const uint8_t *)_buffer, count * sizeof(int32_t));
     }
-    _i2s.write((const uint8_t *)_buffer, count * sizeof(int16_t));
 
-    _control_timer += (_isStereo ? count >> 1 : count);
+    _control_timer += (_isStereo ? count : count << 1);
 };
 
 bool ZeroStomp::prepareTitle(size_t len) {

@@ -64,7 +64,7 @@ private:
     uint8_t _mix = 255;
     uint8_t _level = 255;
 
-    uint8_t *_buffer;
+    uint32_t *_buffer;
     size_t _buffer_size;
     uint32_t _control_timer = 0;
 
