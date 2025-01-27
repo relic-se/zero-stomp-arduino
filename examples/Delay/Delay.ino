@@ -5,8 +5,6 @@
 #include "ZeroStomp.h"
 #include "ZeroAudio.h" // Needed for mixDown
 
-ZeroStomp device;
-
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE >> 1) // 500ms * channels
 #define DELAY_SUBBITS 8
 
@@ -30,19 +28,19 @@ void setup(void) {
   memset((void *)buffer[1], 0, DELAY_SIZE * sizeof(int16_t));
   buffer_pos = 0;
 
-  if (!device.begin()) {
-    Serial.println("Failed to initiate device");
+  if (!zeroStomp.begin()) {
+    Serial.println("Failed to initiate zeroStomp");
     while (1) { };
   }
 
-  device.setTitle(F("Delay"));
-  device.setLabel(0, F("Mix"));
-  device.setLabel(1, F("Time"));
-  device.setLabel(2, F("Decay"));
+  zeroStomp.setTitle(F("Delay"));
+  zeroStomp.setLabel(0, F("Mix"));
+  zeroStomp.setLabel(1, F("Time"));
+  zeroStomp.setLabel(2, F("Decay"));
 }
 
 void loop() {
-  device.update();
+  zeroStomp.update();
 }
 
 int32_t updateDelay(int32_t sample, int16_t *b) {
@@ -71,8 +69,8 @@ void updateAudio(int32_t *l, int32_t *r) {
 }
 
 void updateControl(uint16_t samples) {
-  device.setMix(device.getValue(0) >> 4);
+  zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
   // TODO: Logarithmic
-  buffer_rate = map(device.getValue(1), 0, 4096, MAX_RATE, MIN_RATE);
-  decay = map(device.getValue(2), 0, 4096, 0, 65535);
+  buffer_rate = map(zeroStomp.getValue(1), 0, 4096, MAX_RATE, MIN_RATE);
+  decay = map(zeroStomp.getValue(2), 0, 4096, 0, 65535);
 }

@@ -11,14 +11,16 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 
-ZeroStomp::ZeroStomp(uint32_t sample_rate, uint8_t channels, uint8_t bits_per_sample, size_t buffer_size) :
+ZeroStomp zeroStomp;
+
+ZeroStomp::ZeroStomp() :
     _codec(),
     _i2s(INPUT_PULLUP),
     _display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &DISPLAY_SPI, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_CS) {
-    setSampleRate(sample_rate);
-    setChannels(channels);
-    setBitsPerSample(bits_per_sample);
-    setBufferSize(buffer_size);
+    setSampleRate(DEFAULT_SAMPLE_RATE);
+    setChannels(DEFAULT_CHANNELS);
+    setBitsPerSample(DEFAULT_BITS_PER_SAMPLE);
+    setBufferSize(DEFAULT_BUFFER_SIZE);
 };
 
 bool ZeroStomp::begin() {

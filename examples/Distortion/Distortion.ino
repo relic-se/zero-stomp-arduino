@@ -4,8 +4,6 @@
 
 #include "ZeroStomp.h"
 
-ZeroStomp device;
-
 int32_t gain, clip;
 
 void setup(void) {
@@ -13,20 +11,20 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Distortion");
 
-  if (!device.begin()) {
-    Serial.println("Failed to initiate device");
+  if (!zeroStomp.begin()) {
+    Serial.println("Failed to initiate zeroStomp");
     while (1) { };
   }
 
-  device.setTitle(F("Distortion"));
+  zeroStomp.setTitle(F("Distortion"));
 
-  device.setLabel(0, F("Gain"));
-  device.setLabel(1, F("Clip"));
-  device.setLabel(2, F("Level"));
+  zeroStomp.setLabel(0, F("Gain"));
+  zeroStomp.setLabel(1, F("Clip"));
+  zeroStomp.setLabel(2, F("Level"));
 }
 
 void loop() {
-  device.update();
+  zeroStomp.update();
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
@@ -42,9 +40,9 @@ void updateAudio(int32_t *l, int32_t *r) {
 }
 
 void updateControl(uint16_t samples) {
-  gain = device.getValue(0);
-  clip = ((4096 - device.getValue(1)) << 2) - 1;
+  gain = zeroStomp.getValue(0);
+  clip = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
 
   // Update output level through codec
-  device.setLevel(device.getValue(2) >> 4);
+  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
 }

@@ -17,7 +17,7 @@ class ZeroStomp
 {
 
 public:
-    ZeroStomp(uint32_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS, uint8_t bits_per_sample = DEFAULT_BITS_PER_SAMPLE, size_t buffer_size = DEFAULT_BUFFER_SIZE);
+    ZeroStomp();
     bool begin();
 
     bool setSampleRate(uint32_t value);
@@ -77,5 +77,7 @@ private:
 // User Functions
 void updateAudio(int32_t *l, int32_t *r);
 void updateControl(uint16_t samples);
+
+extern ZeroStomp zeroStomp;
 
 #endif

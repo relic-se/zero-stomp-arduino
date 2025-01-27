@@ -6,7 +6,6 @@
 #include "ZeroFilter.h"
 #include "ZeroUtils.h" // Needed for mapFloat
 
-ZeroStomp device;
 ZeroFilter filter;
 
 #define MIN_Q (0.7071067811865475)
@@ -17,20 +16,20 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Filter");
 
-  if (!device.begin()) {
-    Serial.println("Failed to initiate device");
+  if (!zeroStomp.begin()) {
+    Serial.println("Failed to initiate zeroStomp");
     while (1) { };
   }
   
-  device.setTitle(F("Filter"));
+  zeroStomp.setTitle(F("Filter"));
 
-  device.setLabel(0, F("Freq"));
-  device.setLabel(1, F("Q"));
-  device.setLabel(2, F("Mode"));
+  zeroStomp.setLabel(0, F("Freq"));
+  zeroStomp.setLabel(1, F("Q"));
+  zeroStomp.setLabel(2, F("Mode"));
 }
 
 void loop() {
-  device.update();
+  zeroStomp.update();
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
@@ -41,13 +40,13 @@ void updateAudio(int32_t *l, int32_t *r) {
 
 void updateControl(uint16_t samples) {
   // Frequency
-  filter.frequency = mapFloat(device.getValue(0), 0, 4096, 20, 20000);
+  filter.frequency = mapFloat(zeroStomp.getValue(0), 0, 4096, 20, 20000);
 
   // Resonance
-  filter.Q = mapFloat(device.getValue(1), 0, 4096, MIN_Q, MAX_Q);
+  filter.Q = mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_Q, MAX_Q);
 
   // Mode
-  filter.mode = (FilterMode)map(device.getValue(2), 0, 4096, 0, FILTER_MODES);
+  filter.mode = (FilterMode)map(zeroStomp.getValue(2), 0, 4096, 0, FILTER_MODES);
 
   // Update the filter state
   filter.update();

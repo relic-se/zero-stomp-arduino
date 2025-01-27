@@ -4,8 +4,6 @@
 
 #include "ZeroStomp.h"
 
-ZeroStomp device;
-
 int32_t bitmask = 0xFFFFFFFF;
 
 void setup(void) {
@@ -13,20 +11,20 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Bit Crusher");
 
-  if (!device.begin()) {
-    Serial.println("Failed to initiate device");
+  if (!zeroStomp.begin()) {
+    Serial.println("Failed to initiate zeroStomp");
     while (1) { };
   }
 
-  device.setTitle(F("Bit Crusher"));
+  zeroStomp.setTitle(F("Bit Crusher"));
 
-  device.setLabel(0, F("Mix"));
-  device.setLabel(1, F("Bits"));
-  device.setLabel(2, F("Level"));
+  zeroStomp.setLabel(0, F("Mix"));
+  zeroStomp.setLabel(1, F("Bits"));
+  zeroStomp.setLabel(2, F("Level"));
 }
 
 void loop() {
-  device.update();
+  zeroStomp.update();
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
@@ -37,11 +35,11 @@ void updateAudio(int32_t *l, int32_t *r) {
 
 void updateControl(uint16_t samples) {
   // Update wet/dry mix through codec
-  device.setMix(device.getValue(0) >> 4);
+  zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
 
   // Calculate bit mask
-  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(device.getValue(1), 0, 4096, 0, 14)) - 1);
+  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(zeroStomp.getValue(1), 0, 4096, 0, 14)) - 1);
 
   // Update output level through codec
-  device.setLevel(device.getValue(2) >> 4);
+  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
 }
