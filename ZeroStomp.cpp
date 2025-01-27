@@ -288,23 +288,50 @@ bool ZeroStomp::updateSampleRate() {
     _codec.setBCLKDIV(4);
     _codec.setDCLKDIV(WM8960_DCLKDIV_16);
 
+    uint16_t div_base;
     if (_sample_rate == 8000 || _sample_rate == 12000 || _sample_rate == 16000 || _sample_rate == 24000 || _sample_rate == 32000 || _sample_rate == 48000) {
         // SYSCLK = 12.288 MHz
         // DCLK = 768.0k_hz
         _codec.setPLLN(8);
         _codec.setPLLK(0x31, 0x26, 0xE8);
-        _codec.setADCDIV(48000 / _sample_rate);
-        _codec.setDACDIV(48000 / _sample_rate);
+        div_base = 48000;
     } else if (_sample_rate == 11025 || _sample_rate == 22050 || _sample_rate == 44100) {
         // SYSCLK = 11.2896 MHz
         // DCLK = 705.6k_hz
         _codec.setPLLN(7);
         _codec.setPLLK(0x86, 0xC2, 0x26);
-        _codec.setADCDIV(44100 / _sample_rate);
-        _codec.setDACDIV(44100 / _sample_rate);
+        div_base = 44100;
     } else {
         return false;
     }
+
+    uint8_t div = div_base * 2 / _sample_rate;
+    switch (div) {
+        case 2:
+        default:
+            div = 0;
+            break;
+        case 3:
+            div = 1;
+            break;
+        case 4:
+            div = 2;
+            break;
+        case 6:
+            div = 3;
+            break;
+        case 8:
+            div = 4;
+            break;
+        case 11:
+            div = 5;
+            break;
+        case 12:
+            div = 6;
+            break;
+    }
+    _codec.setADCDIV(div);
+    _codec.setDACDIV(div);
 
     return true;
 };
