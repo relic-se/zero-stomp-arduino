@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroAudio.h"
+#include "ZeroUtils.h"
 #include "config.h"
 #include "display.h"
 
@@ -217,6 +217,9 @@ bool ZeroStomp::begin() {
     _buffer = (uint8_t *)malloc(_buffer_size);
     memset((void *)_buffer, 0, _buffer_size);
     _control_timer = _sample_rate / CONTROL_RATE; // Initiate first control update
+
+    // Allow filter and LFO updates to run during setup
+    control_tick(_sample_rate, _control_timer);
 
     _running = true;
     return true;

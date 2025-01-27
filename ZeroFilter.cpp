@@ -15,6 +15,9 @@ void ZeroFilter::update() {
     if (mode == _mode && (float_equal_or_update(&_W0, W0) & float_equal_or_update(&_Q, Q))) {
         return;
     }
+    if (mode != _mode) {
+        reset();
+    }
     _mode = mode;
 
     float s, c;

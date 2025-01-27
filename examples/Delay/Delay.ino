@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroAudio.h" // Needed for mix_down_sample
+#include "ZeroAudio.h" // Needed for mixDown
 
 ZeroStomp device;
 
@@ -53,7 +53,7 @@ int32_t updateDelay(int32_t sample, int16_t *b) {
   int32_t mix = ((echo * decay) >> 16) + sample;
 
   // Apply dynamic range compression
-  mix = mix_down_sample(mix, MIX_DOWN_SCALE(2));
+  mix = mixDown(mix, MIX_DOWN_SCALE(2));
 
   // Update echo buffer
   for (size_t i = buffer_pos >> DELAY_SUBBITS; i < (buffer_pos + buffer_rate) >> DELAY_SUBBITS; i++) {

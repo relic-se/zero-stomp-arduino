@@ -4,12 +4,13 @@
 
 #include "ZeroStomp.h"
 #include "ZeroFilter.h"
+#include "ZeroUtils.h" // Needed for mapFloat
 
 ZeroStomp device;
 ZeroFilter filter;
 
 #define MIN_Q (0.7071067811865475)
-#define MAX_Q (2.0)
+#define MAX_Q (8.0)
 
 void setup(void) {
   // Open Serial
@@ -20,7 +21,7 @@ void setup(void) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
+  
   device.setTitle(F("Filter"));
 
   device.setLabel(0, F("Freq"));
@@ -40,10 +41,10 @@ void updateAudio(int32_t *l, int32_t *r) {
 
 void updateControl(uint16_t samples) {
   // Frequency
-  filter.frequency = (float)map(device.getValue(0), 0, 4096, 20, 20000);
+  filter.frequency = mapFloat(device.getValue(0), 0, 4096, 20, 20000);
 
   // Resonance
-  filter.Q = (float)map(device.getValue(1), 0, 4096, MIN_Q, MAX_Q);
+  filter.Q = mapFloat(device.getValue(1), 0, 4096, MIN_Q, MAX_Q);
 
   // Mode
   filter.mode = (FilterMode)map(device.getValue(2), 0, 4096, 0, FILTER_MODES);
