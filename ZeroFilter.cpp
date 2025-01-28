@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroFilter.h"
-#include "ZeroAudio.h"
+#include "ZeroUtils.h"
 
 ZeroFilter::ZeroFilter(FilterMode m, float f, float q) : mode(m), frequency(f), Q(q) {
     reset();

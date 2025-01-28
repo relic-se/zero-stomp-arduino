@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroAudio.h" // Needed for mixDown
+#include "ZeroUtils.h" // Needed for mixDown
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE >> 1) // 500ms * channels
 #define DELAY_SUBBITS 8
