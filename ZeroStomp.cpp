@@ -504,9 +504,10 @@ void ZeroStomp::update() {
     // TODO: Support 24-bit and 32-bit samples
 
     // Fill buffers
+    uint8_t buffer_count = NUM_DMA_BUFFERS;
     size_t count, index;
     int32_t l, r;
-    while (_i2s.available()) {
+    while (buffer_count-- && _i2s.available()) {
         // Read single buffer
         count = _i2s.read((uint8_t *)_buffer, _buffer_size);
         index = 0;
