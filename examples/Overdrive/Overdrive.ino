@@ -2,10 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-// NOTE: Requires RP2350 for floating point calculation
-
 #define MIN_GAIN 0.0
-#define MAX_GAIN 20.0
+#define MAX_GAIN 40.0
 
 #include "ZeroStomp.h"
 #include "ZeroUtils.h"
@@ -16,6 +14,11 @@ void setup(void) {
   // Open Serial
   Serial.begin(115200);
   Serial.println("Zero Stomp - Overdrive");
+
+  #if !PICO_RP2350
+  zeroStomp.setSampleRate(16000);
+  zeroStomp.setChannels(1);
+  #endif
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate zeroStomp");
@@ -48,21 +51,23 @@ float applyDrive(float sample) {
   return sample;
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
-  // Convert samples to float (-1.0 to 1.0)
-  float fl, fr;
-  fl = sampleToFloat(*l);
-  fr = sampleToFloat(*r);
+void processSample(int32_t *sample) {
+  // Convert sample to float (-1.0 to 1.0)
+  float samplef = sampleToFloat(*sample);
 
   // Apply gain to signal
-  fl *= gain;
-  fr *= gain;
+  samplef *= gain;
 
   // Apply overdrive
-  fl = applyDrive(fl);
-  fr = applyDrive(fr);
+  samplef = applyDrive(samplef);
 
-  // Convert back to sample format
-  *l = sampleFromFloat(fl);
-  *r = sampleFromFloat(fr);
+  // Convert back to integer format
+  *sample = sampleFromFloat(samplef);
+}
+
+void updateAudio(int32_t *l, int32_t *r) {
+  processSample(l);
+  #if PICO_RP2350
+  processSample(r);
+  #endif
 }
