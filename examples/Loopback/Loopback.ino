@@ -14,7 +14,7 @@ void setup(void) {
     while (1) { };
   }
 
-  zeroStomp.setTitle("Loopback");
+  zeroStomp.setTitle(F("Loopback"));
 }
 
 void updateControl(uint32_t samples) {
