@@ -28,12 +28,6 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Mode"));
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
-  // Process samples through filter biquad
-  *l = filter.process(*l);
-  *r = filter.process(*r);
-}
-
 void updateControl(uint32_t samples) {
   // Frequency
   filter.frequency = mapFloat(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 20, 20000);
@@ -46,4 +40,10 @@ void updateControl(uint32_t samples) {
 
   // Update the filter state
   filter.update();
+}
+
+void updateAudio(int32_t *l, int32_t *r) {
+  // Process samples through filter biquad
+  *l = filter.process(*l);
+  *r = filter.process(*r);
 }

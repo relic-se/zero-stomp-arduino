@@ -23,12 +23,6 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Level"));
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
-  // Apply 32-bit mask to audio samples
-  *l &= bitmask;
-  *r &= bitmask;
-}
-
 void updateControl(uint32_t samples) {
   // Update wet/dry mix through codec
   zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
@@ -38,4 +32,10 @@ void updateControl(uint32_t samples) {
 
   // Update output level through codec
   zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+}
+
+void updateAudio(int32_t *l, int32_t *r) {
+  // Apply 32-bit mask to audio samples
+  *l &= bitmask;
+  *r &= bitmask;
 }

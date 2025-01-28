@@ -23,6 +23,14 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Level"));
 }
 
+void updateControl(uint32_t samples) {
+  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096);
+  clip = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
+
+  // Update output level through codec
+  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+}
+
 void updateAudio(int32_t *l, int32_t *r) {
   // Apply gain to signal
   *l = (*l * gain) >> 6;
@@ -33,12 +41,4 @@ void updateAudio(int32_t *l, int32_t *r) {
   // Hard clip
   *l = min(max(*l, -clip), clip);
   *r = min(max(*r, -clip), clip);
-}
-
-void updateControl(uint32_t samples) {
-  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096);
-  clip = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
-
-  // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
 }

@@ -76,8 +76,8 @@ private:
 };
 
 // User Functions
-void updateAudio(int32_t *l, int32_t *r);
 void updateControl(uint32_t samples);
+void updateAudio(int32_t *l, int32_t *r);
 
 extern ZeroStomp zeroStomp;
 

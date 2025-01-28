@@ -58,15 +58,15 @@ int32_t updateDelay(int32_t sample, int16_t *b) {
   return echo;
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
-  *l = updateDelay(*l, (int16_t *)&buffer[0]);
-  *r = updateDelay(*r, (int16_t *)&buffer[1]);
-  buffer_pos = (buffer_pos + buffer_rate) % (DELAY_SIZE << DELAY_SUBBITS);
-}
-
 void updateControl(uint32_t samples) {
   zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
   // TODO: Logarithmic
   buffer_rate = map(zeroStomp.getValue(1), 0, 4096, MAX_RATE, MIN_RATE);
   decay = map(min(zeroStomp.getValue(2) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 0, 65535);
+}
+
+void updateAudio(int32_t *l, int32_t *r) {
+  *l = updateDelay(*l, (int16_t *)&buffer[0]);
+  *r = updateDelay(*r, (int16_t *)&buffer[1]);
+  buffer_pos = (buffer_pos + buffer_rate) % (DELAY_SIZE << DELAY_SUBBITS);
 }
