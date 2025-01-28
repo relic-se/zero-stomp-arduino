@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#ifndef _HARDWARE_H
-#define _HARDWARE_H
+#ifndef _CONFIG_H
+#define _CONFIG_H
 
 // UART
 

@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: GPLv3
 
+#include "config.h"
+
 #include "ZeroStomp.h"
 #include "ZeroUtils.h"
-#include "config.h"
 #include "display.h"
 
 #include <Wire.h>

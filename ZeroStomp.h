@@ -5,8 +5,9 @@
 #ifndef _ZERO_STOMP_H
 #define _ZERO_STOMP_H
 
-#include "Arduino.h"
 #include "config.h"
+
+#include "Arduino.h"
 #include "display.h"
 
 #include <SparkFun_WM8960_Arduino_Library.h> 
