@@ -8,8 +8,7 @@
 #define ALMOST_ONE (32767.0 / 32768.0)
 
 int16_t lfoWaveformTriangle(size_t index) {
-    // BUG
-    switch (index % (LFO_WAVEFORM_LEN / 4)) {
+    switch (index / (LFO_WAVEFORM_LEN / 4)) {
         case 0:
         default:
             return index * LFO_WAVEFORM_TRIANGLE_ACCUM;
