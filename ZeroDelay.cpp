@@ -52,20 +52,30 @@ void ZeroDelay::process(int32_t *l, int32_t *r) {
 };
 
 int32_t ZeroDelay::processChannel(int32_t sample, uint8_t channel) {
-    // Get current echo value from buffer
-    int32_t echo = (int32_t)_buffer[(_pos >> DELAY_SHIFT) * (channel + 1)];
+    size_t start = _pos >> DELAY_SHIFT, end = (_pos + _rate) >> DELAY_SHIFT;
 
-    // Apply decay to echo and add current sample
-    int32_t mix = applyVolume(echo, _decay) + sample;
+    // Get current position in buffer before updating buffer
+    int16_t output = _buffer[start + _size * channel];
 
-    // Apply dynamic range compression
-    mix = mixDown(mix, MIX_DOWN_SCALE(2));
+    int32_t echo;
+    size_t index;
+    for (size_t i = start; i < end; i++) {
+        // Determine buffer index
+        index = (i % _size) + _size * channel;
 
-    // Update echo buffer
-    for (size_t i = _pos >> DELAY_SHIFT; i < (_pos + _rate) >> DELAY_SHIFT; i++) {
-        _buffer[(i % _size) * (channel + 1)] = (int16_t)mix;
+        // Get echo value from buffer
+        echo = (int32_t)_buffer[index];
+
+        // Apply decay to echo and add current sample
+        echo = applyVolume(echo, _decay) + sample;
+
+        // Apply dynamic range compression
+        echo = mixDown(echo, MIX_DOWN_SCALE(2));
+
+        // Update echo buffer with hard clip
+        _buffer[index] = (int16_t)min(max(echo, -HARD_CLIP), HARD_CLIP);
     }
 
-    // Mix original echo value with dry signal and return
-    return applyMix(sample, echo, _mix);
+    // Mix initial echo value with dry signal and return
+    return applyMix(sample, output, _mix);
 };
