@@ -63,7 +63,6 @@ void updateControl(uint32_t samples) {
     }
     lfo.setWaveform(waveform);
   }
-  
 
   // Level controlled by codec
   zeroStomp.setLevel((uint8_t)min(lfo.get_scaled(0.0, 1.0) >> 7, (1 << 8) - 1));
