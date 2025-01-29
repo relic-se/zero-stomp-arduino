@@ -72,6 +72,6 @@ void updateControl(uint32_t samples) {
 void updateAudio(int32_t *l, int32_t *r) {
   // Level controlled by DSP
   //int32_t level = lfo.get_scaled(0.0, 1.0);
-  //*l = (*l * level) >> 16;
-  //*r = (*r * level) >> 16;
+  //*l = applyVolume(*l, level);
+  //*r = applyVolume(*r, level);
 }

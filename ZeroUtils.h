@@ -32,6 +32,37 @@ float dbToLinear(float value);
 
 int16_t mixDown(int32_t sample, int32_t scale);
 
+// Volume
+
+#define VOLUME_MIN (0)
+#define VOLUME_MAX ((1 << 16) - 1)
+
+static int32_t applyVolume(int32_t sample, uint16_t level) {
+    return (sample * level) >> 16;
+};
+
+// Mix
+
+#define MIX_DRY (0)
+#define MIX_MID (1 << 15)
+#define MIX_WET ((1 << 16) - 1)
+
+static int32_t applyMix(int32_t dry, int32_t wet, uint16_t mix) {
+    return mixDown(
+        applyVolume(dry, mix <= MIX_MID ? VOLUME_MAX : ((MIX_WET - mix) << 1))
+        + applyVolume(wet, mix >= MIX_MID ? VOLUME_MAX : mix << 1),
+        MIX_DOWN_SCALE(2)
+    );
+};
+
+static int32_t applyLinearMix(int32_t dry, int32_t wet, uint16_t mix) {
+    return mixDown(
+        applyVolume(dry, MIX_WET - mix)
+        + applyVolume(wet, mix),
+        MIX_DOWN_SCALE(2)
+    );
+};
+
 // LFO & Filter ticking
 
 extern float global_rate_scale, global_W_scale;
