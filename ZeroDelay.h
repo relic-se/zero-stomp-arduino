@@ -16,7 +16,7 @@ class ZeroDelay
 {
 
 public:
-    ZeroDelay(size_t buffer_size, float time = 0.1, uint16_t decay = VOLUME_MAX, uint16_t mix = MIX_WET, size_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS);
+    ZeroDelay(size_t buffer_size, float time = 0.1, uint16_t decay = VOLUME_MIN, uint16_t mix = MIX_WET, size_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS);
 
     void setBufferSize(size_t value);
     void setTime(float value);
