@@ -7,7 +7,7 @@
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE >> 1) // 500ms * channels
 
-#define MIN_TIME (0.02)
+#define MIN_TIME (0.1)
 #define MAX_TIME (1.0)
 
 ZeroDelay effect(DELAY_SIZE);
