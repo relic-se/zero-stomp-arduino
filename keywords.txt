@@ -51,3 +51,9 @@ update              KEYWORD2
 assign              KEYWORD2
 process             KEYWORD2
 reset               KEYWORD2
+
+ZeroDelay           KEYWORD1
+setTime             KEYWORD2
+setDecay            KEYWORD2
+setMix              KEYWORD2
+process             KEYWORD2
