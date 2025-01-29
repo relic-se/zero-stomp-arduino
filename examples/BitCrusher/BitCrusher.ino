@@ -12,7 +12,7 @@ void setup(void) {
   Serial.println("Zero Stomp - Bit Crusher");
 
   if (!zeroStomp.begin()) {
-    Serial.println("Failed to initiate zeroStomp");
+    Serial.println("Failed to initiate device");
     while (1) { };
   }
 

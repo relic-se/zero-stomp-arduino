@@ -28,7 +28,7 @@ void setup(void) {
   lfo.setWaveform(lfoWaveformSine);
 
   if (!zeroStomp.begin()) {
-    Serial.println("Failed to initiate zeroStomp");
+    Serial.println("Failed to initiate device");
     while (1) { };
   }
 
