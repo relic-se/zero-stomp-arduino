@@ -91,7 +91,7 @@ float ZeroLFO::get_limited(float lo, float hi) {
 };
 
 int32_t ZeroLFO::get_scaled(float lo, float hi) {
-    return (int32_t)round(ldexp(get_limited(lo, hi), 15));
+    return (int32_t)round(ldexp(get_limited(lo, hi), VOLUME_SHIFT));
 };
 
 void ZeroLFO::retrigger() {

@@ -34,18 +34,19 @@ int16_t mixDown(int32_t sample, int32_t scale);
 
 // Volume
 
+#define VOLUME_SHIFT (15)
 #define VOLUME_MIN (0)
-#define VOLUME_MAX ((1 << 16) - 1)
+#define VOLUME_MAX (1 << VOLUME_SHIFT)
 
 static int32_t applyVolume(int32_t sample, uint16_t level) {
-    return (sample * level) >> 16;
+    return (sample * (int32_t)level) >> VOLUME_SHIFT;
 };
 
 // Mix
 
-#define MIX_DRY (0)
-#define MIX_MID (1 << 15)
-#define MIX_WET ((1 << 16) - 1)
+#define MIX_DRY (VOLUME_MIN)
+#define MIX_MID (VOLUME_MAX >> 1)
+#define MIX_WET (VOLUME_MAX)
 
 static int32_t applyMix(int32_t dry, int32_t wet, uint16_t mix) {
     return mixDown(
