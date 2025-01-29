@@ -132,8 +132,4 @@
 #define CONTROL_RATE 20 // hz
 #endif
 
-#ifndef HARD_CLIP
-#define HARD_CLIP ((1 << 14) - 1)
-#endif
-
 #endif

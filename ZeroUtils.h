@@ -7,6 +7,8 @@
 
 #include "Arduino.h"
 
+#define MAX_LEVEL ((1 << 14) - 1)
+
 // Float operations
 
 static float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
@@ -14,11 +16,11 @@ static float mapFloat(float x, float in_min, float in_max, float out_min, float 
 };
 
 static float sampleToFloat(int32_t value) {
-    return (float)value / 32768.0;
+    return (float)value / MAX_LEVEL;
 };
 
 static int32_t sampleFromFloat(float value) {
-    return (int32_t)(value * 32767.0);
+    return (int32_t)(value * MAX_LEVEL);
 };
 
 float dbToLinear(float value);

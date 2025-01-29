@@ -73,7 +73,7 @@ int32_t ZeroDelay::processChannel(int32_t sample, uint8_t channel) {
         echo = mixDown(echo, MIX_DOWN_SCALE(2));
 
         // Update echo buffer with hard clip
-        _buffer[index] = (int16_t)min(max(echo, -HARD_CLIP), HARD_CLIP);
+        _buffer[index] = (int16_t)min(max(echo, -MAX_LEVEL), MAX_LEVEL);
     }
 
     // Mix initial echo value with dry signal and return

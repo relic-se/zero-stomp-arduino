@@ -525,8 +525,8 @@ void ZeroStomp::update() {
             }
 
             // Apply hard clip
-            l = (int16_t)min(max(l, -HARD_CLIP), HARD_CLIP);
-            r = (int16_t)min(max(r, -HARD_CLIP), HARD_CLIP);
+            l = (int16_t)min(max(l, -MAX_LEVEL), MAX_LEVEL);
+            r = (int16_t)min(max(r, -MAX_LEVEL), MAX_LEVEL);
 
             // Update buffer
             _buffer[index] = (uint32_t)(((int16_t)l << 16) | ((int16_t)r & 0xffff));
