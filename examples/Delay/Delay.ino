@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroDelay.h"
+#include "effects/ZeroDelay.h"
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE >> 1) // 500ms * channels
 

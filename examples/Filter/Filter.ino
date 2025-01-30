@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroFilter.h"
+#include "effects/ZeroFilter.h"
 #include "ZeroUtils.h" // Needed for mapFloat
 
 ZeroFilter filter;

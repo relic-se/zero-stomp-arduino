@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#include "ZeroDelay.h"
+#include "effects/ZeroDelay.h"
 
 ZeroDelay::ZeroDelay(size_t buffer_size, float time, uint16_t decay, uint16_t mix, size_t sample_rate, uint8_t channels) :
     _sample_rate(sample_rate),

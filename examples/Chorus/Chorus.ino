@@ -4,7 +4,7 @@
 
 #include "ZeroStomp.h"
 #include "ZeroLFO.h"
-#include "ZeroDelay.h"
+#include "effects/ZeroDelay.h"
 
 // BUG: Rate is too fast
 #define MIN_RATE (0.01)

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#include "ZeroFilter.h"
+#include "effects/ZeroFilter.h"
 #include "ZeroUtils.h"
 
 ZeroFilter::ZeroFilter(FilterMode m, float f, float q) : mode(m), frequency(f), Q(q) {
