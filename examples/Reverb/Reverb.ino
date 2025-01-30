@@ -13,6 +13,12 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Reverb");
 
+  #if !PICO_RP2350
+  zeroStomp.setSampleRate(8000);
+  zeroStomp.setChannels(1);
+  effect.setChannels(1);
+  #endif
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
