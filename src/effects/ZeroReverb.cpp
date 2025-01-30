@@ -11,7 +11,7 @@ ZeroReverb::ZeroReverb(ReverbMode mode, float room_size, float damping, float wi
     setDamping(damping);
     setWidth(width);
     setMix(mix);
-    _isStereo = channels == 2;
+    setChannels(channels);
 };
 
 void ZeroReverb::setMode(ReverbMode mode) {
@@ -34,6 +34,10 @@ void ZeroReverb::setMix(float value) {
     value *= 2.0;
     model.setdry(min(2.0 - value, 1.0));
     model.setwet(min(value, 1.0));
+};
+
+void ZeroReverb::setChannels(uint8_t value) {
+    _isStereo = value == 2;
 };
 
 void ZeroReverb::process(int32_t *l, int32_t *r) {

@@ -26,6 +26,7 @@ public:
     void setDamping(float value);
     void setWidth(float value);
     void setMix(float value);
+    void setChannels(uint8_t value);
 
     void process(int32_t *l, int32_t *r);
 
