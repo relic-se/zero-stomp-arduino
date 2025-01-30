@@ -2,10 +2,7 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#include "config.h"
-
 #include "ZeroStomp.h"
-#include "ZeroUtils.h"
 #include "display.h"
 
 #include <Wire.h>
@@ -13,6 +10,9 @@
 #include <Adafruit_GFX.h>
 
 ZeroStomp zeroStomp;
+
+float global_rate_scale = 0.0, global_W_scale = 0.0;
+uint8_t global_tick = 0;
 
 void loop() {
     #ifdef SINGLE_CORE
@@ -45,7 +45,6 @@ ZeroStomp::ZeroStomp() :
     _display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &DISPLAY_SPI, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_CS) {
     setSampleRate(DEFAULT_SAMPLE_RATE);
     setChannels(DEFAULT_CHANNELS);
-    setBitsPerSample(DEFAULT_BITS_PER_SAMPLE);
     setBufferSize(DEFAULT_BUFFER_SIZE);
 };
 
@@ -54,7 +53,7 @@ bool ZeroStomp::begin() {
         return false;
     }
 
-    analogReadResolution(12);
+    analogReadResolution(ADC_BITS);
     memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
     memset((void *)_knob, 0xFF, KNOB_COUNT * sizeof(uint16_t));
 
@@ -238,7 +237,7 @@ bool ZeroStomp::begin() {
     _i2s.setDIN(PIN_I2S_DIN);
     _i2s.setFrequency(_sample_rate);
     _i2s.setStereo(_isStereo);
-    _i2s.setBitsPerSample(_bits_per_sample);
+    _i2s.setBitsPerSample(BITS_PER_SAMPLE);
     _i2s.setBuffers(NUM_DMA_BUFFERS, _buffer_size / sizeof(uint32_t));
     _i2s.begin();
 
@@ -259,7 +258,7 @@ bool ZeroStomp::begin() {
     return true;
 };
 
-bool ZeroStomp::setSampleRate(uint32_t value) {
+bool ZeroStomp::setSampleRate(size_t value) {
     if (_running) {
         return false;
     }
@@ -348,27 +347,13 @@ bool ZeroStomp::setChannels(uint8_t value) {
     return true;
 };
 
-bool ZeroStomp::setBitsPerSample(uint8_t value) {
-    if (_running) {
-        return false;
-    }
-    if (value != 16 && value != 24 && value != 32) {
-        return false;
-    }
-    _bits_per_sample = value;
-    if (_active) {
-        updateBitsPerSample();
-    }
-    return true;
-};
-
 bool ZeroStomp::updateBitsPerSample() {
     if (!_active || _running) {
         return false;
     }
 
     // WM8960_WL_16BIT (0), WM8960_WL_24BIT (2), WM8960_WL_32BIT (3)
-    uint8_t value = (_bits_per_sample - 16) / 8;
+    uint8_t value = (BITS_PER_SAMPLE - 16) / 8;
     if (value > 0) {
         value++;
     }
@@ -385,8 +370,8 @@ bool ZeroStomp::setBufferSize(size_t value) { // in bytes
     return true;
 };
 
-void ZeroStomp::setMix(uint8_t value) {
-    _mix = value;
+void ZeroStomp::setMix(float value) {
+    _mix = min(max(value, 0.0), 1.0);
     updateMix();
 };
 
@@ -400,8 +385,8 @@ bool ZeroStomp::updateMix() {
 
     // Mic bypass
     uint8_t volume = 7;
-    if (_mix < 255) {
-        volume = _mix > 127 ? map(_mix, 128, 255, 0, 7) : 0;
+    if (_mix < 1.0) {
+        volume = _mix > 0.5 ? round((_mix - 0.5) * 2.0 * 7.0) : 0;
         _codec.enableLB2LO();
         if (_isStereo) {
             _codec.enableRB2RO();
@@ -424,7 +409,7 @@ bool ZeroStomp::updateMix() {
     } else {
         _codec.disableDacMute();
     }
-    volume = _mix < 128 ? _mix << 1 : 255;
+    volume = _mix < 0.5 ? round(_mix * 2.0 * 255.0) : 255;
     _codec.setDacLeftDigitalVolume(volume);
     if (_isStereo) {
         _codec.setDacRightDigitalVolume(volume);
@@ -433,8 +418,8 @@ bool ZeroStomp::updateMix() {
     return true;
 };
 
-void ZeroStomp::setLevel(uint8_t value) {
-    _level = value;
+void ZeroStomp::setLevel(float value) {
+    _level = min(max(value, 0.0), 1.0);
     updateLevel();
 };
 
@@ -446,13 +431,13 @@ bool ZeroStomp::updateLevel() {
         return false;
     }
 
-    _codec.setHeadphoneVolume(map(_level, 0, 255, 47, 127));
+    _codec.setHeadphoneVolume((uint8_t)round(_level * (127.0 - 47.0)) + 47);
     return true;
 };
 
-uint16_t ZeroStomp::getValue(uint8_t index) {
+float ZeroStomp::getValue(uint8_t index) {
     if (!_active || index >= KNOB_COUNT) {
-        return 0;
+        return 0.0;
     }
 
     if (_adc[index] == 0xFFFF) {
@@ -460,10 +445,10 @@ uint16_t ZeroStomp::getValue(uint8_t index) {
         drawKnob(index);
     }
 
-    return _adc[index];
+    return ldexp(_adc[index], -ADC_BITS);
 };
 
-uint16_t ZeroStomp::getExpressionValue() {
+float ZeroStomp::getExpressionValue() {
     if (!_active) {
         return 0;
     }
@@ -472,7 +457,7 @@ uint16_t ZeroStomp::getExpressionValue() {
         _adc[KNOB_COUNT] = analogRead(PIN_ADC_EXPR);
     }
 
-    return _adc[KNOB_COUNT];
+    return ldexp(_adc[KNOB_COUNT], -ADC_BITS);
 };
 
 void ZeroStomp::update() {
@@ -501,20 +486,18 @@ void ZeroStomp::update() {
         _control_timer = 0;
     }
 
-    // TODO: Support 24-bit and 32-bit samples
-
     // Fill buffers
     uint8_t buffer_count = NUM_DMA_BUFFERS;
     size_t count, index;
-    int32_t l, r;
+    float l, r;
     while (buffer_count-- && _i2s.available()) {
         // Read single buffer
         count = _i2s.read((uint8_t *)_buffer, _buffer_size);
         index = 0;
         while (index < count) {
             // Get samples from buffer
-            l = (int16_t)((_buffer[index] >> 16) & 0xffff);
-            r = (int16_t)((_buffer[index] >> 0) & 0xffff);
+            l = ldexp((int32_t)_buffer[index] >> 8, -BITS_PER_SAMPLE + 1);
+            r = ldexp((int32_t)_buffer[index + 1] >> 8, -BITS_PER_SAMPLE + 1);
 
             // Process samples through user code
             if (_isStereo) {
@@ -525,19 +508,20 @@ void ZeroStomp::update() {
             }
 
             // Apply hard clip
-            l = (int16_t)min(max(l, -MAX_LEVEL), MAX_LEVEL);
-            r = (int16_t)min(max(r, -MAX_LEVEL), MAX_LEVEL);
+            l = min(max(l, -1.0), 1.0);
+            r = min(max(r, -1.0), 1.0);
 
             // Update buffer
-            _buffer[index] = (uint32_t)(((int16_t)l << 16) | ((int16_t)r & 0xffff));
+            _buffer[index] = (int32_t)round(ldexp(l, BITS_PER_SAMPLE - 1)) << 8;
+            _buffer[index + 1] = (int32_t)round(ldexp(r, BITS_PER_SAMPLE - 1)) << 8;
 
-            // Increment to next 32-bit word
-            index++;
+            // Increment to the next 2 24-bit words
+            index += 2;
         }
         _i2s.write((const uint8_t *)_buffer, count * sizeof(int32_t));
     }
 
-    _control_timer += (_isStereo ? count : count << 1);
+    _control_timer += (_isStereo ? (count >> 1) : count);
 };
 
 bool ZeroStomp::prepareTitle(size_t len) {
@@ -685,8 +669,7 @@ bool ZeroStomp::drawKnob(uint8_t index) {
         );
 
         // Draw inner circle
-        // TODO: Optimization with integer calculation?
-        float theta_r = ((float)_knob[index] / 4096.0 * -1.5 - 0.25) * PI;
+        float theta_r = (ldexp(_knob[index], -ADC_BITS) * -1.5 - 0.25) * PI;
         int16_t knob_x = center_x + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * sin(theta_r));
         int16_t knob_y = KNOB_Y + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * cos(theta_r));
         _display.drawCircle(

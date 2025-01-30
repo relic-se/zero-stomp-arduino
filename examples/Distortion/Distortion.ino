@@ -4,7 +4,10 @@
 
 #include "ZeroStomp.h"
 
-int32_t gain, clip;
+#define MIN_GAIN 0.0
+#define MAX_GAIN 40.0
+
+float gain, clip;
 
 void setup(void) {
   // Open Serial
@@ -23,20 +26,18 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Level"));
 }
 
-void updateControl(uint32_t samples) {
-  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096);
-  clip = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
+void updateControl(size_t samples) {
+  gain = dbToLinear(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0) * (MAX_GAIN - MIN_GAIN) + MIN_GAIN);
+  clip = 1.0 - zeroStomp.getValue(1);
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(zeroStomp.getValue(2));
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(float *l, float *r) {
   // Apply gain to signal
-  *l = (*l * gain) >> 6;
-  *r = (*r * gain) >> 6;
-
-  // TODO: Soft clip?
+  *l *= gain;
+  *r *= gain;
 
   // Hard clip
   *l = min(max(*l, -clip), clip);

@@ -22,11 +22,11 @@ int16_t lfoWaveformSquare(size_t index);
 int16_t lfoWaveformSine(size_t index);
 int16_t lfoWaveformSaw(size_t index);
 
-class ZeroLFO
+class LFO
 {
 
 public:
-    ZeroLFO(float rate = 1.0, float scale = 1.0, float offset = 0.0, float phase_offset = 0.0);
+    LFO(float rate = 1.0, float scale = 1.0, float offset = 0.0, float phase_offset = 0.0);
 
     void setOnce(bool value);
     void setInterpolate(bool value);
@@ -40,7 +40,6 @@ public:
 
     float get();
     float get_limited(float lo, float hi);
-    int32_t get_scaled(float lo, float hi);
 
     void retrigger();
 

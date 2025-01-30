@@ -3,13 +3,15 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroFilter.h"
-#include "ZeroUtils.h" // Needed for mapFloat
-
-ZeroFilter filter;
+#include "effects/Filter.h"
 
 #define MIN_Q (0.7071067811865475)
 #define MAX_Q (8.0)
+
+#define MIN_FREQUENCY 20
+#define MAX_FREQUENCY 20000
+
+Filter filter;
 
 void setup(void) {
   // Open Serial
@@ -28,22 +30,21 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Mode"));
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   // Frequency
-  filter.frequency = mapFloat(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 20, 20000);
+  filter.frequency = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0) * (MAX_FREQUENCY - MIN_FREQUENCY) + MIN_FREQUENCY;
 
   // Resonance
-  filter.Q = mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_Q, MAX_Q);
+  filter.Q = zeroStomp.getValue(1) * (MAX_Q - MIN_Q) + MIN_Q;
 
   // Mode
-  filter.mode = (FilterMode)map(zeroStomp.getValue(2), 0, 4096, 0, FILTER_MODES);
+  filter.mode = (FilterMode)min(floor(zeroStomp.getValue(2) * FILTER_MODES), FILTER_MODES - 1);
 
   // Update the filter state
   filter.update();
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(float *l, float *r) {
   // Process samples through filter biquad
-  *l = filter.process(*l);
-  *r = filter.process(*r);
+  filter.process(l, r);
 }

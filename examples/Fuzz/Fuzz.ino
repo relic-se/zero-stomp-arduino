@@ -3,9 +3,11 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h" // For MAX_LEVEL
 
-int32_t threshold;
+#define MIN_THRESHOLD (0.0625) // ldexp(1.0, -4)
+#define MAX_THRESHOLD (0.000244140625) // ldexp(1.0, -12)
+
+float threshold;
 
 void setup(void) {
   // Open Serial
@@ -23,18 +25,18 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Level"));
 }
 
-void updateControl(uint32_t samples) {
-  threshold = map(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MAX_LEVEL >> 4, MAX_LEVEL >> 12);
+void updateControl(size_t samples) {
+  threshold = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0) * (MAX_THRESHOLD - MIN_THRESHOLD) + MIN_THRESHOLD;
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(zeroStomp.getValue(2));
 }
 
-int32_t fuzz(int32_t sample) {
-  return map(sample, -threshold, threshold, -MAX_LEVEL, MAX_LEVEL);
+float fuzz(float sample) {
+  return ((x + threshold) / threshold) - 1.0;
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(float *l, float *r) {
   *l = fuzz(*l);
   *r = fuzz(*r);
 }

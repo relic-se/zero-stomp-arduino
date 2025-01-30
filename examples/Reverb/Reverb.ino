@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroReverb.h"
-#include "ZeroUtils.h" // For mapFloat
+#include "effects/Reverb.h"
 
-ZeroReverb effect;
+Reverb effect;
 
 void setup(void) {
   // Open Serial
@@ -31,12 +30,12 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Mix"));
 }
 
-void updateControl(uint32_t samples) {
-    effect.setRoomSize(mapFloat(zeroStomp.getValue(0), 0, 4096, 0.0, 1.0));
-    effect.setDamping(mapFloat(zeroStomp.getValue(1), 0, 4096, 0.0, 1.0));
-    zeroStomp.setMix(zeroStomp.getValue(2) >> 4);
+void updateControl(size_t samples) {
+    effect.setRoomSize(zeroStomp.getValue(0));
+    effect.setDamping(zeroStomp.getValue(1));
+    zeroStomp.setMix(zeroStomp.getValue(2));
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(float *l, float *r) {
   effect.process(l, r);
 }

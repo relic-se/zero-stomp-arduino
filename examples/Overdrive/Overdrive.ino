@@ -6,7 +6,6 @@
 #define MAX_GAIN 40.0
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h"
 
 float gain;
 
@@ -32,14 +31,14 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Level"));
 }
 
-void updateControl(uint32_t samples) {
-  gain = dbToLinear(mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_GAIN, MAX_GAIN));
+void updateControl(size_t samples) {
+  gain = dbToLinear(zeroStomp.getValue(0) * (MAX_GAIN - MIN_GAIN) + MIN_GAIN);
 
   // TODO: Tone EQ
   //zeroStomp.getValue(1)
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(zeroStomp.getValue(2));
 }
 
 float applyDrive(float sample) {
@@ -51,23 +50,9 @@ float applyDrive(float sample) {
   return sample;
 }
 
-void processSample(int32_t *sample) {
-  // Convert sample to float (-1.0 to 1.0)
-  float samplef = sampleToFloat(*sample);
-
-  // Apply gain to signal
-  samplef *= gain;
-
-  // Apply overdrive
-  samplef = applyDrive(samplef);
-
-  // Convert back to integer format
-  *sample = sampleFromFloat(samplef);
-}
-
-void updateAudio(int32_t *l, int32_t *r) {
-  processSample(l);
+void updateAudio(float *l, float *r) {
+  *l = applyDrive(*l * gain);
   #if PICO_RP2350
-  processSample(r);
+  *r = applyDrive(*r * gain);
   #endif
 }

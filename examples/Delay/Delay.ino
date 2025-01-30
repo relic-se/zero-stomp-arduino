@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroDelay.h"
+#include "effects/Delay.h"
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE >> 1) // 500ms * channels
 
 #define MIN_TIME (0.1)
 #define MAX_TIME (1.0)
 
-ZeroDelay effect(DELAY_SIZE);
+Delay effect(DELAY_SIZE);
 
 void setup(void) {
   // Open Serial
@@ -28,12 +28,12 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Decay"));
 }
 
-void updateControl(uint32_t samples) {
-  zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
-  effect.setTime(mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_TIME, MAX_TIME));
-  effect.setDecay(map(min(zeroStomp.getValue(2) + zeroStomp.getExpressionValue(), 4096), 0, 4096, VOLUME_MIN, VOLUME_MAX));
+void updateControl(size_t samples) {
+  zeroStomp.setMix(zeroStomp.getValue(0));
+  effect.setTime(zeroStomp.getValue(1) * (MAX_TIME - MIN_TIME) + MIN_TIME);
+  effect.setDecay(min(zeroStomp.getValue(2) + zeroStomp.getExpressionValue(), 1.0) * (VOLUME_MAX - VOLUME_MIN) + VOLUME_MIN);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(float *l, float *r) {
   effect.process(l, r);
 }

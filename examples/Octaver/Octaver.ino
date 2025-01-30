@@ -3,12 +3,11 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h" // For MAX_LEVEL
 
 #define MAX_DIST (DEFAULT_SAMPLE_RATE >> 9)
 
-uint16_t dist, counter = 0;
-int32_t last_l, last_r;
+size_t dist, counter = 0;
+float last_l, last_r;
 
 void setup(void) {
   // Open Serial
@@ -26,14 +25,14 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Level"));
 }
 
-void updateControl(uint32_t samples) {
-  dist = map(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 0, MAX_DIST);
+void updateControl(size_t samples) {
+  dist = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0) * MAX_DIST;
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(zeroStomp.getValue(2));
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(float *l, float *r) {
   counter++;
   if (counter >= dist) {
     counter = 0;
