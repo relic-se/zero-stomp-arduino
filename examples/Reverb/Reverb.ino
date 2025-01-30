@@ -27,8 +27,8 @@ void setup(void) {
 
 void updateControl(uint32_t samples) {
     effect.setRoomSize(mapFloat(zeroStomp.getValue(0), 0, 4096, 0.0, 1.0));
-    effect.setDamping(mapFloat(zeroStomp.getValue(0), 0, 4096, 0.0, 1.0));
-    zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
+    effect.setDamping(mapFloat(zeroStomp.getValue(1), 0, 4096, 0.0, 1.0));
+    zeroStomp.setMix(zeroStomp.getValue(2) >> 4);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
