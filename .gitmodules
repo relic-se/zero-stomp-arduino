@@ -1,0 +1,3 @@
+[submodule "freeverb"]
+	path = freeverb
+	url = https://github.com/relic-se/freeverb
