@@ -15,39 +15,39 @@ ZeroReverb::ZeroReverb(ReverbMode mode, float room_size, float damping, float wi
 };
 
 void ZeroReverb::setMode(ReverbMode mode) {
-    model.setmode(mode == FREEZE ? freezemode : 0.0);
+    _model.setmode(mode == FREEZE ? freezemode : 0.0);
 };
 
 void ZeroReverb::setRoomSize(float value) {
-    model.setroomsize(value);
+    _model.setroomsize(value);
 };
 
 void ZeroReverb::setDamping(float value) {
-    model.setdamp(value);
+    _model.setdamp(value);
 };
 
 void ZeroReverb::setWidth(float value) {
-    model.setwidth(value);
+    _model.setwidth(value);
 };
 
 void ZeroReverb::setMix(float value) {
     value *= 2.0;
-    model.setdry(min(2.0 - value, 1.0));
-    model.setwet(min(value, 1.0));
+    _model.setdry(min(2.0 - value, 1.0));
+    _model.setwet(min(value, 1.0));
 };
 
 void ZeroReverb::setChannels(uint8_t value) {
-    _isStereo = value == 2;
+    _model.setstereo(value == 2);
 };
 
 void ZeroReverb::process(int32_t *l, int32_t *r) {
     float fl = sampleToFloat(*l), fr = 0;
-    if (_isStereo) {
+    if (_model.getstereo()) {
         fr = sampleToFloat(*r);
     }
-    model.processreplace(&fl, &fr, &fl, &fr, 1, 0);
+    _model.processreplace(&fl, &fr, &fl, &fr, 1, 0);
     *l = sampleFromFloat(fl);
-    if (_isStereo) {
+    if (_model.getstereo()) {
         *r = sampleFromFloat(fr);
     }
 };

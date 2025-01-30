@@ -31,8 +31,7 @@ public:
     void process(int32_t *l, int32_t *r);
 
 private:
-    revmodel model;
-    bool _isStereo;
+    revmodel _model;
 
 };
 
