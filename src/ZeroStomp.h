@@ -18,7 +18,7 @@
 #define PIN_I2S_DIN 5
 
 #define DEFAULT_SAMPLE_RATE 48000
-#define BITS_PER_SAMPLE 24
+#define BITS_PER_SAMPLE 16 // BUG: 24 and 32 bit modes cause distortion
 #define DEFAULT_CHANNELS 2
 #define DEFAULT_BUFFER_SIZE 512
 #define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)

@@ -496,8 +496,13 @@ void ZeroStomp::update() {
         index = 0;
         while (index < count) {
             // Get samples from buffer
-            l = ldexp((int32_t)_buffer[index] >> 8, -BITS_PER_SAMPLE + 1);
-            r = ldexp((int32_t)_buffer[index + 1] >> 8, -BITS_PER_SAMPLE + 1);
+            #if BITS_PER_SAMPLE == 16
+            l = ldexp((int16_t)((_buffer[index] >> 16) & 0xffff), -BITS_PER_SAMPLE + 1);
+            r = ldexp((int16_t)(_buffer[index] & 0xffff), -BITS_PER_SAMPLE + 1);
+            #else
+            l = ldexp((int32_t)_buffer[index], -31);
+            r = ldexp((int32_t)_buffer[index + 1], -31);
+            #endif
 
             // Process samples through user code
             if (_isStereo) {
@@ -512,16 +517,31 @@ void ZeroStomp::update() {
             r = min(max(r, -1.0), 1.0);
 
             // Update buffer
-            _buffer[index] = (int32_t)round(ldexp(l, BITS_PER_SAMPLE - 1)) << 8;
-            _buffer[index + 1] = (int32_t)round(ldexp(r, BITS_PER_SAMPLE - 1)) << 8;
+            #if BITS_PER_SAMPLE == 16
+            _buffer[index] = (uint32_t)(
+                ((int16_t)round(ldexp(l, BITS_PER_SAMPLE - 1)) << 16) |
+                ((int16_t)round(ldexp(r, BITS_PER_SAMPLE - 1)) & 0xffff)
+            );
+            #else
+            _buffer[index] = (int32_t)round(ldexp(l, 31));
+            _buffer[index + 1] = (int32_t)round(ldexp(r, 31));
+            #endif
 
-            // Increment to the next 2 24-bit words
+            // Increment to the next 2 words
+            #if BITS_PER_SAMPLE == 16
+            index += 1;
+            #else
             index += 2;
+            #endif
         }
         _i2s.write((const uint8_t *)_buffer, count * sizeof(int32_t));
     }
 
+    #if BITS_PER_SAMPLE <= 16
+    _control_timer += (_isStereo ? count : (count << 1));
+    #else
     _control_timer += (_isStereo ? (count >> 1) : count);
+    #endif
 };
 
 bool ZeroStomp::prepareTitle(size_t len) {
