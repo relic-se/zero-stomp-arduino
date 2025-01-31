@@ -31,7 +31,7 @@ void setup(void) {
 void updateControl(size_t samples) {
   zeroStomp.setMix(zeroStomp.getValue(0));
   effect.setTime(zeroStomp.getValue(1) * (MAX_TIME - MIN_TIME) + MIN_TIME);
-  effect.setDecay(min(zeroStomp.getValue(2) + zeroStomp.getExpressionValue(), 1.0) * (VOLUME_MAX - VOLUME_MIN) + VOLUME_MIN);
+  effect.setDecay(min(zeroStomp.getValue(2) + zeroStomp.getExpressionValue(), 1.0));
 }
 
 void updateAudio(float *l, float *r) {
