@@ -10,13 +10,13 @@
 #define CHANNELS (DEFAULT_CHANNELS)
 #else
 #define SAMPLE_RATE (16000)
-#define CHANNELS (1)
+#define CHANNELS (2) // BUG: Delay is distorted when mono
 #endif
 
 #define MIN_TIME (0.1)
 #define MAX_TIME (1.0)
 
-#define DELAY_SIZE (SAMPLE_RATE >> 1) // 500ms * CHANNELS
+#define DELAY_SIZE (SAMPLE_RATE >> 2) // 250ms * CHANNELS
 
 Delay effect(DELAY_SIZE, MIN_TIME, 0.0, 1.0, SAMPLE_RATE, CHANNELS);
 
