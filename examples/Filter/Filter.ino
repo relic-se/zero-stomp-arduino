@@ -32,7 +32,7 @@ void setup(void) {
 
 void updateControl(size_t samples) {
   // Frequency
-  filter.frequency = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0) * (MAX_FREQUENCY - MIN_FREQUENCY) + MIN_FREQUENCY;
+  filter.frequency = pow(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0), 3.0) * (MAX_FREQUENCY - MIN_FREQUENCY) + MIN_FREQUENCY;
 
   // Resonance
   filter.Q = zeroStomp.getValue(1) * (MAX_Q - MIN_Q) + MIN_Q;
