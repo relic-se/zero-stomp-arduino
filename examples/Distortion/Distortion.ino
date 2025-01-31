@@ -7,7 +7,7 @@
 #define MIN_GAIN 0.0
 #define MAX_GAIN 40.0
 
-float gain, clip;
+float gain, clip_level;
 
 void setup(void) {
   // Open Serial
@@ -28,7 +28,7 @@ void setup(void) {
 
 void updateControl(size_t samples) {
   gain = dbToLinear(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 1.0) * (MAX_GAIN - MIN_GAIN) + MIN_GAIN);
-  clip = 1.0 - zeroStomp.getValue(1);
+  clip_level = 1.0 - zeroStomp.getValue(1);
 
   // Update output level through codec
   zeroStomp.setLevel(zeroStomp.getValue(2));
@@ -40,6 +40,6 @@ void updateAudio(float *l, float *r) {
   *r *= gain;
 
   // Hard clip
-  *l = min(max(*l, -clip), clip);
-  *r = min(max(*r, -clip), clip);
+  *l = clip(*l, clip_level);
+  *r = clip(*r, clip_level);
 }
