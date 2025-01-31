@@ -497,11 +497,11 @@ void ZeroStomp::update() {
         while (index < count) {
             // Get samples from buffer
             #if BITS_PER_SAMPLE == 16
-            l = ldexp((int16_t)((_buffer[index] >> 16) & 0xffff), -BITS_PER_SAMPLE + 1);
-            r = ldexp((int16_t)(_buffer[index] & 0xffff), -BITS_PER_SAMPLE + 1);
+            l = convert<int16_t>((int16_t)((_buffer[index] >> 16) & 0xffff));
+            r = convert<int16_t>((int16_t)(_buffer[index] & 0xffff));
             #else
-            l = ldexp((int32_t)_buffer[index], -31);
-            r = ldexp((int32_t)_buffer[index + 1], -31);
+            l = convert<int32_t>((int32_t)_buffer[index]);
+            l = convert<int32_t>((int32_t)_buffer[index + 1]);
             #endif
 
             // Process samples through user code
@@ -513,18 +513,18 @@ void ZeroStomp::update() {
             }
 
             // Apply hard clip
-            l = min(max(l, -1.0), 1.0);
-            r = min(max(r, -1.0), 1.0);
+            l = clip(l);
+            r = clip(r);
 
             // Update buffer
             #if BITS_PER_SAMPLE == 16
             _buffer[index] = (uint32_t)(
-                ((int16_t)round(ldexp(l, BITS_PER_SAMPLE - 1)) << 16) |
-                ((int16_t)round(ldexp(r, BITS_PER_SAMPLE - 1)) & 0xffff)
+                (convert<int16_t>(l) << 16) |
+                (convert<int16_t>(r) & 0xffff)
             );
             #else
-            _buffer[index] = (int32_t)round(ldexp(l, 31));
-            _buffer[index + 1] = (int32_t)round(ldexp(r, 31));
+            _buffer[index] = convert<int32_t>(l);
+            _buffer[index + 1] = convert<int32_t>(r);
             #endif
 
             // Increment to the next 2 words

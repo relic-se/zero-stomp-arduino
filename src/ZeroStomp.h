@@ -60,7 +60,7 @@
 // Program
 
 #define NUM_DMA_BUFFERS 6
-#define CONTROL_RATE 20 // hz
+#define CONTROL_RATE 16 // hz
 #define SWITCH_DURATION 400 // ms
 
 #include "Arduino.h"
@@ -145,33 +145,6 @@ extern void setup1();
 extern void loop1();
 #endif
 
-// Global Helper Functions
-
-static float dbToLinear(float value) {
-    return exp(value * 0.11512925464970228420089957273422);
-};
-
-static float mixDown(float sample, uint8_t count = 2, float range = 0.85) {
-    float scale = (1.0 / (count - range));
-    if (sample < -range) {
-        sample = ((sample + range) * scale) - range;
-    } else if (sample > range) {
-        sample = ((sample - range) * scale) + range;
-    }
-    return sample;
-};
-
-static float applyMix(float dry, float wet, float mix) {
-    return mixDown(
-        dry * (mix <= 0.5 ? 1.0 : ((1.0 - mix) * 2.0))
-        + wet * (mix >= 0.5 ? 1.0 : (mix * 2.0))
-    );
-};
-
-static float applyLinearMix(float dry, float wet, float mix) {
-    return mixDown(dry * (1.0 - mix) + wet * mix);
-};
-
 extern float global_rate_scale, global_W_scale;
 extern uint8_t global_tick;
 static void control_tick(size_t sample_rate, size_t samples) {
@@ -179,6 +152,84 @@ static void control_tick(size_t sample_rate, size_t samples) {
     global_rate_scale = (float)samples * recip_sample_rate;
     global_W_scale = (2.0 * PI) * recip_sample_rate;
     global_tick++;
+};
+
+// Global Helper Functions
+
+#define SHIFT(T) (sizeof(T) * 8 - 1)
+#define MAX_VALUE(T) ((1 << SHIFT(T)) - 1)
+
+static float dbToLinear(float value) {
+    return exp(value * 0.11512925464970228420089957273422);
+};
+
+#define MIX_DOWN_RANGE_F (0.85)
+#define MIX_DOWN_SCALE_F(x) (1.0 / (x - MIX_DOWN_RANGE_F))
+
+static float mixDown(float sample, float scale = MIX_DOWN_SCALE_F(2.0)) {
+    if (sample < -MIX_DOWN_RANGE_F) {
+        sample = ((sample + MIX_DOWN_RANGE_F) * scale) - MIX_DOWN_RANGE_F;
+    } else if (sample > MIX_DOWN_RANGE_F) {
+        sample = ((sample - MIX_DOWN_RANGE_F) * scale) + MIX_DOWN_RANGE_F;
+    }
+    return sample;
+};
+
+#define MIX_DOWN_RANGE (28000)
+#define MIX_DOWN_SCALE(x) (0xfffffff / (32768 * x - MIX_DOWN_RANGE))
+
+static int16_t mixDown(int32_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
+    if (sample < -MIX_DOWN_RANGE) {
+        sample = (((sample + MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) - MIX_DOWN_RANGE;
+    } else if (sample > MIX_DOWN_RANGE) {
+        sample = (((sample - MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) + MIX_DOWN_RANGE;
+    }
+    return sample;
+};
+
+static float applyMix(float dry, float wet, float mix) {
+    if (mix >= 1.0) return wet;
+    if (mix <= 0.0) return dry;
+    return mixDown(
+        (float)(dry * (mix <= 0.5 ? 1.0 : ((1.0 - mix) * 2.0))
+        + wet * (mix >= 0.5 ? 1.0 : (mix * 2.0)))
+    );
+};
+
+static float applyLinearMix(float dry, float wet, float mix) {
+    if (mix >= 1.0) return wet;
+    if (mix <= 0.0) return dry;
+    return mixDown((float)(dry * (1.0 - mix) + wet * mix));
+};
+
+template <typename T>
+inline float convert(T sample) {
+    return ldexp(sample, -SHIFT(T));
+};
+
+template <typename T>
+inline T convert(float sample) {
+    return (T)round(ldexp(sample, SHIFT(T)));
+};
+
+inline float clip(float sample, float level = 1.0) {
+    return min(max(sample, -level), level);
+};
+
+template <typename T>
+inline T clip(T sample, T level = -1) {
+    if (level < 0) level = MAX_VALUE(T);
+    return min(max(sample, -level), level);
+};
+
+template <typename T>
+inline T scale(float value) {
+    return round(ldexp(value, SHIFT(T)));
+};
+
+template <typename T>
+inline int32_t scale(int32_t sample, T value) {
+    return (sample * (int32_t)value) >> SHIFT(T);
 };
 
 #endif
