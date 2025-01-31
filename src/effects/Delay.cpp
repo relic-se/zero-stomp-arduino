@@ -56,14 +56,14 @@ void Delay::process(float *l, float *r) {
 };
 
 float Delay::processChannel(float sample, uint8_t channel) {
-    size_t start = _pos >> DELAY_SHIFT, end = (_pos + _rate) >> DELAY_SHIFT;
+    size_t start = _pos >> DELAY_SHIFT, end = (_pos + _rate) >> DELAY_SHIFT, offset = _size * channel;
 
     // Get current position in buffer before updating buffer
     float output;
     #ifdef DELAY_USE_FLOAT
-    output = _buffer[start + _size * channel];
+    output = _buffer[start + offset];
     #else
-    output = convert<int16_t>(_buffer[(_pos >> DELAY_SHIFT) + _size * channel]);
+    output = convert<int16_t>(_buffer[(_pos >> DELAY_SHIFT) + offset]);
     #endif
 
     #ifdef DELAY_USE_FLOAT
@@ -76,7 +76,7 @@ float Delay::processChannel(float sample, uint8_t channel) {
     size_t index;
     for (size_t i = start; i < end; i++) {
         // Determine buffer index
-        index = (i % _size) + _size * channel;
+        index = (i % _size) + offset;
 
         // Get echo value from buffer
         echo = _buffer[index];
@@ -88,7 +88,7 @@ float Delay::processChannel(float sample, uint8_t channel) {
         echo = scale<int16_t>(echo, _decay) + input;
         #endif
 
-        // Apply dynamic range compression
+        // Dynamic range compression
         echo = mixDown(echo);
 
         // Hard clip
@@ -104,11 +104,7 @@ float Delay::processChannel(float sample, uint8_t channel) {
 
 void Delay::reset() {
     if (_buffer) free(_buffer);
-    #ifdef DELAY_USE_FLOAT
-    _buffer = (float *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(float));
-    #else
-    _buffer = (int16_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(int16_t));
-    #endif
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(_buffer[0]));
+    _buffer = (delay_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(delay_t));
+    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(delay_t));
     _pos = 0;
 };

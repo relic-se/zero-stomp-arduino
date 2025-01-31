@@ -11,7 +11,13 @@
 #include "ZeroStomp.h"
 
 #define DELAY_USE_FLOAT
-#define DELAY_POS_SHIFT (8)
+#define DELAY_SHIFT (8)
+
+#ifdef DELAY_USE_FLOAT
+typedef float delay_t;
+#else
+typedef int16_t delay_t;
+#endif
 
 class Delay : public Effect
 {
