@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
+// TODO: Implementation is incomplete
+
 #include "ZeroStomp.h"
 #include "LFO.h"
 #include "effects/Delay.h"
