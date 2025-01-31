@@ -6,8 +6,9 @@
 #include "ZeroStomp.h"
 
 Delay::Delay(size_t buffer_size, float time, float decay, float mix, size_t sample_rate, uint8_t channels) :
-    Effect(mix, channels), _sample_rate(sample_rate) {
+    Effect(mix, channels) {
     setBufferSize(buffer_size);
+    setSampleRate(sample_rate);
     setTime(time);
     setDecay(decay);
 };
@@ -17,12 +18,24 @@ void Delay::setBufferSize(size_t value) {
     reset();
 };
 
+void Delay::setSampleRate(size_t value) {
+    // Adjust rate if necessary
+    if (_rate && _sample_rate) {
+        _rate = _rate * _sample_rate / value;
+    }
+    _sample_rate = value;
+};
+
 void Delay::setTime(float value) {
     _rate = max((float)_size / _sample_rate / value, 0.001);
 };
 
 void Delay::setDecay(float value) {
-    _decay = min(max(value, 0.0), 1.0);
+};
+
+void Delay::setChannels(uint8_t value) {
+    Effect::setChannels(value);
+    reset();
 };
 
 void Delay::process(float *l, float *r) {
