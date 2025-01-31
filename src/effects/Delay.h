@@ -10,6 +10,9 @@
 #include "effects/Effect.h"
 #include "ZeroStomp.h"
 
+#define DELAY_USE_FLOAT
+#define DELAY_POS_SHIFT (8)
+
 class Delay : public Effect
 {
 
@@ -30,9 +33,18 @@ protected:
     void reset();
 
 private:
+    #ifdef DELAY_USE_FLOAT
     float *_buffer;
+    #else
+    int16_t *_buffer;
+    #endif
     size_t _size, _sample_rate;
-    float _pos, _rate, _decay;
+    size_t _pos, _rate;
+    #ifdef DELAY_USE_FLOAT
+    float _decay;
+    #else
+    int16_t _decay;
+    #endif
 
 };
 

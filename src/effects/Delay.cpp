@@ -27,10 +27,19 @@ void Delay::setSampleRate(size_t value) {
 };
 
 void Delay::setTime(float value) {
-    _rate = max((float)_size / _sample_rate / value, 0.001);
+    _rate = (size_t)max(
+        (float)_size * (1 << DELAY_SHIFT) / _sample_rate / value,
+        1.0
+    );
 };
 
 void Delay::setDecay(float value) {
+    value = min(max(value, 0.0), 1.0);
+    #ifdef DELAY_USE_FLOAT
+    _decay = value;
+    #else
+    _decay = scale<int16_t>(value);
+    #endif
 };
 
 void Delay::setChannels(uint8_t value) {
@@ -43,16 +52,27 @@ void Delay::process(float *l, float *r) {
     if (_isStereo) {
         *r = processChannel(*r, 1);
     }
-    _pos = fmod(_pos + _rate, _size);
+    _pos = (_pos + _rate) % (_size << DELAY_SHIFT);
 };
 
 float Delay::processChannel(float sample, uint8_t channel) {
-    size_t start = (size_t)_pos, end = (size_t)(_pos + _rate);
+    size_t start = _pos >> DELAY_SHIFT, end = (_pos + _rate) >> DELAY_SHIFT;
 
     // Get current position in buffer before updating buffer
-    float output = _buffer[start + _size * channel];
+    float output;
+    #ifdef DELAY_USE_FLOAT
+    output = _buffer[start + _size * channel];
+    #else
+    output = convert<int16_t>(_buffer[(_pos >> DELAY_SHIFT) + _size * channel]);
+    #endif
 
+    #ifdef DELAY_USE_FLOAT
     float echo;
+    #else
+    int16_t input = convert<int16_t>(sample);
+    int32_t echo;
+    #endif
+
     size_t index;
     for (size_t i = start; i < end; i++) {
         // Determine buffer index
@@ -62,13 +82,20 @@ float Delay::processChannel(float sample, uint8_t channel) {
         echo = _buffer[index];
 
         // Apply decay to echo and add current sample
+        #ifdef DELAY_USE_FLOAT
         echo = echo * _decay + sample;
+        #else
+        echo = scale<int16_t>(echo, _decay) + input;
+        #endif
 
         // Apply dynamic range compression
         echo = mixDown(echo);
 
-        // Update echo buffer with hard clip
-        _buffer[index] = min(max(echo, -1.0), 1.0);
+        // Hard clip
+        echo = clip(echo);
+
+        // Update echo buffer
+        _buffer[index] = echo;
     }
 
     // Mix initial echo value with dry signal and return
@@ -76,11 +103,12 @@ float Delay::processChannel(float sample, uint8_t channel) {
 };
 
 void Delay::reset() {
-    if (_buffer) {
-        free(_buffer);
-        _buffer = nullptr;
-    }
+    if (_buffer) free(_buffer);
+    #ifdef DELAY_USE_FLOAT
     _buffer = (float *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(float));
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(float));
-    _pos = 0.0;
+    #else
+    _buffer = (int16_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(int16_t));
+    #endif
+    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(_buffer[0]));
+    _pos = 0;
 };
