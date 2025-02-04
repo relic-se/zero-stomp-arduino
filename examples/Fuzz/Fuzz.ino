@@ -33,7 +33,7 @@ void updateControl(size_t samples) {
 }
 
 float fuzz(float sample) {
-  return ((x + threshold) / threshold) - 1.0;
+  return ((sample + threshold) / threshold) - 1.0;
 }
 
 void updateAudio(float *l, float *r) {
