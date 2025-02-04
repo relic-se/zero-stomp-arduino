@@ -15,6 +15,7 @@ void setup(void) {
   #if !PICO_RP2350
   zeroStomp.setSampleRate(8000);
   zeroStomp.setChannels(1);
+  effect.setSampleRate(8000);
   effect.setChannels(1);
   #endif
 
