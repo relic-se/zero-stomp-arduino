@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroLFO.h"
+#include "LFO.h"
 
 // BUG: Rate is too fast
 #define MIN_SPEED 0.01
 #define MAX_SPEED 0.2
 
-ZeroLFO lfo;
+LFO lfo;
 
 uint8_t waveform_index = 0;
 #define NUM_WAVEFORMS 4
