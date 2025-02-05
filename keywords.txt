@@ -39,11 +39,16 @@ PIN_ADC_2           LITERAL1
 PIN_ADC_EXPR        LITERAL1
 CONTROL_RATE        LITERAL1
 
-mixDown             KEYWORD2
-
+dbToLinear          KEYWORD2
 mapFloat            KEYWORD2
+mixDown             KEYWORD2
+applyMix            KEYWORD2
+applyLinearMix      KEYWORD2
+convert             KEYWORD2
+clip                KEYWORD2
+scale               KEYWORD2
 
-ZeroFilter          KEYWORD1
+Filter              KEYWORD1
 mode                KEYWORD2
 frequency           KEYWORD2
 Q                   KEYWORD2
@@ -52,8 +57,17 @@ assign              KEYWORD2
 process             KEYWORD2
 reset               KEYWORD2
 
-ZeroDelay           KEYWORD1
+Delay               KEYWORD1
 setTime             KEYWORD2
 setDecay            KEYWORD2
 setMix              KEYWORD2
 process             KEYWORD2
+
+Reverb              KEYWORD1
+setMode             KEYWORD1
+setRoomSize         KEYWORD1
+setDamping          KEYWORD1
+setWidth            KEYWORD1
+setMix              KEYWORD1
+setChannels         KEYWORD1
+process             KEYWORD1

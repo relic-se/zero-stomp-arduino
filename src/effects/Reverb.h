@@ -15,11 +15,11 @@ typedef enum {
     FREEZE = 1
 } ReverbMode;
 
-class ZeroReverb
+class Reverb
 {
 
 public:
-    ZeroReverb(ReverbMode mode = NORMAL, float room_size = initialroom, float damping = initialdamp, float width = initialwidth, float mix = 1.0, uint8_t channels = DEFAULT_CHANNELS);
+    Reverb(ReverbMode mode = NORMAL, float room_size = initialroom, float damping = initialdamp, float width = initialwidth, float mix = 1.0, uint8_t channels = DEFAULT_CHANNELS);
 
     void setMode(ReverbMode value);
     void setRoomSize(float value);

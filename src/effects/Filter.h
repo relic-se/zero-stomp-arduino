@@ -45,11 +45,11 @@ static bool float_equal_or_update(float *cached, float value) {
     return true;
 };
 
-class ZeroFilter
+class Filter
 {
 
 public:
-    ZeroFilter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475);
+    Filter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475);
     
     FilterMode mode;
     float frequency, Q;

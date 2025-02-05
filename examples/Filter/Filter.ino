@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroFilter.h"
+#include "effects/Filter.h"
 
-ZeroFilter filter;
+Filter filter;
 
 #define MIN_Q (0.7071067811865475)
 #define MAX_Q (8.0)

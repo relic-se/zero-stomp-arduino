@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroReverb.h"
+#include "effects/Reverb.h"
 
-ZeroReverb effect;
+Reverb effect;
 
 void setup(void) {
   // Open Serial

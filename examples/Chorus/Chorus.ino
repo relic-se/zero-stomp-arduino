@@ -4,7 +4,7 @@
 
 #include "ZeroStomp.h"
 #include "LFO.h"
-#include "effects/ZeroDelay.h"
+#include "effects/Delay.h"
 
 // BUG: Rate is too fast
 #define MIN_RATE (0.01)
@@ -15,7 +15,7 @@
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE * MAX_DEPTH * 2)
 
-ZeroDelay effect(DELAY_SIZE);
+Delay effect(DELAY_SIZE);
 LFO lfo;
 
 float depth;
