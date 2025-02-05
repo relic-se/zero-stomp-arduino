@@ -4,28 +4,25 @@
 
 #include "effects/Delay.h"
 
-Delay::Delay(size_t buffer_size, float time, uint16_t decay, uint16_t mix, size_t sample_rate, uint8_t channels) :
-    _sample_rate(sample_rate),
-    _decay(decay),
-    _mix(mix) {
-    _isStereo = channels == 2;
+Delay::Delay(size_t buffer_size, float time, int16_t decay, int16_t mix, size_t sample_rate, uint8_t channels) :
+    Effect(mix, channels) {
     setBufferSize(buffer_size);
+    setSampleRate(sample_rate);
     setTime(time);
-};
-
-void Delay::reset() {
-    if (_buffer) {
-        free(_buffer);
-        _buffer = nullptr;
-    }
-    _buffer = (sample_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(sample_t));
-    _pos = 0;
+    setDecay(decay);
 };
 
 void Delay::setBufferSize(size_t value) {
     _size = max(value, 1);
     reset();
+};
+
+void Delay::setSampleRate(size_t value) {
+    // Adjust rate if necessary
+    if (_rate && _sample_rate) {
+        _rate = _rate * _sample_rate / value;
+    }
+    _sample_rate = value;
 };
 
 void Delay::setTime(float value) {
@@ -35,12 +32,13 @@ void Delay::setTime(float value) {
     );
 };
 
-void Delay::setDecay(uint16_t value) {
+void Delay::setDecay(int16_t value) {
     _decay = value;
 };
 
-void Delay::setMix(uint16_t value) {
-    _mix = value;
+void Delay::setChannels(uint8_t value) {
+    Effect::setChannels(value);
+    reset();
 };
 
 void Delay::process(int32_t *l, int32_t *r) {
@@ -78,4 +76,14 @@ int32_t Delay::processChannel(int32_t sample, uint8_t channel) {
 
     // Mix initial echo value with dry signal and return
     return applyMix(sample, output, _mix);
+};
+
+void Delay::reset() {
+    if (_buffer) {
+        free(_buffer);
+        _buffer = nullptr;
+    }
+    _buffer = (sample_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(sample_t));
+    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(sample_t));
+    _pos = 0;
 };

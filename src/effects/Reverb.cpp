@@ -4,7 +4,8 @@
 
 #include "effects/Reverb.h"
 
-Reverb::Reverb(ReverbMode mode, float room_size, float damping, float width, float mix, uint8_t channels) {
+Reverb::Reverb(ReverbMode mode, float room_size, float damping, float width, int16_t mix, size_t sample_rate, uint8_t channels) :
+    Effect(mix, channels) {
     setMode(mode);
     setRoomSize(room_size);
     setDamping(damping);
@@ -29,13 +30,20 @@ void Reverb::setWidth(float value) {
     _model.setwidth(value);
 };
 
-void Reverb::setMix(float value) {
-    value *= 2.0;
-    _model.setdry(min(2.0 - value, 1.0));
-    _model.setwet(min(value, 1.0));
+void Reverb::setMix(int16_t value) {
+    Effect::setMix(value);
+    float mix = convert<int16_t>(value);
+    mix *= 2.0;
+    _model.setdry(min(2.0 - mix, 1.0));
+    _model.setwet(min(mix, 1.0));
+};
+
+void Reverb::setSampleRate(size_t value) {
+    _model.setsamplerate(value);
 };
 
 void Reverb::setChannels(uint8_t value) {
+    Effect::setChannels(value);w
     _model.setstereo(value == 2);
 };
 

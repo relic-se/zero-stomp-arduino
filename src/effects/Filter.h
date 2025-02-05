@@ -45,7 +45,7 @@ static bool float_equal_or_update(float *cached, float value) {
     return true;
 };
 
-class Filter
+class Filter : public Effect
 {
 
 public:
@@ -56,8 +56,12 @@ public:
 
     void update();
     void assign(float a1, float a2, float b0, float b1, float b2);
-    int32_t process(int32_t input);
+    
+    void process(int32_t *l, int32_t *r);
     void reset();
+
+protected:
+    int32_t processSample(int32_t input);
 
 private:
     FilterMode _mode;

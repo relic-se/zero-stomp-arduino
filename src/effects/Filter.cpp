@@ -4,7 +4,8 @@
 
 #include "effects/Filter.h"
 
-Filter::Filter(FilterMode m, float f, float q) : mode(m), frequency(f), Q(q) {
+Filter::Filter(FilterMode m, float f, float q, ) :
+    Effect(mix, channels), mode(m), frequency(f), Q(q) {
     reset();
 };
 
@@ -73,7 +74,14 @@ void Filter::assign(float a1, float a2, float b0, float b1, float b2) {
     _b2 = scale(b2, BIQUAD_SHIFT);
 };
 
-int32_t Filter::process(int32_t input) {
+void Filter::process(int32_t *l, int32_t *r) {
+    *l = processSample(*l);
+    if (_isStereo) {
+        *r = processSample(*r);
+    }
+};
+
+int32_t Filter::processSample(int32_t input) {
     int32_t output = (_b0 * input + _b1 * _x[0] + _b2 * _x[1] - _a1 * _y[0] - _a2 * _y[1] + (1 << (BIQUAD_SHIFT - 1))) >> BIQUAD_SHIFT;
 
     _x[1] = _x[0];
