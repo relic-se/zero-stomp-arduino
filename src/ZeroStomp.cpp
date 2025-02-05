@@ -137,9 +137,14 @@ bool ZeroStomp::begin() {
     _active = true;
 
     // Codec Configuration
+
     /// Power On
     _codec.enableVREF();
     _codec.enableVMID();
+
+    _codec.setVSEL(WM8960_VSEL_LOWEST_BIAS_CURRENT);
+    _codec.setVROI(WM8960_VROI_500);
+    _codec.setVMID(WM8960_VMIDSEL_2X5KOHM);
 
     /// Audio Signal Paths
 
@@ -191,6 +196,16 @@ bool ZeroStomp::begin() {
     if (_isStereo) {
         _codec.enableRD2RO();
     }
+
+    //// Disable unused inputs
+    zeroStomp._codec.setLIN2BOOST(WM8960_BOOST_MIXER_GAIN_MUTE);
+    zeroStomp._codec.setRIN2BOOST(WM8960_BOOST_MIXER_GAIN_MUTE);
+
+    zeroStomp._codec.setLIN3BOOST(WM8960_BOOST_MIXER_GAIN_MUTE);
+    zeroStomp._codec.setRIN3BOOST(WM8960_BOOST_MIXER_GAIN_MUTE);
+
+    zeroStomp._codec.disableLI2LO();
+    zeroStomp._codec.disableRI2RO();
 
     /// Digital Interface
 
