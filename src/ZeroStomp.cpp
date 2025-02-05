@@ -148,6 +148,8 @@ bool ZeroStomp::begin() {
 
     /// Audio Signal Paths
 
+    #ifdef USE_PGA
+
     //// Enable PGA
     _codec.enableLMIC();
     if (_isStereo) {
@@ -155,11 +157,15 @@ bool ZeroStomp::begin() {
     }
     _codec.enablePgaZeroCross();
 
-    //// Connect from INPUT1 to "n" (aka inverting) input of PGA
+    //// Connect INPUT1 to "n" (aka inverting) input of PGA
     _codec.connectLMN1();
     if (_isStereo) {
         _codec.connectRMN1();
     }
+
+    //// Connect VMID to "p" (aka non-inverting) input of PGA
+    zeroStomp._codec.pgaLeftNonInvSignalSelect(WM8960_PGAL_VMID);
+    zeroStomp._codec.pgaRightNonInvSignalSelect(WM8960_PGAL_VMID);
 
     //// Disable mute on PGA input
     _codec.disableLINMUTE();
@@ -173,13 +179,15 @@ bool ZeroStomp::begin() {
         _codec.setRINVOLDB(0.00);
     }
 
+    #endif
+
     //// Set gain of input boost mixer
     _codec.setLMICBOOST(WM8960_MIC_BOOST_GAIN_0DB);
     if (_isStereo) {
         _codec.setRMICBOOST(WM8960_MIC_BOOST_GAIN_0DB);
     }
 
-    //// Connect PGA output to boost mixer
+    //// Connect input boost output to boost mixer
     _codec.connectLMIC2B();
     if (_isStereo) {
         _codec.connectRMIC2B();

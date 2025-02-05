@@ -42,6 +42,10 @@
 #define NUM_DMA_BUFFERS 6
 #endif
 
+// Codec
+
+#define USE_PGA
+
 // I2C
 
 #ifndef PIN_I2C_SDA
