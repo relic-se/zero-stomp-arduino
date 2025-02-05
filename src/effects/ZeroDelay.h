@@ -7,7 +7,7 @@
 
 #include "Arduino.h"
 
-#include "config.h"
+#include "ZeroStomp.h"
 #include "ZeroUtils.h"
 
 #define DELAY_SHIFT (8)

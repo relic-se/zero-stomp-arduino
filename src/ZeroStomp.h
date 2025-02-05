@@ -5,7 +5,67 @@
 #ifndef _ZERO_STOMP_H
 #define _ZERO_STOMP_H
 
-#include "config.h"
+// UART
+
+#define PIN_UART_TX 0
+#define PIN_UART_RX 1
+
+// I2S
+
+#define PIN_I2S_BCLK 2
+#define PIN_I2S_LRCLK 3
+#define PIN_I2S_DOUT 4
+#define PIN_I2S_DIN 5
+
+#define DEFAULT_SAMPLE_RATE 48000
+#define BITS_PER_SAMPLE 16
+#define DEFAULT_CHANNELS 2
+#define DEFAULT_BUFFER_SIZE 512
+#define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)
+
+// Codec
+
+#define USE_PGA
+
+// I2C
+
+#define PIN_I2C_SDA 6
+#define PIN_I2C_SCL 7
+
+#define I2C_WIRE Wire1
+#define I2C_SPEED 1000000 // fast mode plus
+
+// Switch
+
+#define PIN_LED 8
+#define PIN_SWITCH 9
+
+// Display
+
+#define PIN_DISPLAY_RESET 10
+#define PIN_DISPLAY_DC 11
+#define PIN_DISPLAY_CS 13
+#define PIN_DISPLAY_SCK 14 // Not required when using hardware SPI
+#define PIN_DISPLAY_TX 15 // Not required when using hardware SPI
+
+#define DISPLAY_SPI SPI1
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGHT 64
+
+// ADC
+
+#define PIN_ADC_0 26
+#define PIN_ADC_1 27
+#define PIN_ADC_2 28
+#define PIN_ADC_EXPR 29
+
+#define ADC_BITS 12
+
+// Program
+
+#define NUM_DMA_BUFFERS 6
+#define CONTROL_RATE 16 // hz
+#define SWITCH_DURATION 400 // ms
 
 #include "Arduino.h"
 #include "display.h"

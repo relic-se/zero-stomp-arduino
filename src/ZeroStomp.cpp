@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#include "config.h"
-
 #include "ZeroStomp.h"
 #include "ZeroUtils.h"
 #include "display.h"
@@ -45,7 +43,7 @@ ZeroStomp::ZeroStomp() :
     _display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &DISPLAY_SPI, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_CS) {
     setSampleRate(DEFAULT_SAMPLE_RATE);
     setChannels(DEFAULT_CHANNELS);
-    setBitsPerSample(DEFAULT_BITS_PER_SAMPLE);
+    setBitsPerSample(BITS_PER_SAMPLE);
     setBufferSize(DEFAULT_BUFFER_SIZE);
 };
 
@@ -54,7 +52,7 @@ bool ZeroStomp::begin() {
         return false;
     }
 
-    analogReadResolution(12);
+    analogReadResolution(ADC_BITS);
     memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
     memset((void *)_knob, 0xFF, KNOB_COUNT * sizeof(uint16_t));
 

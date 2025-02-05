@@ -6,7 +6,7 @@
 #define _ZERO_REVERB_H
 
 #include "Arduino.h"
-#include "config.h" // For DEFAULT_CHANNELS
+#include "ZeroStomp.h" // For DEFAULT_CHANNELS
 
 #include "freeverb/revmodel.hpp"
 
