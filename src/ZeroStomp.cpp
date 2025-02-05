@@ -238,7 +238,12 @@ bool ZeroStomp::begin() {
     }
     _codec.disableLoopBack();
 
-    zeroStomp._codec.enableDac6dbAttenuation(); // Improves continuity with bypass output level
+    _codec.enableDac6dbAttenuation(); // Improves continuity with bypass output level
+    _codec.setDacDeEmphasis(WM8960_DEEMPH_48K); // Reduces some noise
+    _codec.enableDacSlopingStopbandFilter(); // Minimal effect on output
+
+    _codec.enableDacSoftMute();
+    _codec.disableDacSlowSoftMute();
 
     /// Output
 
