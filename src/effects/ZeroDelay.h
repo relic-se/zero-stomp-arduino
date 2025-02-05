@@ -8,7 +8,6 @@
 #include "Arduino.h"
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h"
 
 #define DELAY_SHIFT (8)
 
@@ -30,7 +29,7 @@ protected:
     int32_t processChannel(int32_t sample, uint8_t channel);
 
 private:
-    int16_t *_buffer;
+    sample_t *_buffer;
     size_t _size, _sample_rate, _pos;
     uint32_t _rate;
     uint16_t _decay, _mix;

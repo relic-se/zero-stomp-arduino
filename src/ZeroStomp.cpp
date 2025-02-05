@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h"
 #include "display.h"
 
 #include <Wire.h>
@@ -11,6 +10,9 @@
 #include <Adafruit_GFX.h>
 
 ZeroStomp zeroStomp;
+
+float global_rate_scale = 0.0, global_W_scale = 0.0;
+uint8_t global_tick = 0;
 
 void loop() {
     #ifdef SINGLE_CORE
@@ -529,8 +531,6 @@ void ZeroStomp::update() {
         _control_timer = 0;
     }
 
-    // TODO: Support 24-bit and 32-bit samples
-
     // Fill buffers
     uint8_t buffer_count = NUM_DMA_BUFFERS;
     size_t count, index;
@@ -540,9 +540,21 @@ void ZeroStomp::update() {
         count = _i2s.read((uint8_t *)_buffer, _buffer_size);
         index = 0;
         while (index < count) {
+
             // Get samples from buffer
+            #if BITS_PER_SAMPLE == 16
             l = (int16_t)((_buffer[index] >> 16) & 0xffff);
             r = (int16_t)((_buffer[index] >> 0) & 0xffff);
+            #else
+            l = (int32_t)_buffer[index];
+            r = (int32_t)_buffer[index + 1];
+            #endif
+
+            #if BITS_PER_SAMPLE == 24
+            // 24-bit samples are read right-aligned, so left-align them to keep the binary point between 33.32
+            l <<= 8;
+            r <<= 8;
+            #endif
 
             // Process samples through user code
             if (_isStereo) {
@@ -553,19 +565,32 @@ void ZeroStomp::update() {
             }
 
             // Apply hard clip
-            l = (int16_t)min(max(l, -MAX_LEVEL), MAX_LEVEL);
-            r = (int16_t)min(max(r, -MAX_LEVEL), MAX_LEVEL);
+            l = clip(l);
+            r = clip(r);
 
             // Update buffer
+            #if BITS_PER_SAMPLE == 16
             _buffer[index] = (uint32_t)(((int16_t)l << 16) | ((int16_t)r & 0xffff));
+            #else
+            _buffer[index] = (uint32_t)l;
+            _buffer[index + 1] = (uint32_t)r;
+            #endif
 
             // Increment to next 32-bit word
+            #if BITS_PER_SAMPLE == 16
             index++;
+            #else
+            index += 2;
+            #endif
         }
         _i2s.write((const uint8_t *)_buffer, count * sizeof(int32_t));
     }
 
-    _control_timer += (_isStereo ? count : count << 1);
+    #if BITS_PER_SAMPLE == 16
+    _control_timer += (_isStereo ? count : (count << 1));
+    #else
+    _control_timer += (_isStereo ? (count >> 1) : count);
+    #endif
 };
 
 bool ZeroStomp::prepareTitle(size_t len) {

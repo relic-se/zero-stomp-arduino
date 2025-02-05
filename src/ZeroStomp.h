@@ -23,6 +23,12 @@
 #define DEFAULT_BUFFER_SIZE 512
 #define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)
 
+#if BITS_PER_SAMPLE == 16
+typedef int16_t sample_t;
+#else
+typedef int32_t sample_t;
+#endif
+
 // Codec
 
 #define USE_PGA
@@ -148,5 +154,123 @@ extern bool core1_separate_stack;
 extern void setup1();
 extern void loop1();
 #endif
+
+extern float global_rate_scale, global_W_scale;
+extern uint8_t global_tick;
+static void control_tick(size_t sample_rate, size_t samples) {
+    float recip_sample_rate = 1.0 / (float)sample_rate;
+    global_rate_scale = (float)samples * recip_sample_rate;
+    global_W_scale = (2.0 * PI) * recip_sample_rate;
+    global_tick++;
+};
+
+// Global Helper Functions
+
+#define SHIFT(T) (sizeof(T) * 8 - 1)
+#define MAX_VALUE(T) ((1 << SHIFT(T)) - 1)
+#define MID_VALUE(T) (1 << (SHIFT(T) - 1))
+
+#define SAMPLE_SHIFT (BITS_PER_SAMPLE - 1)
+#define SAMPLE_MAX_VALUE ((1 << SAMPLE_SHIFT) - 1)
+
+static float dbToLinear(float value) {
+    return exp(value * 0.11512925464970228420089957273422);
+};
+
+static float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+};
+
+#define MIX_DOWN_RANGE_F (0.85)
+#define MIX_DOWN_SCALE_F(x) (1.0 / (x - MIX_DOWN_RANGE_F))
+
+static float mixDown(float sample, float scale = MIX_DOWN_SCALE_F(2.0)) {
+    if (sample < -MIX_DOWN_RANGE_F) {
+        sample = ((sample + MIX_DOWN_RANGE_F) * scale) - MIX_DOWN_RANGE_F;
+    } else if (sample > MIX_DOWN_RANGE_F) {
+        sample = ((sample - MIX_DOWN_RANGE_F) * scale) + MIX_DOWN_RANGE_F;
+    }
+    return sample;
+};
+
+#define MIX_DOWN_RANGE (28000)
+#define MIX_DOWN_SCALE(x) (0xfffffff / (32768 * x - MIX_DOWN_RANGE))
+
+static int16_t mixDown(int32_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
+    if (sample < -MIX_DOWN_RANGE) {
+        sample = (((sample + MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) - MIX_DOWN_RANGE;
+    } else if (sample > MIX_DOWN_RANGE) {
+        sample = (((sample - MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) + MIX_DOWN_RANGE;
+    }
+    return sample;
+};
+
+static float applyMix(float dry, float wet, float mix) {
+    if (mix >= 1.0) return wet;
+    if (mix <= 0.0) return dry;
+    return mixDown(
+        (float)(dry * (mix <= 0.5 ? 1.0 : ((1.0 - mix) * 2.0))
+        + wet * (mix >= 0.5 ? 1.0 : (mix * 2.0)))
+    );
+};
+
+template <typename T>
+static int32_t applyMix(int32_t dry, int32_t wet, T mix) {
+    return mixDown(
+        scale<T>(dry, mix <= MID_VALUE(T) ? MAX_VALUE(T) : ((MID_VALUE(T) - mix) << 1))
+        + scale<T>(wet, mix >= MID_VALUE(T) ? MAX_VALUE(T) : mix << 1),
+        MIX_DOWN_SCALE(2)
+    );
+};
+
+static float applyLinearMix(float dry, float wet, float mix) {
+    if (mix >= 1.0) return wet;
+    if (mix <= 0.0) return dry;
+    return mixDown((float)(dry * (1.0 - mix) + wet * mix));
+};
+
+template <typename T>
+static int32_t applyLinearMix(int32_t dry, int32_t wet, T mix) {
+    return mixDown(
+        scale<T>(dry, MAX_VALUE(T) - mix)
+        + scale<T>(wet, mix),
+        MIX_DOWN_SCALE(2)
+    );
+};
+
+inline float convert(int32_t sample) {
+    return ldexp(sample, -SAMPLE_SHIFT);
+};
+
+inline int32_t convert(float sample) {
+    return (int32_t)round(ldexp(sample, SAMPLE_SHIFT));
+};
+
+inline float clip(float sample, float level = 1.0) {
+    return min(max(sample, -level), level);
+};
+
+inline int32_t clip(int32_t sample, int32_t level = -1) {
+    if (level < 0) level = SAMPLE_MAX_VALUE;
+    return min(max(sample, -level), level);
+};
+
+template <typename T>
+inline T scale(float value) {
+    return round(ldexp(value, SHIFT(T)));
+};
+
+inline int32_t scale(float value, int8_t shift) {
+    return round(ldexp(value, shift));
+};
+
+template <typename T>
+inline int32_t scale(int32_t sample, T value) {
+    return (sample * (int32_t)value) >> SHIFT(T);
+};
+
+inline int32_t scale(int32_t sample, int16_t value, int8_t shift) {
+    return (sample * (int32_t)value) >> shift;
+};
 
 #endif

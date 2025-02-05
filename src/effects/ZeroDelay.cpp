@@ -18,8 +18,8 @@ void ZeroDelay::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (int16_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(int16_t));
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(int16_t));
+    _buffer = (sample_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(sample_t));
+    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(sample_t));
     _pos = 0;
 };
 
@@ -73,7 +73,7 @@ int32_t ZeroDelay::processChannel(int32_t sample, uint8_t channel) {
         echo = mixDown(echo, MIX_DOWN_SCALE(2));
 
         // Update echo buffer with hard clip
-        _buffer[index] = (int16_t)min(max(echo, -MAX_LEVEL), MAX_LEVEL);
+        _buffer[index] = (sample_t)clip(echo);
     }
 
     // Mix initial echo value with dry signal and return

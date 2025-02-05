@@ -4,7 +4,6 @@
 
 #include "ZeroStomp.h"
 #include "ZeroLFO.h"
-#include "ZeroUtils.h"
 
 // BUG: Rate is too fast
 #define MIN_SPEED 0.01
@@ -70,7 +69,7 @@ void updateControl(uint32_t samples) {
 
 void updateAudio(int32_t *l, int32_t *r) {
   // Level controlled by DSP
-  //int32_t level = lfo.get_scaled(0.0, 1.0);
-  //*l = applyVolume(*l, level);
-  //*r = applyVolume(*r, level);
+  //int16_t level = lfo.get_scaled(0.0, 1.0);
+  //*l = scale<int16_t>(*l, level);
+  //*r = scale<int16_t>(*r, level);
 }

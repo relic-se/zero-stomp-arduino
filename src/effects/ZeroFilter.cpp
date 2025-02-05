@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "effects/ZeroFilter.h"
-#include "ZeroUtils.h"
 
 ZeroFilter::ZeroFilter(FilterMode m, float f, float q) : mode(m), frequency(f), Q(q) {
     reset();
@@ -67,15 +66,11 @@ void ZeroFilter::update() {
 };
 
 void ZeroFilter::assign(float a1, float a2, float b0, float b1, float b2) {
-    _a1 = scale(a1);
-    _a2 = scale(a2);
-    _b0 = scale(b0);
-    _b1 = scale(b1);
-    _b2 = scale(b2);
-};
-
-int32_t ZeroFilter::scale(float arg) {
-    return (int32_t)round(ldexp(arg, BIQUAD_SHIFT));
+    _a1 = scale(a1, BIQUAD_SHIFT);
+    _a2 = scale(a2, BIQUAD_SHIFT);
+    _b0 = scale(b0, BIQUAD_SHIFT);
+    _b1 = scale(b1, BIQUAD_SHIFT);
+    _b2 = scale(b2, BIQUAD_SHIFT);
 };
 
 int32_t ZeroFilter::process(int32_t input) {

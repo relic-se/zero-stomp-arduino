@@ -6,7 +6,6 @@
 #define MAX_GAIN 40.0
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h"
 
 float gain;
 
@@ -53,7 +52,7 @@ float applyDrive(float sample) {
 
 void processSample(int32_t *sample) {
   // Convert sample to float (-1.0 to 1.0)
-  float samplef = sampleToFloat(*sample);
+  float samplef = convert<int16_t>(*sample);
 
   // Apply gain to signal
   samplef *= gain;
@@ -62,7 +61,7 @@ void processSample(int32_t *sample) {
   samplef = applyDrive(samplef);
 
   // Convert back to integer format
-  *sample = sampleFromFloat(samplef);
+  *sample = convert<int16_t>(samplef);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

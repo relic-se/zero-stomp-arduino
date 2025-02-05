@@ -4,7 +4,6 @@
 
 #include "ZeroStomp.h"
 #include "effects/ZeroFilter.h"
-#include "ZeroUtils.h" // Needed for mapFloat
 
 ZeroFilter filter;
 

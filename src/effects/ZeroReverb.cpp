@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "effects/ZeroReverb.h"
-#include "ZeroUtils.h"
 
 ZeroReverb::ZeroReverb(ReverbMode mode, float room_size, float damping, float width, float mix, uint8_t channels) {
     setMode(mode);
@@ -41,13 +40,13 @@ void ZeroReverb::setChannels(uint8_t value) {
 };
 
 void ZeroReverb::process(int32_t *l, int32_t *r) {
-    float fl = sampleToFloat(*l), fr = 0;
+    float fl = convert<int16_t>(*l), fr = 0;
     if (_model.getstereo()) {
-        fr = sampleToFloat(*r);
+        fr = convert<int16_t>(*r);
     }
     _model.processreplace(&fl, &fr, &fl, &fr, 1, 0);
-    *l = sampleFromFloat(fl);
+    *l = convert<int16_t>(fl);
     if (_model.getstereo()) {
-        *r = sampleFromFloat(fr);
+        *r = convert<int16_t>(fr);
     }
 };

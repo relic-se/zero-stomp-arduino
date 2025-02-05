@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroLFO.h"
-#include "ZeroUtils.h"
 
 #define ALMOST_ONE (32767.0 / 32768.0)
 

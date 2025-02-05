@@ -65,8 +65,6 @@ private:
     int32_t _a1, _a2, _b0, _b1, _b2;
     int32_t _x[2], _y[2];
 
-    int32_t scale(float arg);
-
 };
 
 #endif

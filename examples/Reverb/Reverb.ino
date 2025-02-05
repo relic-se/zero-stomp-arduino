@@ -4,7 +4,6 @@
 
 #include "ZeroStomp.h"
 #include "effects/ZeroReverb.h"
-#include "ZeroUtils.h" // For mapFloat
 
 ZeroReverb effect;
 

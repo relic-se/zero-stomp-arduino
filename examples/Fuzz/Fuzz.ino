@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h" // For MAX_LEVEL
 
 int32_t threshold;
 
