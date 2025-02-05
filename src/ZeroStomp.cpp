@@ -238,6 +238,8 @@ bool ZeroStomp::begin() {
     }
     _codec.disableLoopBack();
 
+    zeroStomp._codec.enableDac6dbAttenuation(); // Improves continuity with bypass output level
+
     /// Output
 
     //// Enable output mixer
