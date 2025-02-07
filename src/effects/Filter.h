@@ -59,7 +59,7 @@ public:
     void update();
     void assign(float a1, float a2, float b0, float b1, float b2);
     
-    void process(int32_t *l, int32_t *r);
+    void process(int32_t *l, int32_t *r = nullptr);
     void reset();
 
 protected:

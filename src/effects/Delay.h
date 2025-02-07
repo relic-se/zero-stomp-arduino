@@ -24,7 +24,7 @@ public:
     void setTime(float value);
     void setDecay(int16_t value);
 
-    void process(int32_t *l, int32_t *r);
+    void process(int32_t *l, int32_t *r = nullptr);
 
 protected:
     int32_t processChannel(int32_t sample, uint8_t channel);

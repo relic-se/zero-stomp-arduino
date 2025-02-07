@@ -24,7 +24,7 @@ public:
         _mix = value;
     }
 
-    virtual void process(float *l, float *r) = 0;
+    virtual void process(int32_t *l, int32_t *r = nullptr) = 0;
 
 protected:
     bool _isStereo;

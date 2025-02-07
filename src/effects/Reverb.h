@@ -29,7 +29,7 @@ public:
     void setSampleRate(size_t value);
     void setChannels(uint8_t value) override;
 
-    void process(int32_t *l, int32_t *r);
+    void process(int32_t *l, int32_t *r = nullptr);
 
 private:
     revmodel _model;
