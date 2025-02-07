@@ -4,7 +4,6 @@
 
 #include "ZeroStomp.h"
 #include "display.h"
-
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_GFX.h>

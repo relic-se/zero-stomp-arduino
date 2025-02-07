@@ -6,13 +6,12 @@
 #define _EFFECT_H
 
 #include "Arduino.h"
-
 #include "ZeroStomp.h"
 
 class Effect
 {
 public:
-    Effect(int16_t mix = 1.0, uint8_t channels = DEFAULT_CHANNELS) {
+    Effect(int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS) {
         setMix(mix);
         setChannels(channels);
     }

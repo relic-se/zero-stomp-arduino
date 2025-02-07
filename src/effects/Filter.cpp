@@ -4,7 +4,7 @@
 
 #include "effects/Filter.h"
 
-Filter::Filter(FilterMode m, float f, float q, ) :
+Filter::Filter(FilterMode m, float f, float q, int16_t mix, uint8_t channels) :
     Effect(mix, channels), mode(m), frequency(f), Q(q) {
     reset();
 };
@@ -67,11 +67,11 @@ void Filter::update() {
 };
 
 void Filter::assign(float a1, float a2, float b0, float b1, float b2) {
-    _a1 = scale(a1, BIQUAD_SHIFT);
-    _a2 = scale(a2, BIQUAD_SHIFT);
-    _b0 = scale(b0, BIQUAD_SHIFT);
-    _b1 = scale(b1, BIQUAD_SHIFT);
-    _b2 = scale(b2, BIQUAD_SHIFT);
+    _a1 = convert(a1, BIQUAD_SHIFT);
+    _a2 = convert(a2, BIQUAD_SHIFT);
+    _b0 = convert(b0, BIQUAD_SHIFT);
+    _b1 = convert(b1, BIQUAD_SHIFT);
+    _b2 = convert(b2, BIQUAD_SHIFT);
 };
 
 void Filter::process(int32_t *l, int32_t *r) {

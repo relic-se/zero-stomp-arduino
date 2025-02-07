@@ -6,6 +6,8 @@
 #define _ZERO_FILTER_H
 
 #include "Arduino.h"
+#include "ZeroStomp.h"
+#include "effects/Effect.h"
 
 extern float global_W_scale;
 
@@ -49,7 +51,7 @@ class Filter : public Effect
 {
 
 public:
-    Filter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475);
+    Filter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475, int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS);
     
     FilterMode mode;
     float frequency, Q;

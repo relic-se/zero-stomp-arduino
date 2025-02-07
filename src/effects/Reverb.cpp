@@ -39,11 +39,11 @@ void Reverb::setMix(int16_t value) {
 };
 
 void Reverb::setSampleRate(size_t value) {
-    _model.setsamplerate(value);
+    //_model.setsamplerate(value); // BUG: Not implemented
 };
 
 void Reverb::setChannels(uint8_t value) {
-    Effect::setChannels(value);w
+    Effect::setChannels(value);
     _model.setstereo(value == 2);
 };
 

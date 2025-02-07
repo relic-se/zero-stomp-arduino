@@ -6,6 +6,7 @@
 #define _ZERO_LFO_H
 
 #include "Arduino.h"
+#include "ZeroStomp.h"
 
 extern float global_rate_scale;
 extern uint8_t global_tick;

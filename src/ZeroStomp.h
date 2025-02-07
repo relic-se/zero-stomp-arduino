@@ -21,13 +21,9 @@
 #define BITS_PER_SAMPLE 16
 #define DEFAULT_CHANNELS 2
 #define DEFAULT_BUFFER_SIZE 512
-#define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)
 
-#if BITS_PER_SAMPLE == 16
-typedef int16_t sample_t;
-#else
-typedef int32_t sample_t;
-#endif
+#define MIN_LEVEL 0
+#define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)
 
 // Codec
 
@@ -75,10 +71,15 @@ typedef int32_t sample_t;
 
 #include "Arduino.h"
 #include "display.h"
-
 #include <SparkFun_WM8960_Arduino_Library.h> 
 #include <I2S.h>
 #include <Adafruit_SSD1306.h>
+
+#if BITS_PER_SAMPLE == 16
+typedef int16_t sample_t;
+#else
+typedef int32_t sample_t;
+#endif
 
 class ZeroStomp
 {
@@ -181,6 +182,41 @@ static float mapFloat(float x, float in_min, float in_max, float out_min, float 
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 };
 
+inline float convert(int32_t sample) {
+    return ldexp(sample, -SAMPLE_SHIFT);
+};
+
+inline int32_t convert(float sample) {
+    return (int32_t)round(ldexp(sample, SAMPLE_SHIFT));
+};
+
+template <typename T>
+inline T convert(float value) {
+    return (T)round(ldexp(value, SHIFT(T)));
+};
+
+inline int32_t convert(float value, int8_t shift) {
+    return (int32_t)round(ldexp(value, shift));
+};
+
+inline float clip(float sample, float level = 1.0) {
+    return min(max(sample, -level), level);
+};
+
+inline int32_t clip(int32_t sample, int32_t level = -1) {
+    if (level < 0) level = SAMPLE_MAX_VALUE;
+    return min(max(sample, -level), level);
+};
+
+template <typename T>
+inline int32_t scale(int32_t sample, T value) {
+    return (sample * (int32_t)value) >> SHIFT(T);
+};
+
+inline int32_t scale(int32_t sample, int32_t value, int8_t shift) {
+    return (sample * value) >> shift;
+};
+
 #define MIX_DOWN_RANGE_F (0.85)
 #define MIX_DOWN_SCALE_F(x) (1.0 / (x - MIX_DOWN_RANGE_F))
 
@@ -236,41 +272,6 @@ static int32_t applyLinearMix(int32_t dry, int32_t wet, T mix) {
         + scale<T>(wet, mix),
         MIX_DOWN_SCALE(2)
     );
-};
-
-inline float convert(int32_t sample) {
-    return ldexp(sample, -SAMPLE_SHIFT);
-};
-
-inline int32_t convert(float sample) {
-    return (int32_t)round(ldexp(sample, SAMPLE_SHIFT));
-};
-
-inline float clip(float sample, float level = 1.0) {
-    return min(max(sample, -level), level);
-};
-
-inline int32_t clip(int32_t sample, int32_t level = -1) {
-    if (level < 0) level = SAMPLE_MAX_VALUE;
-    return min(max(sample, -level), level);
-};
-
-template <typename T>
-inline T scale(float value) {
-    return round(ldexp(value, SHIFT(T)));
-};
-
-inline int32_t scale(float value, int8_t shift) {
-    return round(ldexp(value, shift));
-};
-
-template <typename T>
-inline int32_t scale(int32_t sample, T value) {
-    return (sample * (int32_t)value) >> SHIFT(T);
-};
-
-inline int32_t scale(int32_t sample, int16_t value, int8_t shift) {
-    return (sample * (int32_t)value) >> shift;
 };
 
 #endif
