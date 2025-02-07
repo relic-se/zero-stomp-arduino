@@ -48,13 +48,13 @@ void Reverb::setChannels(uint8_t value) {
 };
 
 void Reverb::process(int32_t *l, int32_t *r) {
-    float fl = convert<int16_t>(*l), fr = 0;
+    float fl = convert(*l), fr = 0;
     if (_model.getstereo()) {
-        fr = convert<int16_t>(*r);
+        fr = convert(*r);
     }
     _model.processreplace(&fl, &fr, &fl, &fr, 1, 0);
-    *l = convert<int16_t>(fl);
+    *l = convert(fl);
     if (_model.getstereo()) {
-        *r = convert<int16_t>(fr);
+        *r = convert(fr);
     }
 };

@@ -43,6 +43,5 @@ void updateControl(uint32_t samples) {
 
 void updateAudio(int32_t *l, int32_t *r) {
   // Process samples through filter biquad
-  *l = filter.process(*l);
-  *r = filter.process(*r);
+  filter.process(l, r);
 }

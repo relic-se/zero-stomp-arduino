@@ -52,7 +52,7 @@ float applyDrive(float sample) {
 
 void processSample(int32_t *sample) {
   // Convert sample to float (-1.0 to 1.0)
-  float samplef = convert<int16_t>(*sample);
+  float samplef = convert(*sample);
 
   // Apply gain to signal
   samplef *= gain;
@@ -61,7 +61,7 @@ void processSample(int32_t *sample) {
   samplef = applyDrive(samplef);
 
   // Convert back to integer format
-  *sample = convert<int16_t>(samplef);
+  *sample = convert(samplef);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
