@@ -14,6 +14,8 @@ LFO lfo;
 uint8_t waveform_index = 0;
 #define NUM_WAVEFORMS 4
 
+int16_t level;
+
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
@@ -64,12 +66,12 @@ void updateControl(uint32_t samples) {
   }
 
   // Level controlled by codec
-  zeroStomp.setLevel((uint8_t)min(lfo.get_scaled(0.0, 1.0) >> 7, (1 << 8) - 1));
+  level = lfo.get_scaled(0.0, 1.0);
+  zeroStomp.setLevel((uint8_t)min(level >> 7, UMAX_VALUE(uint8_t)));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
   // Level controlled by DSP
-  //int16_t level = lfo.get_scaled(0.0, 1.0);
   //*l = scale<int16_t>(*l, level);
   //*r = scale<int16_t>(*r, level);
 }

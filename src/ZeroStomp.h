@@ -171,6 +171,10 @@ static void control_tick(size_t sample_rate, size_t samples) {
 #define MAX_VALUE(T) ((1 << SHIFT(T)) - 1)
 #define MID_VALUE(T) (1 << (SHIFT(T) - 1))
 
+#define USHIFT(T) (sizeof(T) * 8)
+#define UMAX_VALUE(T) ((1 << USHIFT(T)) - 1)
+#define UMID_VALUE(T) (1 << (USHIFT(T) - 1))
+
 #define SAMPLE_SHIFT (BITS_PER_SAMPLE - 1)
 #define SAMPLE_MAX_VALUE ((1 << SAMPLE_SHIFT) - 1)
 
