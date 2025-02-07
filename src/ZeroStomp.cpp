@@ -564,8 +564,9 @@ void ZeroStomp::update() {
             }
 
             // Apply hard clip
-            l = clip(l);
-            r = clip(r);
+            // BUG: Distortion occurs when using full max value
+            l = clip(l, SAMPLE_MAX_VALUE >> 1);
+            r = clip(r, SAMPLE_MAX_VALUE >> 1);
 
             // Update buffer
             #if BITS_PER_SAMPLE == 16
