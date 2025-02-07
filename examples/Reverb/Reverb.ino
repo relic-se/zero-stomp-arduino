@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroReverb.h"
-#include "ZeroUtils.h" // For mapFloat
+#include "effects/Reverb.h"
 
-ZeroReverb effect;
+Reverb effect;
 
 void setup(void) {
   // Open Serial
@@ -16,6 +15,7 @@ void setup(void) {
   #if !PICO_RP2350
   zeroStomp.setSampleRate(8000);
   zeroStomp.setChannels(1);
+  effect.setSampleRate(8000);
   effect.setChannels(1);
   #endif
 

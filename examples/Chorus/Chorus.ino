@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "ZeroLFO.h"
-#include "effects/ZeroDelay.h"
+#include "LFO.h"
+#include "effects/Delay.h"
 
 // BUG: Rate is too fast
 #define MIN_RATE (0.01)
@@ -15,8 +15,8 @@
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE * MAX_DEPTH * 2)
 
-ZeroDelay effect(DELAY_SIZE);
-ZeroLFO lfo;
+Delay effect(DELAY_SIZE);
+LFO lfo;
 
 float depth;
 

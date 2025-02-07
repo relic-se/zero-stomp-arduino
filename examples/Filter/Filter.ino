@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
-#include "effects/ZeroFilter.h"
-#include "ZeroUtils.h" // Needed for mapFloat
+#include "effects/Filter.h"
 
-ZeroFilter filter;
+Filter filter;
 
 #define MIN_Q (0.7071067811865475)
 #define MAX_Q (8.0)
@@ -44,6 +43,5 @@ void updateControl(uint32_t samples) {
 
 void updateAudio(int32_t *l, int32_t *r) {
   // Process samples through filter biquad
-  *l = filter.process(*l);
-  *r = filter.process(*r);
+  filter.process(l, r);
 }

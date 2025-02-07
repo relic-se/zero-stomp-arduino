@@ -2,8 +2,7 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#include "ZeroLFO.h"
-#include "ZeroUtils.h"
+#include "LFO.h"
 
 #define ALMOST_ONE (32767.0 / 32768.0)
 
@@ -32,7 +31,7 @@ int16_t lfoWaveformSaw(size_t index) {
     return (index - (LFO_WAVEFORM_LEN / 2)) * -LFO_WAVEFORM_MAX / (LFO_WAVEFORM_LEN / 2);
 };
 
-ZeroLFO::ZeroLFO(float rate, float scale, float offset, float phase_offset) :
+LFO::LFO(float rate, float scale, float offset, float phase_offset) :
     _rate(rate),
     _scale(scale),
     _offset(offset),
@@ -43,42 +42,42 @@ ZeroLFO::ZeroLFO(float rate, float scale, float offset, float phase_offset) :
 
 };
 
-void ZeroLFO::setOnce(bool value) {
+void LFO::setOnce(bool value) {
     _once = value;
 };
 
-void ZeroLFO::setInterpolate(bool value) {
+void LFO::setInterpolate(bool value) {
     _interpolate = value;
 };
 
-void ZeroLFO::setRate(float value) {
+void LFO::setRate(float value) {
     _rate = value;
 };
 
-void ZeroLFO::setScale(float value) {
+void LFO::setScale(float value) {
     _scale = value;
 };
 
-void ZeroLFO::setOffset(float value) {
+void LFO::setOffset(float value) {
     _offset = value;
 };
 
-void ZeroLFO::setPhaseOffset(float value) {
+void LFO::setPhaseOffset(float value) {
     _phase_offset = value;
 };
 
-void ZeroLFO::setWaveform(LfoWaveform waveform) {
+void LFO::setWaveform(LfoWaveform waveform) {
     for (size_t i = 0; i < LFO_WAVEFORM_LEN; i++) {
         _waveform[i] = waveform(i);
     }
 };
 
-float ZeroLFO::get() {
+float LFO::get() {
     tick();
     return _value;
 };
 
-float ZeroLFO::get_limited(float lo, float hi) {
+float LFO::get_limited(float lo, float hi) {
     tick();
     if (_value < lo) {
         return lo;
@@ -89,15 +88,15 @@ float ZeroLFO::get_limited(float lo, float hi) {
     return _value;
 };
 
-int32_t ZeroLFO::get_scaled(float lo, float hi) {
-    return (int32_t)round(ldexp(get_limited(lo, hi), VOLUME_SHIFT));
+int32_t LFO::get_scaled(float lo, float hi) {
+    return convert(get_limited(lo, hi), SAMPLE_SHIFT);
 };
 
-void ZeroLFO::retrigger() {
+void LFO::retrigger() {
     _accum = 0.0;
 };
 
-void ZeroLFO::tick() {
+void LFO::tick() {
     if (_tick == global_tick) {
         return;
     }

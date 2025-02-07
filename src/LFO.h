@@ -6,6 +6,7 @@
 #define _ZERO_LFO_H
 
 #include "Arduino.h"
+#include "ZeroStomp.h"
 
 extern float global_rate_scale;
 extern uint8_t global_tick;
@@ -22,11 +23,11 @@ int16_t lfoWaveformSquare(size_t index);
 int16_t lfoWaveformSine(size_t index);
 int16_t lfoWaveformSaw(size_t index);
 
-class ZeroLFO
+class LFO
 {
 
 public:
-    ZeroLFO(float rate = 1.0, float scale = 1.0, float offset = 0.0, float phase_offset = 0.0);
+    LFO(float rate = 1.0, float scale = 1.0, float offset = 0.0, float phase_offset = 0.0);
 
     void setOnce(bool value);
     void setInterpolate(bool value);

@@ -6,9 +6,8 @@
 #define MAX_GAIN 40.0
 
 #include "ZeroStomp.h"
-#include "ZeroUtils.h"
 
-float gain;
+float gain, preGain, postGain;
 
 void setup(void) {
   // Open Serial
@@ -27,13 +26,15 @@ void setup(void) {
 
   zeroStomp.setTitle(F("Overdrive"));
 
-  zeroStomp.setLabel(0, F("Gain"));
+  zeroStomp.setLabel(0, F("Drive"));
   //zeroStomp.setLabel(1, F("Tone"));
   zeroStomp.setLabel(2, F("Level"));
 }
 
 void updateControl(uint32_t samples) {
-  gain = dbToLinear(mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_GAIN, MAX_GAIN));
+  gain = mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_GAIN, MAX_GAIN);
+  preGain = dbToLinear(gain);
+  postGain = dbToLinear(-gain);
 
   // TODO: Tone EQ
   //zeroStomp.getValue(1)
@@ -53,16 +54,19 @@ float applyDrive(float sample) {
 
 void processSample(int32_t *sample) {
   // Convert sample to float (-1.0 to 1.0)
-  float samplef = sampleToFloat(*sample);
+  float samplef = convert(*sample);
 
-  // Apply gain to signal
-  samplef *= gain;
+  // Apply pre-gain to signal
+  samplef *= preGain;
 
   // Apply overdrive
   samplef = applyDrive(samplef);
 
+  // Apply post-gain to signal
+  samplef *= postGain;
+
   // Convert back to integer format
-  *sample = sampleFromFloat(samplef);
+  *sample = convert(samplef);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
