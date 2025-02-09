@@ -10,6 +10,10 @@ Chorus::Chorus(float max_time, float time, uint8_t voices, int16_t mix, size_t s
     setMaxTime(max_time);
     setTime(time);
     setVoices(voices);
+
+    _current_offset = _offset;
+    updateStep();
+
     reset();
 };
 
@@ -46,38 +50,46 @@ void Chorus::process(int32_t *l, int32_t *r) {
     if (_isStereo) {
         *r = processChannel(*r, 1);
     }
+    
     if (++_pos >= _size) _pos = 0;
+
+    if (_offset != _current_offset) {
+        if (_offset > _current_offset) {
+            _current_offset++;
+        } else if (_offset < _current_offset) {
+            _current_offset--;
+        }
+        updateStep();
+    }
+
 };
 
 int32_t Chorus::processChannel(int32_t sample, uint8_t channel) {
     // Update current position of buffer
     _buffer[_pos + _size * channel] = (sample_t)clip(sample);
 
-    int32_t output = sample;
-    if (_voices > 1) {
-        size_t pos = _pos;
-        for (uint8_t i = 1; i < _voices; i++) {
-            pos -= _step;
-            if (pos < 0) pos += _size;
+    int32_t output = 0;
+    int32_t pos = (int32_t)_pos << CHORUS_SHIFT;
+    for (uint8_t i = 0; i < _voices; i++) {
+        pos -= _step;
+        if (pos < 0) pos += _size << CHORUS_SHIFT;
 
-            output += _buffer[pos + _size * channel];
-        }
-
-        // Apply dynamic range compression
-        output = mixDown(output, _scale);
+        output += _buffer[(pos >> CHORUS_SHIFT) + _size * channel];
     }
+
+    // Apply dynamic range compression
+    if (_voices > 1) output = mixDown(output, _scale);
 
     // Mix with dry signal and return
     return applyMix(sample, output, _mix);
 };
 
 void Chorus::updateOffset() {
-    _offset = min(max(_time * _sample_rate, 1), _size - 1);
-    updateStep();
+    _offset = min(max(_time * _sample_rate * (1 << CHORUS_SHIFT), 1), (_size - 1) << CHORUS_SHIFT);
 };
 
 void Chorus::updateStep() {
-    _step = _offset / (_voices - 1);
+    _step = max(_current_offset / _voices, 1);
 };
 
 void Chorus::reset() {

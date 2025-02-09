@@ -9,6 +9,8 @@
 #include "ZeroStomp.h"
 #include "effects/Effect.h"
 
+#define CHORUS_SHIFT (2)
+
 class Chorus : public Effect
 {
 
@@ -32,7 +34,8 @@ protected:
 private:
     sample_t *_buffer;
     float _max_time, _time;
-    size_t _size, _sample_rate, _pos, _offset, _step;
+    size_t _size, _sample_rate, _pos;
+    size_t _offset, _current_offset, _step; // << CHORUS_SHIFT
     uint8_t _voices;
     int32_t _scale; // For mixDown
 
