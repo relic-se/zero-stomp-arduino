@@ -36,7 +36,9 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Chorus");
 
+  #if USE_LFO
   lfo.setWaveform(lfoWaveformSine);
+  #endif
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
