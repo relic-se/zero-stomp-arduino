@@ -513,7 +513,7 @@ void ZeroStomp::update() {
         // Reset knobs
         memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
 
-        // Update values needed for processing filters
+        // Update values needed for processing filters and LFOs
         control_tick(_sample_rate, _control_timer);
 
         // Run user code
