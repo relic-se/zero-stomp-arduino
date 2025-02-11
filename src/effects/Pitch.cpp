@@ -29,42 +29,62 @@ void Pitch::process(int32_t *l, int32_t *r) {
     if (_isStereo) {
         *r = processChannel(*r, 1);
     }
-    
+
+    // Increment write buffer pointer
     if (++_write >= _window) _write = 0;
 
+    // Increment read buffer by rate
     _read += _rate;
     if (_read >= _window << PITCH_SHIFT) _read -= _window << PITCH_SHIFT;
 };
 
 int32_t Pitch::processChannel(int32_t sample, uint8_t channel) {
-    // Update current position of buffer
+    // Restore previous sample
+    _buffer[((_write + _window - 1) % _window) + _window * channel] = _writeBuffer[channel];
+
+    // Save current sample for next call
+    _writeBuffer[channel] = (sample_t)clip(sample);
+
+    // Mix current input sample with current buffer sample
+    sample += _buffer[_write + _window * channel];
+    sample /= 2;
+
+    // Write sample to buffer
     _buffer[_write + _window * channel] = (sample_t)clip(sample);
 
+    // Read sample from buffer
     size_t index = _read >> PITCH_SHIFT;
-    int32_t output = _buffer[index + _window * channel];
+    int32_t output = (int32_t)_buffer[index + _window * channel];
 
-    #if PITCH_SHIFT == 8
     // Blend current sample with next sample
-    int16_t pos = _read & ((1 << PITCH_SHIFT) - 1);
+    size_t pos = _read & ((1 << PITCH_SHIFT) - 1);
     if (pos) {
-        output = applyMix<int8_t>(
-            output,
-            _buffer[((index + 1) % _window) + _window * channel],
-            (int8_t)pos - (1 << (PITCH_SHIFT - 1))
-        );
+        output = output * (((1 << PITCH_SHIFT) - 1) - pos);
+        output += _buffer[((index + 1) % _window) + _window * channel] * pos;
+        output >>= PITCH_SHIFT;
     }
-    #endif
 
     // Mix with dry signal and return
     return applyMix<int16_t>(sample, output, _mix);
 };
 
 void Pitch::reset() {
+    // Reset circular buffer
     if (_buffer) {
         free(_buffer);
         _buffer = nullptr;
     }
     _buffer = (sample_t *)malloc(_window * (_isStereo + 1) * sizeof(sample_t));
     memset((void *)_buffer, 0, _window * (_isStereo + 1) * sizeof(sample_t));
+
+    // Reset last write buffer
+    if (_writeBuffer) {
+        free (_writeBuffer);
+        _writeBuffer = nullptr;
+    }
+    _writeBuffer = (sample_t *)malloc((_isStereo + 1) * sizeof(sample_t));
+    memset((void *)_writeBuffer, 0, (_isStereo + 1) * sizeof(sample_t));
+
+    // Reset buffer pointers
     _write = _read = 0;
 };
