@@ -257,7 +257,7 @@ static float applyMix(float dry, float wet, float mix) {
 template <typename T>
 static int32_t applyMix(int32_t dry, int32_t wet, T mix) {
     return mixDown(
-        scale<T>(dry, mix <= MID_VALUE(T) ? MAX_VALUE(T) : ((MID_VALUE(T) - mix) << 1))
+        scale<T>(dry, mix <= MID_VALUE(T) ? MAX_VALUE(T) : ((MAX_VALUE(T) - mix) << 1))
         + scale<T>(wet, mix >= MID_VALUE(T) ? MAX_VALUE(T) : mix << 1),
         MIX_DOWN_SCALE(2)
     );
