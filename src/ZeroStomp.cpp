@@ -265,7 +265,7 @@ bool ZeroStomp::begin() {
     _i2s.setBCLK(PIN_I2S_BCLK); // LRCLK is BCLK + 1
     _i2s.setDOUT(PIN_I2S_DOUT);
     _i2s.setDIN(PIN_I2S_DIN);
-    _i2s.setFrequency(_sample_rate);
+    _i2s.setFrequency(_sampleRate);
     _i2s.setStereo(_isStereo);
     _i2s.setBitsPerSample(_bits_per_sample);
     _i2s.setBuffers(NUM_DMA_BUFFERS, _buffer_size / sizeof(uint32_t));
@@ -273,10 +273,10 @@ bool ZeroStomp::begin() {
 
     _buffer = (uint32_t *)malloc(_buffer_size);
     memset((void *)_buffer, 0, _buffer_size);
-    _control_timer = _sample_rate / CONTROL_RATE; // Initiate first control update
+    _control_timer = _sampleRate / CONTROL_RATE; // Initiate first control update
 
     // Allow filter and LFO updates to run during setup
-    control_tick(_sample_rate, _control_timer);
+    control_tick(_sampleRate, _control_timer);
 
     _running = true;
 
@@ -295,7 +295,7 @@ bool ZeroStomp::setSampleRate(uint32_t value) {
     if (value < 8000 || value > 48000) {
         return false;
     }
-    _sample_rate = value;
+    _sampleRate = value;
     if (_active) {
         updateSampleRate();
     }
@@ -319,13 +319,13 @@ bool ZeroStomp::updateSampleRate() {
     _codec.setDCLKDIV(WM8960_DCLKDIV_16);
 
     uint16_t div_base;
-    if (_sample_rate == 8000 || _sample_rate == 12000 || _sample_rate == 16000 || _sample_rate == 24000 || _sample_rate == 32000 || _sample_rate == 48000) {
+    if (_sampleRate == 8000 || _sampleRate == 12000 || _sampleRate == 16000 || _sampleRate == 24000 || _sampleRate == 32000 || _sampleRate == 48000) {
         // SYSCLK = 12.288 MHz
         // DCLK = 768.0k_hz
         _codec.setPLLN(8);
         _codec.setPLLK(0x31, 0x26, 0xE8);
         div_base = 48000;
-    } else if (_sample_rate == 11025 || _sample_rate == 22050 || _sample_rate == 44100) {
+    } else if (_sampleRate == 11025 || _sampleRate == 22050 || _sampleRate == 44100) {
         // SYSCLK = 11.2896 MHz
         // DCLK = 705.6k_hz
         _codec.setPLLN(7);
@@ -335,7 +335,7 @@ bool ZeroStomp::updateSampleRate() {
         return false;
     }
 
-    uint8_t div = div_base * 2 / _sample_rate;
+    uint8_t div = div_base * 2 / _sampleRate;
     switch (div) {
         case 2:
         default:
@@ -509,12 +509,12 @@ void ZeroStomp::update() {
         return;
     }
 
-    if (_control_timer >= _sample_rate / CONTROL_RATE) {
+    if (_control_timer >= _sampleRate / CONTROL_RATE) {
         // Reset knobs
         memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
 
         // Update values needed for processing filters and LFOs
-        control_tick(_sample_rate, _control_timer);
+        control_tick(_sampleRate, _control_timer);
 
         // Run user code
         #ifndef SINGLE_CORE
@@ -587,9 +587,9 @@ void ZeroStomp::update() {
     }
 
     #if BITS_PER_SAMPLE == 16
-    _control_timer += (_isStereo ? count : (count << 1));
+    _control_timer += count << (1 - _isStereo);
     #else
-    _control_timer += (_isStereo ? (count >> 1) : count);
+    _control_timer += count >> _isStereo;
     #endif
 };
 

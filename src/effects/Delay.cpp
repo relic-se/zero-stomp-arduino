@@ -19,15 +19,15 @@ void Delay::setBufferSize(size_t value) {
 
 void Delay::setSampleRate(size_t value) {
     // Adjust rate if necessary
-    if (_rate && _sample_rate) {
-        _rate = _rate * _sample_rate / value;
+    if (_rate && _sampleRate) {
+        _rate = _rate * _sampleRate / value;
     }
-    _sample_rate = value;
+    _sampleRate = value;
 };
 
 void Delay::setTime(float value) {
     _rate = (uint32_t)max(
-        (float)_size * (1 << DELAY_SHIFT) / _sample_rate / value,
+        (float)_size * (1 << DELAY_SHIFT) / _sampleRate / value,
         1.0
     );
 };
@@ -75,7 +75,7 @@ int32_t Delay::processChannel(int32_t sample, uint8_t channel) {
     }
 
     // Mix initial echo value with dry signal and return
-    return applyMix(sample, output, _mix);
+    return applyMix<int16_t>(sample, output, _mix);
 };
 
 void Delay::reset() {
@@ -83,7 +83,7 @@ void Delay::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (sample_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(sample_t));
+    _buffer = (sample_t *)malloc(_size * (_isStereo + 1) * sizeof(sample_t));
+    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(sample_t));
     _pos = 0;
 };

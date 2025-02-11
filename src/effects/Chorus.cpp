@@ -19,7 +19,7 @@ Chorus::Chorus(float max_time, float time, uint8_t voices, int16_t mix, size_t s
 
 void Chorus::setMaxTime(float value) {
     _max_time = max(value, 0.001);
-    _size = max(_max_time * _sample_rate, 1);
+    _size = max(_max_time * _sampleRate, 1);
     updateOffset();
     if (_buffer) reset();
 };
@@ -36,7 +36,7 @@ void Chorus::setVoices(uint8_t value) {
 };
 
 void Chorus::setSampleRate(size_t value) {
-    _sample_rate = value;
+    _sampleRate = value;
     if (_buffer) reset();
 };
 
@@ -81,11 +81,11 @@ int32_t Chorus::processChannel(int32_t sample, uint8_t channel) {
     if (_voices > 1) output = mixDown(output, _scale);
 
     // Mix with dry signal and return
-    return applyMix(sample, output, _mix);
+    return applyMix<int16_t>(sample, output, _mix);
 };
 
 void Chorus::updateOffset() {
-    _offset = min(max(_time * _sample_rate * (1 << CHORUS_SHIFT), 1), (_size - 1) << CHORUS_SHIFT);
+    _offset = min(max(_time * _sampleRate * (1 << CHORUS_SHIFT), 1), (_size - 1) << CHORUS_SHIFT);
 };
 
 void Chorus::updateStep() {
@@ -97,7 +97,7 @@ void Chorus::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (sample_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(sample_t));
+    _buffer = (sample_t *)malloc(_size * (_isStereo + 1) * sizeof(sample_t));
+    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(sample_t));
     _pos = 0;
 };
