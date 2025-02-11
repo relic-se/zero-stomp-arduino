@@ -75,7 +75,7 @@ int32_t Delay::processChannel(int32_t sample, uint8_t channel) {
     }
 
     // Mix initial echo value with dry signal and return
-    return applyMix(sample, output, _mix);
+    return applyMix<int16_t>(sample, output, _mix);
 };
 
 void Delay::reset() {

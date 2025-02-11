@@ -81,7 +81,7 @@ int32_t Chorus::processChannel(int32_t sample, uint8_t channel) {
     if (_voices > 1) output = mixDown(output, _scale);
 
     // Mix with dry signal and return
-    return applyMix(sample, output, _mix);
+    return applyMix<int16_t>(sample, output, _mix);
 };
 
 void Chorus::updateOffset() {
