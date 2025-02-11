@@ -32,7 +32,7 @@ protected:
 
 private:
     float _shift;
-    size_t _window, _overlap, _sample_rate;
+    size_t _window, _overlap, _sampleRate;
     size_t _write;
     size_t _read, _rate; // << PITCH_SHIFT
     sample_t *_buffer;

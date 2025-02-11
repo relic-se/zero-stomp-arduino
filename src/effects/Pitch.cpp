@@ -22,7 +22,7 @@ void Pitch::setWindow(size_t value) {
 };
 
 void Pitch::setSampleRate(size_t value) {
-    _sample_rate = value;
+    _sampleRate = value;
     updateRate();
     if (_buffer) reset();
 };

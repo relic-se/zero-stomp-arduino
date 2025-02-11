@@ -19,15 +19,15 @@ void Delay::setBufferSize(size_t value) {
 
 void Delay::setSampleRate(size_t value) {
     // Adjust rate if necessary
-    if (_rate && _sample_rate) {
-        _rate = _rate * _sample_rate / value;
+    if (_rate && _sampleRate) {
+        _rate = _rate * _sampleRate / value;
     }
-    _sample_rate = value;
+    _sampleRate = value;
 };
 
 void Delay::setTime(float value) {
     _rate = (uint32_t)max(
-        (float)_size * (1 << DELAY_SHIFT) / _sample_rate / value,
+        (float)_size * (1 << DELAY_SHIFT) / _sampleRate / value,
         1.0
     );
 };

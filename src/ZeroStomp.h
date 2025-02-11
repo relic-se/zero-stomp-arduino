@@ -122,7 +122,7 @@ protected:
 private:
     WM8960 _codec;
     I2S _i2s;
-    uint32_t _sample_rate;
+    uint32_t _sampleRate;
     bool _isStereo;
     uint8_t _bits_per_sample;
     bool _active = false;
@@ -159,9 +159,9 @@ extern void loop1();
 extern float global_rate_scale, global_W_scale;
 extern uint8_t global_tick;
 static void control_tick(size_t sample_rate, size_t samples) {
-    float recip_sample_rate = 1.0 / (float)sample_rate;
-    global_rate_scale = (float)samples * recip_sample_rate;
-    global_W_scale = (2.0 * PI) * recip_sample_rate;
+    float recip_sampleRate = 1.0 / (float)sample_rate;
+    global_rate_scale = (float)samples * recip_sampleRate;
+    global_W_scale = (2.0 * PI) * recip_sampleRate;
     global_tick++;
 };
 
