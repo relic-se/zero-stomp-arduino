@@ -587,9 +587,9 @@ void ZeroStomp::update() {
     }
 
     #if BITS_PER_SAMPLE == 16
-    _control_timer += (_isStereo ? count : (count << 1));
+    _control_timer += count << (1 - _isStereo);
     #else
-    _control_timer += (_isStereo ? (count >> 1) : count);
+    _control_timer += count >> _isStereo;
     #endif
 };
 

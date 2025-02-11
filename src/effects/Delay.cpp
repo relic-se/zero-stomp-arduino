@@ -83,7 +83,7 @@ void Delay::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (sample_t *)malloc(_size * (_isStereo ? 2 : 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _size * (_isStereo ? 2 : 1) * sizeof(sample_t));
+    _buffer = (sample_t *)malloc(_size * (_isStereo + 1) * sizeof(sample_t));
+    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(sample_t));
     _pos = 0;
 };
