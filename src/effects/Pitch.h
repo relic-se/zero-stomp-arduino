@@ -9,17 +9,19 @@
 #include "ZeroStomp.h"
 #include "effects/Effect.h"
 
-#define PITCH_DEFAULT_WINDOW (DEFAULT_SAMPLE_RATE * 0.05) // 50ms
+#define PITCH_DEFAULT_WINDOW (DEFAULT_SAMPLE_RATE * 0.02) // 20ms
+#define PITCH_DEFAULT_OVERLAP (PITCH_DEFAULT_WINDOW * 0.1) // 2ms
 #define PITCH_SHIFT (8)
 
 class Pitch : public Effect
 {
 
 public:
-    Pitch(size_t window = PITCH_DEFAULT_WINDOW, int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS);
+    Pitch(size_t window = PITCH_DEFAULT_WINDOW, size_t overlap = PITCH_DEFAULT_OVERLAP, int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS);
 
     void setShift(float value); // semitones
     void setWindow(size_t value);
+    void setOverlap(size_t value);
     void setChannels(uint8_t value) override;
 
     void process(int32_t *l, int32_t *r = nullptr);
@@ -33,7 +35,8 @@ private:
     size_t _window, _write;
     size_t _read, _rate; // << PITCH_SHIFT
     sample_t *_buffer;
-    sample_t *_writeBuffer;
+    size_t _overlapSize, _overlapIndex;
+    sample_t *_overlapBuffer;
 
 };
 

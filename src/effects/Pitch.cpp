@@ -4,8 +4,9 @@
 
 #include "effects/Pitch.h"
 
-Pitch::Pitch(size_t window, int16_t mix, uint8_t channels) : Effect(mix, channels) {
+Pitch::Pitch(size_t window, size_t overlap, int16_t mix, uint8_t channels) : Effect(mix, channels) {
     setWindow(window);
+    setOverlap(overlap);
     reset();
 };
 
@@ -17,6 +18,11 @@ void Pitch::setShift(float value) {
 void Pitch::setWindow(size_t value) {
     _window = max(value, 2);
     if (_buffer) reset();
+};
+
+void Pitch::setOverlap(size_t value) {
+    _overlapSize = min(value, _window - 1);
+    reset();
 };
 
 void Pitch::setChannels(uint8_t value) {
@@ -33,35 +39,39 @@ void Pitch::process(int32_t *l, int32_t *r) {
     // Increment write buffer pointer
     if (++_write >= _window) _write = 0;
 
+    // Increment overlap buffer pointer
+    if (_overlapSize && ++_overlapIndex >= _overlapSize) _overlapIndex = 0;
+
     // Increment read buffer by rate
     _read += _rate;
     if (_read >= _window << PITCH_SHIFT) _read -= _window << PITCH_SHIFT;
 };
 
 int32_t Pitch::processChannel(int32_t sample, uint8_t channel) {
-    // Restore previous sample
-    _buffer[((_write + _window - 1) % _window) + _window * channel] = _writeBuffer[channel];
+    if (_overlapSize) {
+        // Pull last sample from overlap and store in buffer
+        _buffer[_write + _window * channel] = _overlapBuffer[_overlapIndex + _overlapSize * channel];
 
-    // Save current sample for next call
-    _writeBuffer[channel] = (sample_t)clip(sample);
+        // Save current sample in overlap
+        _overlapBuffer[_overlapIndex + _overlapSize * channel] = (sample_t)clip(sample);
+    } else {
+        // Write sample to buffer
+        _buffer[_write + _window * channel] = (sample_t)clip(sample);
+    }
 
-    // Mix current input sample with current buffer sample
-    sample += _buffer[_write + _window * channel];
-    sample /= 2;
-
-    // Write sample to buffer
-    _buffer[_write + _window * channel] = (sample_t)clip(sample);
+    // Determine how far we are into the overlap
+    size_t readIndex = _read >> PITCH_SHIFT;
+    size_t readOverlapOffset = readIndex + _window * (readIndex < _write) - _write;
 
     // Read sample from buffer
-    size_t index = _read >> PITCH_SHIFT;
-    int32_t output = (int32_t)_buffer[index + _window * channel];
-
-    // Blend current sample with next sample
-    size_t pos = _read & ((1 << PITCH_SHIFT) - 1);
-    if (pos) {
-        output = output * (((1 << PITCH_SHIFT) - 1) - pos);
-        output += _buffer[((index + 1) % _window) + _window * channel] * pos;
-        output >>= PITCH_SHIFT;
+    int32_t output = (int32_t)_buffer[readIndex + _window * channel];
+    
+    // Check if we're within the overlap range
+    if (readOverlapOffset > 0 && readOverlapOffset <= _overlapSize) {
+        // Blend buffer sample with overlap sample
+        output *= (int32_t)readOverlapOffset; // Apply blend volume to buffer sample
+        output += (int32_t)_overlapBuffer[((_overlapIndex + readOverlapOffset) % _overlapSize) + _overlapSize * channel] * (int32_t)(_overlapSize - readOverlapOffset); // Add overlap with blend volume
+        output /= (int32_t)_overlapSize; // Scale down
     }
 
     // Mix with dry signal and return
@@ -78,13 +88,15 @@ void Pitch::reset() {
     memset((void *)_buffer, 0, _window * (_isStereo + 1) * sizeof(sample_t));
 
     // Reset last write buffer
-    if (_writeBuffer) {
-        free (_writeBuffer);
-        _writeBuffer = nullptr;
+    if (_overlapBuffer) {
+        free (_overlapBuffer);
+        _overlapBuffer = nullptr;
     }
-    _writeBuffer = (sample_t *)malloc((_isStereo + 1) * sizeof(sample_t));
-    memset((void *)_writeBuffer, 0, (_isStereo + 1) * sizeof(sample_t));
+    if (_overlapSize) {
+        _overlapBuffer = (sample_t *)malloc(_overlapSize * (_isStereo + 1) * sizeof(sample_t));
+        memset((void *)_overlapBuffer, 0, _overlapSize * (_isStereo + 1) * sizeof(sample_t));
+    }
 
     // Reset buffer pointers
-    _write = _read = 0;
+    _write = _overlapIndex = _read = 0;
 };
