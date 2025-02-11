@@ -4,26 +4,18 @@
 
 #include "effects/Pitch.h"
 
-Pitch::Pitch(size_t window, int16_t mix, size_t sample_rate, uint8_t channels) : Effect(mix, channels) {
-    setSampleRate(sample_rate);
+Pitch::Pitch(size_t window, int16_t mix, uint8_t channels) : Effect(mix, channels) {
     setWindow(window);
     reset();
 };
 
 void Pitch::setShift(float value) {
     _shift = value;
-    updateRate();
+    _rate = (size_t)(pow(2, _shift / 12.0) * (1 << PITCH_SHIFT));
 };
 
 void Pitch::setWindow(size_t value) {
     _window = max(value, 2);
-    updateRate();
-    if (_buffer) reset();
-};
-
-void Pitch::setSampleRate(size_t value) {
-    _sampleRate = value;
-    updateRate();
     if (_buffer) reset();
 };
 
@@ -65,10 +57,6 @@ int32_t Pitch::processChannel(int32_t sample, uint8_t channel) {
 
     // Mix with dry signal and return
     return applyMix<int16_t>(sample, output, _mix);
-};
-
-void Pitch::updateRate() {
-    _rate = (size_t)(pow(2, _shift / 12.0) * (1 << PITCH_SHIFT));
 };
 
 void Pitch::reset() {
