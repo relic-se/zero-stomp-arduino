@@ -23,14 +23,14 @@ public:
 
     void process(int32_t *l, int32_t *r = nullptr);
     float get();
-    sample_t get_scaled();
+    int32_t get_scaled();
 
 protected:
     void reset();
 
 private:
     int16_t _rise, _fall;
-    sample_t _accum;
+    int32_t _accum;
 
 };
 

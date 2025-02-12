@@ -19,7 +19,7 @@ void Envelope::setFall(float value) {
     _fall = (int16_t)(value * MAX_VALUE(int16_t));
 };
 
-void Envelope::process(int32_t *l, int32_t *r = nullptr) {
+void Envelope::process(int32_t *l, int32_t *r) {
     int32_t sample = *l;
     if (_isStereo && r != nullptr) {
         sample += *r;
@@ -34,7 +34,7 @@ float Envelope::get() {
     return convert(_accum); // Convert to float
 };
 
-sample_t Envelope::get_scaled() {
+int32_t Envelope::get_scaled() {
     return _accum; // Already scaled
 };
 
