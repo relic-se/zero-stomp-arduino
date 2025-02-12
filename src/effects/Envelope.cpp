@@ -27,7 +27,7 @@ void Envelope::process(int32_t *l, int32_t *r = nullptr) {
     }
 
     int16_t mix = (_accum < sample ? _rise : _fall);
-    _accum = applyLinearMix<int16_t>(_accum, sample, mix);
+    _accum = applyLinearMix<int16_t>(_accum, max(sample, 0), mix);
 };
 
 float Envelope::get() {
