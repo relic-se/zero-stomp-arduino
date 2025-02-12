@@ -9,9 +9,8 @@
 #include "ZeroStomp.h"
 #include "effects/Effect.h"
 
-
-#define ENVELOPE_DEFAULT_RISE (0.6)
-#define ENVELOPE_DEFAULT_FALL (0.05)
+#define ENVELOPE_DEFAULT_RISE (0.01)
+#define ENVELOPE_DEFAULT_FALL (0.0001)
 
 class Envelope : public Effect
 {
