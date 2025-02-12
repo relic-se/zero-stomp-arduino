@@ -6,18 +6,20 @@
 #include "effects/Envelope.h"
 #include "effects/Filter.h"
 
-#define MIN_RISE (0.25)
-#define MAX_RISE (0.9)
+#define MIN_RISE (0.001)
+#define MAX_RISE (0.01)
 
-#define MIN_FREQUENCY (40) // hz
-#define MIN_RANGE (100) // hz
+#define MIN_FREQUENCY (200) // hz
+#define MIN_RANGE (200) // hz
 #define MAX_RANGE (10000) // hz
 
 #define MIN_Q (0.7071067811865475)
 #define MAX_Q (8.0)
 
+#define GAIN (5.0)
+
 Envelope envelope;
-Filter filter(FilterMode::BAND_PASS, MIN_FREQUENCY, MIN_Q);
+Filter filter(FilterMode::LOW_PASS, MIN_FREQUENCY, MIN_Q);
 
 void setup(void) {
   // Open Serial
@@ -49,7 +51,7 @@ void updateControl(uint32_t samples) {
   filter.Q = mapFloat(zeroStomp.getValue(2), 0, 4096, MIN_Q, MAX_Q);
 
   // Set the filter frequency scaled by the envelope
-  filter.frequency = MIN_FREQUENCY + range * envelope.get();
+  filter.frequency = MIN_FREQUENCY + range * min(envelope.get() * GAIN, 1.0);
 
   // Update the filter state
   filter.update();
