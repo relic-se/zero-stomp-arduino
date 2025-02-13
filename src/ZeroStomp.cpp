@@ -46,16 +46,30 @@ ZeroStomp::ZeroStomp() :
     setChannels(DEFAULT_CHANNELS);
     setBitsPerSample(BITS_PER_SAMPLE);
     setBufferSize(DEFAULT_BUFFER_SIZE);
+
+    // Knobs
+    analogReadResolution(ADC_BITS);
+    memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
+    memset((void *)_knob, 0xFF, KNOB_COUNT * sizeof(uint16_t));
+
+    // Stomp
+
+    /// PWM LED
+    analogWriteFreq(LED_FREQUENCY);
+    analogWriteResolution(sizeof(uint16_t) * 8);
+    pinMode(PIN_LED, OUTPUT);
+    analogWrite(PIN_LED, 0);
+
+    /// Switch
+    pinMode(PIN_SWITCH, INPUT_PULLUP);
+    _switch_value = isBypassed();
+    _switch_millis = millis();
 };
 
 bool ZeroStomp::begin() {
     if (_running) {
         return false;
     }
-
-    analogReadResolution(ADC_BITS);
-    memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
-    memset((void *)_knob, 0xFF, KNOB_COUNT * sizeof(uint16_t));
 
     // Display
     if (!_display.begin(SSD1306_SWITCHCAPVCC)) {
@@ -427,10 +441,12 @@ bool ZeroStomp::updateMix() {
         return false;
     }
 
+    uint8_t mix = !isBypassed() ? _mix : 0;
+
     // Mic bypass
     uint8_t volume = 7;
-    if (_mix < 255) {
-        volume = _mix > 127 ? map(_mix, 128, 255, 0, 7) : 0;
+    if (mix < 255) {
+        volume = mix > 127 ? map(mix, 128, 255, 0, 7) : 0;
         _codec.enableLB2LO();
         if (_isStereo) {
             _codec.enableRB2RO();
@@ -448,12 +464,12 @@ bool ZeroStomp::updateMix() {
     }
 
     // Dac Output
-    if (!_mix) {
+    if (!mix) {
         _codec.enableDacMute();
     } else {
         _codec.disableDacMute();
     }
-    volume = _mix < 128 ? _mix << 1 : 255;
+    volume = mix < 128 ? mix << 1 : 255;
     _codec.setDacLeftDigitalVolume(volume);
     if (_isStereo) {
         _codec.setDacRightDigitalVolume(volume);
@@ -515,6 +531,9 @@ void ZeroStomp::update() {
 
         // Update values needed for processing filters and LFOs
         control_tick(_sampleRate, _control_timer);
+
+        // Update switch
+        updateSwitch();
 
         // Run user code
         #ifndef SINGLE_CORE
@@ -591,6 +610,30 @@ void ZeroStomp::update() {
     #else
     _control_timer += count >> _isStereo;
     #endif
+};
+
+void ZeroStomp::updateSwitch() {
+    bool current_value = isBypassed();
+
+    if (_led_control) {
+        analogWrite(PIN_LED, (uint16_t)!current_value * MAX_LED);
+    }
+
+    if (_switch_value == current_value) return;
+    _switch_value = current_value;
+
+    // TODO: Switch change callback
+
+    unsigned long current_millis = millis();
+    if (current_millis - _switch_millis < SWITCH_DURATION) {
+        _switch_count++;
+        // TODO: Switch short click callback
+    } else {
+        _switch_count = 0;
+    }
+    _switch_millis = current_millis;
+
+    updateMix();
 };
 
 bool ZeroStomp::prepareTitle(size_t len) {
@@ -749,4 +792,18 @@ bool ZeroStomp::drawKnob(uint8_t index) {
     }
     
     return true;
+};
+
+bool ZeroStomp::isBypassed() {
+    return digitalRead(PIN_SWITCH) == HIGH;
+};
+
+uint16_t ZeroStomp::getLed() {
+    return _led_value;
+};
+
+void ZeroStomp::setLed(uint16_t value) {
+    _led_control = false;
+    _led_value = value;
+    analogWrite(PIN_LED, value);
 };
