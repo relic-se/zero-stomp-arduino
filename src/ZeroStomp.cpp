@@ -621,13 +621,12 @@ void ZeroStomp::updateSwitch() {
 
     if (_switch_value == current_value) return;
     _switch_value = current_value;
-
-    // TODO: Switch change callback
+    if (_bypass_change_cb != nullptr) (*_bypass_change_cb)(_switch_value);
 
     unsigned long current_millis = millis();
     if (current_millis - _switch_millis < SWITCH_DURATION) {
         _switch_count++;
-        // TODO: Switch short click callback
+        if (_click_cb != nullptr) (*_click_cb)(_switch_count);
     } else {
         _switch_count = 0;
     }
@@ -796,6 +795,14 @@ bool ZeroStomp::drawKnob(uint8_t index) {
 
 bool ZeroStomp::isBypassed() {
     return digitalRead(PIN_SWITCH) == HIGH;
+};
+
+void ZeroStomp::setBypassChange(bypassChangeCallback cb) {
+    _bypass_change_cb = cb;
+};
+
+void ZeroStomp::setClick(clickCallback cb) {
+    _click_cb = cb;
 };
 
 uint16_t ZeroStomp::getLed() {

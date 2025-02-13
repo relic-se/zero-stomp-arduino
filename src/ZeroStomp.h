@@ -83,6 +83,8 @@ typedef int16_t sample_t;
 typedef int32_t sample_t;
 #endif
 
+typedef void (*bypassChangeCallback)(bool);
+typedef void (*clickCallback)(uint8_t);
 class ZeroStomp
 {
 
@@ -111,6 +113,8 @@ public:
 
     // Switch Functions
     bool isBypassed();
+    void setBypassChange(bypassChangeCallback cb = nullptr);
+    void setClick(clickCallback cb = nullptr);
 
     uint16_t getLed();
     void setLed(uint16_t value);
@@ -144,6 +148,8 @@ private:
     bool _switch_value = false;
     unsigned long _switch_millis = 0;
     uint8_t _switch_count = 0;
+    bypassChangeCallback _bypass_change_cb = nullptr;
+    clickCallback _click_cb = nullptr;
 
     // Full DAC and Headphone output by default
     uint8_t _mix = 255;
