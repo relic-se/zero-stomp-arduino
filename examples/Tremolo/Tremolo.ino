@@ -68,6 +68,9 @@ void updateControl(uint32_t samples) {
   // Level controlled by codec
   level = lfo.get_scaled(0.0, 1.0);
   zeroStomp.setLevel((uint8_t)min(level >> 7, UMAX_VALUE(uint8_t)));
+
+  // Control led
+  zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * level) : 0);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

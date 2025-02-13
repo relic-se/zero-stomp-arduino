@@ -17,6 +17,8 @@
 #define MAX_Q (8.0)
 
 #define GAIN (5.0)
+#define GAIN_LED (3.0)
+#define MIN_LED (0.5)
 
 Envelope envelope;
 Filter filter(FilterMode::LOW_PASS, MIN_FREQUENCY, MIN_Q);
@@ -51,10 +53,18 @@ void updateControl(uint32_t samples) {
   filter.Q = mapFloat(zeroStomp.getValue(2), 0, 4096, MIN_Q, MAX_Q);
 
   // Set the filter frequency scaled by the envelope
-  filter.frequency = MIN_FREQUENCY + range * min(envelope.get() * GAIN, 1.0);
+  float level = min(envelope.get() * GAIN, 1.0);
+  filter.frequency = MIN_FREQUENCY + range * level;
 
   // Update the filter state
   filter.update();
+
+  // Control led
+  if (!zeroStomp.isBypassed()) {
+    zeroStomp.setLed(MAX_LED * (min(level * GAIN_LED, 1.0) * (1.0 - MIN_LED) + MIN_LED));
+  } else {
+    zeroStomp.setLed(0);
+  }
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

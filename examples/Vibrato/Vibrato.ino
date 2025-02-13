@@ -35,9 +35,13 @@ void setup(void) {
   zeroStomp.setLabel(2, F("Shape"));
 }
 
+float lfo_scale = 0.0;
+
 void updateControl(uint32_t samples) {
   lfo.setRate(mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_SPEED, MAX_SPEED));
-  lfo.setScale(mapFloat(zeroStomp.getValue(1), 0, 4096, 0.0, MAX_DEPTH));
+
+  lfo_scale = mapFloat(zeroStomp.getValue(1), 0, 4096, 0.0, MAX_DEPTH);
+  lfo.setScale(lfo_scale);
 
   uint8_t current_waveform_index = map(zeroStomp.getValue(2), 0, 4096, 0, NUM_WAVEFORMS);
   if (waveform_index != current_waveform_index) {
@@ -61,7 +65,11 @@ void updateControl(uint32_t samples) {
     lfo.setWaveform(waveform);
   }
 
-  effect.setShift(lfo.get());
+  float value = lfo.get();
+  effect.setShift(value);
+
+  // Control led
+  zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (value / 2 + lfo_scale) / MAX_DEPTH)) : 0);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

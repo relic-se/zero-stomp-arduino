@@ -41,6 +41,8 @@
 
 #define PIN_LED 8
 #define PIN_SWITCH 9
+#define LED_FREQUENCY 100000
+#define MAX_LED 65535
 
 // Display
 
@@ -81,6 +83,8 @@ typedef int16_t sample_t;
 typedef int32_t sample_t;
 #endif
 
+typedef void (*bypassChangeCallback)(bool);
+typedef void (*clickCallback)(uint8_t);
 class ZeroStomp
 {
 
@@ -107,6 +111,14 @@ public:
 
     void update();
 
+    // Switch Functions
+    bool isBypassed();
+    void setBypassChange(bypassChangeCallback cb = nullptr);
+    void setClick(clickCallback cb = nullptr);
+
+    uint16_t getLed();
+    void setLed(uint16_t value);
+
 protected:
     bool updateSampleRate();
     bool updateBitsPerSample();
@@ -119,6 +131,8 @@ protected:
 
     bool drawKnob(uint8_t index);
 
+    void updateSwitch();
+
 private:
     WM8960 _codec;
     I2S _i2s;
@@ -127,6 +141,15 @@ private:
     uint8_t _bits_per_sample;
     bool _active = false;
     bool _running = false;
+
+    bool _led_control = true;
+    uint16_t _led_value = 0;
+
+    bool _switch_value = false;
+    unsigned long _switch_millis = 0;
+    uint8_t _switch_count = 0;
+    bypassChangeCallback _bypass_change_cb = nullptr;
+    clickCallback _click_cb = nullptr;
 
     // Full DAC and Headphone output by default
     uint8_t _mix = 255;
