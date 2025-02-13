@@ -76,6 +76,9 @@ void updateControl(uint32_t samples) {
   lfo.setOffset(depth);
   lfo.setScale(depth / 2);
   effect.setTime(lfo.get());
+
+  // Control led
+  zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (lfo.get() - depth / 2) / MAX_DEPTH)) : 0);
   #endif
 }
 
