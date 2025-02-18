@@ -5,13 +5,16 @@
 #include "ZeroStomp.h"
 
 #define NUM_STEPS 16
-#define NUM_PATTERNS 4
-
+#define NUM_PATTERNS 8
 const uint8_t patterns[NUM_PATTERNS][NUM_STEPS / (sizeof(uint8_t) * 8)] = {
-    { 0b11001100, 0b11001100 },
-    { 0b10101010, 0b10101010 },
-    { 0b10100010, 0b10100000 },
-    { 0b10010101, 0b10010010 },
+  { 0b11001100, 0b11001100 },
+  { 0b10101010, 0b10101010 },
+  { 0b10100010, 0b10100000 },
+  { 0b10010101, 0b10010010 },
+  { 0b11101110, 0b11101110 },
+  { 0b10000010, 0b10000010 },
+  { 0b10000100, 0b10000100 },
+  { 0b11111110, 0b11101110 },
 };
 
 #define MIN_RATE (DEFAULT_SAMPLE_RATE / 4)
