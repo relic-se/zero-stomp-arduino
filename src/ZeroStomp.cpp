@@ -493,7 +493,7 @@ bool ZeroStomp::updateLevel() {
     return true;
 };
 
-uint16_t ZeroStomp::getExpression() {
+int ZeroStomp::getExpression() {
     if (!_active) {
         return 0;
     }
@@ -503,6 +503,26 @@ uint16_t ZeroStomp::getExpression() {
     }
 
     return _adc_expr;
+};
+
+int ZeroStomp::getExpression(int max_value) {
+    return getExpression(0, max_value);
+};
+
+int ZeroStomp::getExpression(int min_value, int max_value) {
+    return map(getExpression(), 0, 4096, min_value, max_value);
+};
+
+float ZeroStomp::getExpressionFloat() {
+    return (float)getExpression() / 4096;
+};
+
+float ZeroStomp::getExpressionFloat(float max_value) {
+    return getExpressionFloat(0.0, max_value);
+};
+
+float ZeroStomp::getExpressionFloat(float min_value, float max_value) {
+    return mapFloat(getExpression(), 0, 4096, min_value, max_value);
 };
 
 void ZeroStomp::update() {

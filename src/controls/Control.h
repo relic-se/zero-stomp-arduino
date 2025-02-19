@@ -21,6 +21,13 @@ public:
     void setCallback(ControlCallback cb = nullptr);
 
     int get();
+    int get(int max_value);
+    int get(int min_value, int max_value);
+
+    float getFloat();
+    float getFloat(float max_value);
+    float getFloat(float min_value, float max_value);
+
     void set(int value);
     bool update(int value);
     virtual void reset();

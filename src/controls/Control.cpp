@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "controls/Control.h"
+#include "ZeroStomp.h"
 
 Control::Control(const String &s, int value) : _value(value) {
     setTitle(s);
@@ -32,6 +33,26 @@ void Control::setCallback(ControlCallback cb) {
 
 int Control::get() {
     return _value;
+};
+
+int Control::get(int max_value) {
+    return get(0, max_value);
+}
+
+int Control::get(int min_value, int max_value) {
+    return map(_value, 0, 4096, min_value, max_value);
+};
+
+float Control::getFloat() {
+    return getFloat(0.0, 1.0);
+};
+
+float Control::getFloat(float max_value) {
+    return getFloat(0.0, max_value);
+};
+
+float Control::getFloat(float min_value, float max_value) {
+    return mapFloat(_value, 0, 4096, min_value, max_value);
 };
 
 bool Control::update(int value) {

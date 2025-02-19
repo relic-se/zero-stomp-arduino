@@ -100,8 +100,13 @@ public:
     void setMix(uint8_t value);
     void setLevel(uint8_t value);
 
-    uint16_t getValue(uint8_t index);
-    uint16_t getExpression();
+    int getExpression();
+    int getExpression(int max_value);
+    int getExpression(int min_value, int max_value);
+
+    float getExpressionFloat();
+    float getExpressionFloat(float max_value);
+    float getExpressionFloat(float min_value, float max_value);
 
     void setTitle(const String &s, bool update = true);
     void setTitle(const char c[], bool update = true);
