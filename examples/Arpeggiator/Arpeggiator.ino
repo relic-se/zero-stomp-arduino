@@ -62,7 +62,7 @@ size_t timer = 0, rate = MIN_RATE;
 void updateControl(uint32_t samples) {
   selected_pattern = map(zeroStomp.getValue(0), 0, 4096, 0, NUM_PATTERNS);
   selected_scale = map(zeroStomp.getValue(1), 0, 4096, 0, NUM_SCALES);
-  rate = map(min(zeroStomp.getValue(2) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MIN_RATE, MAX_RATE);
+  rate = map(min(zeroStomp.getValue(2) + zeroStomp.getExpression(), 4096), 0, 4096, MIN_RATE, MAX_RATE);
 
   if (timer > rate) {
     timer %= rate;

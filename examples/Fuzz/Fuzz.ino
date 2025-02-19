@@ -23,7 +23,7 @@ void setup(void) {
 }
 
 void updateControl(uint32_t samples) {
-  threshold = map(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MAX_LEVEL >> 4, MAX_LEVEL >> 12);
+  threshold = map(min(zeroStomp.getValue(0) + zeroStomp.getExpression(), 4096), 0, 4096, MAX_LEVEL >> 4, MAX_LEVEL >> 12);
 
   // Update output level through codec
   zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);

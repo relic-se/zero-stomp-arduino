@@ -25,7 +25,7 @@ void setup(void) {
 }
 
 void updateControl(uint32_t samples) {
-  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096);
+  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpression(), 4096);
   clip_level = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
 
   // Update output level through codec

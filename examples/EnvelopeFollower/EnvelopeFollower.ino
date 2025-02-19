@@ -47,7 +47,7 @@ void updateControl(uint32_t samples) {
   envelope.setRise(mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_RISE, MAX_RISE));
 
   // Filter range
-  range = mapFloat(min(zeroStomp.getValue(1) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MIN_RANGE, MAX_RANGE);
+  range = mapFloat(min(zeroStomp.getValue(1) + zeroStomp.getExpression(), 4096), 0, 4096, MIN_RANGE, MAX_RANGE);
 
   // Resonance
   filter.Q = mapFloat(zeroStomp.getValue(2), 0, 4096, MIN_Q, MAX_Q);

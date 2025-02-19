@@ -74,7 +74,7 @@ void updateControl(uint32_t samples) {
   #else
   probability = map(zeroStomp.getValue(0), 0, 4096, 1, UMAX_VALUE(uint8_t) - 1);
   #endif
-  rate = map(min(zeroStomp.getValue(1) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MIN_RATE, MAX_RATE);
+  rate = map(min(zeroStomp.getValue(1) + zeroStomp.getExpression(), 4096), 0, 4096, MIN_RATE, MAX_RATE);
   fade_rate = map(zeroStomp.getValue(2), 0, 4096, MIN_FADE, MAX_FADE);
 
   // Control led
