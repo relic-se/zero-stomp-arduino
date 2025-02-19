@@ -9,11 +9,7 @@ void Knob::draw(Adafruit_SSD1306 *display, size_t index, bool update) {
     Control::draw(display, index, false);
 
     // Prevent redrawing knob
-    /*
-    if (_value < 0 || _previous_draw == _value) {
-        return;
-    }
-    */
+    if (_previous_draw == _value) return;
     _previous_draw = _value;
 
     // Calculate center position of knob
