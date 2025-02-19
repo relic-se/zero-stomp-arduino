@@ -53,8 +53,6 @@
 #define PIN_DISPLAY_TX 15 // Not required when using hardware SPI
 
 #define DISPLAY_SPI SPI1
-#define DISPLAY_WIDTH 128
-#define DISPLAY_HEIGHT 64
 
 // ADC
 
@@ -70,9 +68,11 @@
 #define NUM_DMA_BUFFERS 6
 #define CONTROL_RATE 16 // hz
 #define SWITCH_DURATION 400 // ms
+#define MAX_CONTROLS 16
 
 #include "Arduino.h"
 #include "display.h"
+#include "controls/Control.h"
 #include <SparkFun_WM8960_Arduino_Library.h> 
 #include <I2S.h>
 #include <Adafruit_SSD1306.h>
@@ -83,8 +83,8 @@ typedef int16_t sample_t;
 typedef int32_t sample_t;
 #endif
 
-typedef void (*bypassChangeCallback)(bool);
-typedef void (*clickCallback)(uint8_t);
+typedef void (*BypassChangeCallback)(bool);
+typedef void (*ClickCallback)(uint8_t);
 class ZeroStomp
 {
 
@@ -101,23 +101,31 @@ public:
     void setLevel(uint8_t value);
 
     uint16_t getValue(uint8_t index);
-    uint16_t getExpressionValue();
+    uint16_t getExpression();
 
-    bool setTitle(const String &s, bool update = true);
-    bool setTitle(const char c[], bool update = true);
-
-    bool setLabel(uint8_t index, const String &s, bool update = true);
-    bool setLabel(uint8_t index, const char c[], bool update = true);
+    void setTitle(const String &s, bool update = true);
+    void setTitle(const char c[], bool update = true);
 
     void update();
+    void updateControls(uint32_t samples);
 
     // Switch Functions
     bool isBypassed();
-    void setBypassChange(bypassChangeCallback cb = nullptr);
-    void setClick(clickCallback cb = nullptr);
+    void setBypassChange(BypassChangeCallback cb = nullptr);
+    void setClick(ClickCallback cb = nullptr);
 
     uint16_t getLed();
     void setLed(uint16_t value);
+
+    bool addControl(Control *control);
+    bool addControls(int count, ...);
+
+    size_t getPageCount();
+    size_t getPage();
+    size_t getPageControlCount();
+
+    void previousPage(bool update = true);
+    void nextPage(bool update = true);
 
 protected:
     bool updateSampleRate();
@@ -126,12 +134,10 @@ protected:
     bool updateMix();
     bool updateLevel();
 
-    bool prepareTitle(size_t len);
-    bool prepareKnobLabel(uint8_t index, size_t len);
+    bool drawTitle(bool update = true);
 
-    bool drawKnob(uint8_t index);
-
-    void updateSwitch();
+    void clearPage(bool update = true);
+    void drawPage(bool update = true);
 
 private:
     WM8960 _codec;
@@ -148,8 +154,8 @@ private:
     bool _switch_value = false;
     unsigned long _switch_millis = 0;
     uint8_t _switch_count = 0;
-    bypassChangeCallback _bypass_change_cb = nullptr;
-    clickCallback _click_cb = nullptr;
+    BypassChangeCallback _bypass_change_cb = nullptr;
+    ClickCallback _click_cb = nullptr;
 
     // Full DAC and Headphone output by default
     uint8_t _mix = 255;
@@ -160,8 +166,15 @@ private:
     uint32_t _control_timer = 0;
 
     Adafruit_SSD1306 _display;
-    uint16_t _adc[KNOB_COUNT + 1];
-    uint16_t _knob[KNOB_COUNT];
+
+    const char *_title;
+    size_t _title_len = 0;
+
+    Control *_controls[MAX_CONTROLS];
+    size_t _num_controls = 0;
+    size_t _page = 0;
+
+    int _adc_expr = -1;
 
 };
 
