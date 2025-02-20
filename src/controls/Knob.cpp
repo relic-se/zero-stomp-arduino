@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "controls/Knob.h"
+#include "ZeroStomp.h"
 
 void Knob::draw(Adafruit_SSD1306 *display, size_t index, bool update) {
     // Draw title
