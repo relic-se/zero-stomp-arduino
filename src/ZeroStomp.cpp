@@ -606,6 +606,8 @@ void ZeroStomp::update() {
 };
 
 void ZeroStomp::updateControls(uint32_t samples) {
+    // BUG: samples (after rp2040.fifo.pop) is invalid
+
     // Update values needed for processing filters and LFOs
     control_tick(_sampleRate, samples);
 
