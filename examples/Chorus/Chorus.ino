@@ -5,6 +5,8 @@
 #include "ZeroStomp.h"
 #include "LFO.h"
 #include "effects/Chorus.h"
+#include "controls/Knob.h"
+#include "controls/Selector.h"
 
 #define MIN_VOICES (1)
 #define MAX_VOICES (5)
@@ -16,29 +18,20 @@
 #define MIN_DEPTH (0.01) // 10ms +/ 5ms
 #define MAX_DEPTH (0.1) // 100ms +/- 50ms
 
-#define USE_LFO (1)
+#define MAX_LFO_DEPTH (0.5)
 
-#if USE_LFO
-#define KNOB_VOICES (0)
-#define KNOB_RATE (1)
-#define KNOB (KNOB_VOICES)
-
-Chorus effect(MAX_DEPTH * 1.5);
+Chorus effect(MAX_DEPTH * (1.0 + MAX_LFO_DEPTH));
 LFO lfo;
-#else
-Chorus effect(MAX_DEPTH);
-#endif
-
-float depth;
+Knob level("Level"), depth("Depth");
+Selector voices("Voices", MAX_VOICES - MIN_VOICES + 1);
+Knob lfoRate("Rate"), lfoDepth("Depth");
 
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
   Serial.println("Zero Stomp - Chorus");
 
-  #if USE_LFO
   lfo.setWaveform(lfoWaveformSine);
-  #endif
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
@@ -46,40 +39,23 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Chorus"));
-  zeroStomp.setLabel(0, F("Level"));
-  #if !USE_LFO || KNOB == KNOB_VOICES
-  zeroStomp.setLabel(1, F("Voices"));
-  #if USE_LFO
-  lfo.setRate(MIN_RATE);
-  #endif
-  #else
-  zeroStomp.setLabel(1, F("Rate"));
-  effect.setVoices(MAX_VOICES);
-  #endif
-  zeroStomp.setLabel(2, F("Depth"));
+  zeroStomp.addControls(3, &level, &voices, &depth);
+  zeroStomp.addControls(2, &lfoRate, &lfoDepth);
 }
 
 void updateControl(uint32_t samples) {
-  zeroStomp.setMix(zeroStomp.getValue(0) >> 5); // Only allow 0-127
+  zeroStomp.setMix(level.get(127));
 
-  #if !USE_LFO || KNOB == KNOB_VOICES
-  effect.setVoices(map(zeroStomp.getValue(1), 0, 4096, MIN_VOICES, MAX_VOICES));
-  #else
-  lfo.setRate(mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_RATE, MAX_RATE));
-  #endif
-
-  depth = mapFloat(zeroStomp.getValue(2), 0, 4096, MIN_DEPTH, MAX_DEPTH);
-
-  #if !USE_LFO
-  effect.setTime(depth);
-  #else
-  lfo.setOffset(depth);
-  lfo.setScale(depth / 2);
+  effect.setVoices(voices.get() + MIN_VOICES);
+  
+  float current_depth = depth.getFloat(MIN_DEPTH, MAX_DEPTH);
+  lfo.setOffset(current_depth);
+  lfo.setRate(lfoRate.getFloat(MIN_RATE, MAX_RATE));
+  lfo.setScale(current_depth * lfoDepth.getFloat(MAX_LFO_DEPTH));
   effect.setTime(lfo.get());
 
   // Control led
-  zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (lfo.get() - depth / 2) / MAX_DEPTH)) : 0);
-  #endif
+  zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (lfo.get() - current_depth / 2) / MAX_DEPTH)) : 0);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

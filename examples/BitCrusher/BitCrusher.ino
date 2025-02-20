@@ -3,8 +3,11 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
+#include "controls/Knob.h"
 
 int32_t bitmask = 0xFFFFFFFF;
+
+Knob mix("Mix"), bits("Bits"), level("Level");
 
 void setup(void) {
   // Open Serial
@@ -17,21 +20,18 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Bit Crusher"));
-
-  zeroStomp.setLabel(0, F("Mix"));
-  zeroStomp.setLabel(1, F("Bits"));
-  zeroStomp.setLabel(2, F("Level"));
+  zeroStomp.addControls(3, &mix, &bits, &level);
 }
 
 void updateControl(uint32_t samples) {
   // Update wet/dry mix through codec
-  zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
+  zeroStomp.setMix(mix.get() >> 4);
 
   // Calculate bit mask
-  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)map(min(zeroStomp.getValue(1) + zeroStomp.getExpressionValue(), 4096), 0, 4096, 0, 14)) - 1);
+  bitmask = 0xFFFFFFFF ^ ((1 << (uint32_t)mapControl(bits.get() + zeroStomp.getExpression(), 0, 14)) - 1);
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(level.get() >> 4);
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

@@ -5,8 +5,7 @@ setBitsPerSample    KEYWORD2
 setBufferSize       KEYWORD2
 setMix              KEYWORD2
 setLevel            KEYWORD2
-getValue            KEYWORD2
-getExpressionValue  KEYWORD2
+getExpression       KEYWORD2
 update              KEYWORD2
 
 updateAudio         KEYWORD3
@@ -48,6 +47,36 @@ convert             KEYWORD2
 clip                KEYWORD2
 scale               KEYWORD2
 
+Control             KEYWORD1
+setCallback         KEYWORD2
+get                 KEYWORD2
+set                 KEYWORD2
+update              KEYWORD2
+reset               KEYWORD2
+setTitle            KEYWORD2
+draw                KEYWORD2
+clear               KEYWORD2
+
+Knob                KEYWORD1
+
+LFO                 KEYWORD1
+setOnce             KEYWORD2
+setInterpolate      KEYWORD2
+setRate             KEYWORD2
+setScale            KEYWORD2
+setOffset           KEYWORD2
+setPhaseOffset      KEYWORD2
+setWaveform         KEYWORD2
+get                 KEYWORD2
+get_limited         KEYWORD2
+set_scaled          KEYWORD2
+retrigger           KEYWORD2
+
+lfoWaveformTriangle KEYWORD3
+lfoWaveformSquare   KEYWORD3
+lfoWaveformSine     KEYWORD3
+lfoWaveformSaw      KEYWORD3
+
 Filter              KEYWORD1
 mode                KEYWORD2
 frequency           KEYWORD2
@@ -64,10 +93,32 @@ setMix              KEYWORD2
 process             KEYWORD2
 
 Reverb              KEYWORD1
-setMode             KEYWORD1
-setRoomSize         KEYWORD1
-setDamping          KEYWORD1
-setWidth            KEYWORD1
-setMix              KEYWORD1
-setChannels         KEYWORD1
-process             KEYWORD1
+setMode             KEYWORD2
+setRoomSize         KEYWORD2
+setDamping          KEYWORD2
+setWidth            KEYWORD2
+setMix              KEYWORD2
+setChannels         KEYWORD2
+process             KEYWORD2
+
+Pitch               KEYWORD1
+setShift            KEYWORD2
+setWindow           KEYWORD2
+setOverlap          KEYWORD2
+setChannels         KEYWORD2
+process             KEYWORD2
+
+Envelope            KEYWORD1
+setRise             KEYWORD2
+setFall             KEYWORD2
+process             KEYWORD2
+get                 KEYWORD2
+get_scaled          KEYWORD2
+
+Chorus              KEYWORD1
+setMaxTime          KEYWORD2
+setTime             KEYWORD2
+setVoices           KEYWORD2
+setSampleRate       KEYWORD2
+setChannels         KEYWORD2
+process             KEYWORD2

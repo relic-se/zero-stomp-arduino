@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#ifndef _ZERO_REVERB_H
-#define _ZERO_REVERB_H
+#ifndef _REVERB_H
+#define _REVERB_H
 
 #include "Arduino.h"
 #include "ZeroStomp.h" // For DEFAULT_CHANNELS

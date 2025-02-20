@@ -18,7 +18,7 @@ void loop() {
     zeroStomp.update();
     #else
     while (rp2040.fifo.available()) {
-        updateControl(rp2040.fifo.pop());
+        zeroStomp.updateControls(rp2040.fifo.pop());
     }
     #endif
 };
@@ -47,10 +47,8 @@ ZeroStomp::ZeroStomp() :
     setBitsPerSample(BITS_PER_SAMPLE);
     setBufferSize(DEFAULT_BUFFER_SIZE);
 
-    // Knobs
+    // ADCs
     analogReadResolution(ADC_BITS);
-    memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
-    memset((void *)_knob, 0xFF, KNOB_COUNT * sizeof(uint16_t));
 
     // Stomp
 
@@ -495,29 +493,36 @@ bool ZeroStomp::updateLevel() {
     return true;
 };
 
-uint16_t ZeroStomp::getValue(uint8_t index) {
-    if (!_active || index >= KNOB_COUNT) {
-        return 0;
-    }
-
-    if (_adc[index] == 0xFFFF) {
-        _adc[index] = analogRead(PIN_ADC_0 + index);
-        drawKnob(index);
-    }
-
-    return _adc[index];
-};
-
-uint16_t ZeroStomp::getExpressionValue() {
+int ZeroStomp::getExpression() {
     if (!_active) {
         return 0;
     }
 
-    if (_adc[KNOB_COUNT] == 0xFFFF) {
-        _adc[KNOB_COUNT] = analogRead(PIN_ADC_EXPR);
+    if (_adc_expr < 0) {
+        _adc_expr = analogRead(PIN_ADC_EXPR);
     }
 
-    return _adc[KNOB_COUNT];
+    return _adc_expr;
+};
+
+int ZeroStomp::getExpression(int max_value) {
+    return getExpression(0, max_value);
+};
+
+int ZeroStomp::getExpression(int min_value, int max_value) {
+    return mapControl(getExpression(), min_value, max_value);
+};
+
+float ZeroStomp::getExpressionFloat() {
+    return getExpressionFloat(0.0, 1.0);
+};
+
+float ZeroStomp::getExpressionFloat(float max_value) {
+    return getExpressionFloat(0.0, max_value);
+};
+
+float ZeroStomp::getExpressionFloat(float min_value, float max_value) {
+    return mapControlFloat(getExpression(), min_value, max_value);
 };
 
 void ZeroStomp::update() {
@@ -526,25 +531,13 @@ void ZeroStomp::update() {
     }
 
     if (_control_timer >= _sampleRate / CONTROL_RATE) {
-        // Reset knobs
-        memset((void *)_adc, 0xFF, (KNOB_COUNT + 1) * sizeof(uint16_t));
-
-        // Update values needed for processing filters and LFOs
-        control_tick(_sampleRate, _control_timer);
-
-        // Update switch
-        updateSwitch();
-
-        // Run user code
+        // Update sensors and control logic
         #ifndef SINGLE_CORE
-        // Trigger control update on core0
+        // Trigger on core0
         rp2040.fifo.push(_control_timer);
         #else
-        updateControl(_control_timer);
+        updateControls(_control_timer);
         #endif
-
-        // Update display
-        _display.display();
 
         _control_timer = 0;
     }
@@ -612,30 +605,68 @@ void ZeroStomp::update() {
     #endif
 };
 
-void ZeroStomp::updateSwitch() {
-    bool current_value = isBypassed();
+void ZeroStomp::updateControls(uint32_t samples) {
+    // BUG: samples (after rp2040.fifo.pop) is invalid
 
+    // Update values needed for processing filters and LFOs
+    control_tick(_sampleRate, samples);
+
+    // Update switch, led, and bypass
+    bool current_value = isBypassed();
     if (_led_control) {
         analogWrite(PIN_LED, (uint16_t)!current_value * MAX_LED);
     }
+    if (_switch_value != current_value) {
+        _switch_value = current_value;
+        if (_bypass_change_cb != nullptr) (*_bypass_change_cb)(_switch_value);
 
-    if (_switch_value == current_value) return;
-    _switch_value = current_value;
-    if (_bypass_change_cb != nullptr) (*_bypass_change_cb)(_switch_value);
+        unsigned long current_millis = millis();
+        if (current_millis - _switch_millis < SWITCH_DURATION) {
+            _switch_count++;
+            if (_click_cb != nullptr) {
+                (*_click_cb)(_switch_count);
+            } else if (_switch_count == 1) {
+                nextPage();
+            }
+        } else {
+            _switch_count = 0;
+        }
+        _switch_millis = current_millis;
 
-    unsigned long current_millis = millis();
-    if (current_millis - _switch_millis < SWITCH_DURATION) {
-        _switch_count++;
-        if (_click_cb != nullptr) (*_click_cb)(_switch_count);
-    } else {
-        _switch_count = 0;
+        updateMix();
     }
-    _switch_millis = current_millis;
 
-    updateMix();
+    // Update controls on active page with ADC values
+    for (size_t i = 0; i < getPageControlCount(); i++) {
+        Control *control = _controls[i + _page * CONTROL_COUNT];
+        if (control->update(analogRead(PIN_ADC_0 + i))) {
+            control->draw(&_display, i, false);
+        }
+    }
+
+    // Reset caching of expression value
+    _adc_expr = -1;
+
+    // Run user control code
+    updateControl(samples);
+
+    // Update display
+    _display.display();
 };
 
-bool ZeroStomp::prepareTitle(size_t len) {
+void ZeroStomp::setTitle(const String &s, bool update) {
+    _title = s.c_str();
+    _title_len = s.length();
+    drawTitle(update);
+};
+
+void ZeroStomp::setTitle(const char c[], bool update) {
+    _title = c;
+    _title_len = strlen(c);
+    drawTitle(update);
+};
+
+bool ZeroStomp::drawTitle(bool update) {
     if (!_active) {
         return false;
     }
@@ -658,19 +689,11 @@ bool ZeroStomp::prepareTitle(size_t len) {
     _display.setTextSize(1);
     _display.setTextColor(SSD1306_WHITE);
     _display.setCursor(
-        (DISPLAY_WIDTH - STR_WIDTH(len)) / 2,
+        (DISPLAY_WIDTH - STR_WIDTH(_title_len)) / 2,
         TITLE_PAD
     );
-
-    return true;
-};
-
-bool ZeroStomp::setTitle(const String &s, bool update) {
-    if (!prepareTitle(s.length())) {
-        return false;
-    }
     
-    if (!_display.println(s)) {
+    if (!_display.println(_title)) {
         return false;
     }
 
@@ -678,118 +701,6 @@ bool ZeroStomp::setTitle(const String &s, bool update) {
         _display.display();
     }
 
-    return true;
-};
-
-bool ZeroStomp::setTitle(const char c[], bool update) {
-    if (!prepareTitle(strlen(c))) {
-        return false;
-    }
-    
-    if (!_display.println(c)) {
-        return false;
-    }
-
-    if (update) {
-        _display.display();
-    }
-
-    return true;
-};
-
-bool ZeroStomp::prepareKnobLabel(uint8_t index, size_t len) {
-    if (!_active) {
-        return false;
-    }
-
-    index %= KNOB_COUNT;
-
-    // Clear area
-    _display.fillRect(
-        DISPLAY_WIDTH / KNOB_COUNT * index, LABEL_Y,
-        DISPLAY_WIDTH / KNOB_COUNT, CHAR_HEIGHT, 0
-    );
-
-    /// Draw string
-    _display.setTextSize(1);
-    _display.setTextColor(SSD1306_WHITE);
-    _display.setCursor(
-        (DISPLAY_WIDTH / KNOB_COUNT / 2 * (index * 2 + 1)) - (STR_WIDTH(len) / 2),
-        LABEL_Y
-    );
-
-    return true;
-};
-
-bool ZeroStomp::setLabel(uint8_t index, const String &s, bool update) {
-    if (!prepareKnobLabel(index, s.length())) {
-        return false;
-    }
-    
-    if (!_display.println(s)) {
-        return false;
-    }
-
-    if (update) {
-        _display.display();
-    }
-
-    return true;
-};
-
-bool ZeroStomp::setLabel(uint8_t index, const char c[], bool update) {
-    if (!prepareKnobLabel(index, strlen(c))) {
-        return false;
-    }
-    
-    if (!_display.println(c)) {
-        return false;
-    }
-
-    if (update) {
-        _display.display();
-    }
-
-    return true;
-};
-
-bool ZeroStomp::drawKnob(uint8_t index) {
-    if (!_active) {
-        return false;
-    }
-
-    index %= KNOB_COUNT;
-
-    // Prevent redrawing knob
-    if (_adc[index] != 0xFFFF && _knob[index] != _adc[index]) {
-        _knob[index] = _adc[index];
-
-        // Calculate center position of knob
-        int16_t center_x = DISPLAY_WIDTH / KNOB_COUNT / 2 * (index * 2 + 1);
-
-        // Clear area
-        _display.fillRect(
-            center_x - KNOB_OUTER_RADIUS, KNOB_Y - KNOB_OUTER_RADIUS,
-            KNOB_OUTER_RADIUS * 2, KNOB_OUTER_RADIUS * 2, 0
-        );
-
-        // Draw outer circle
-        _display.drawCircle(
-            center_x, KNOB_Y,
-            KNOB_OUTER_RADIUS, 1
-        );
-
-        // Draw inner circle
-        // TODO: Optimization with integer calculation?
-        float theta_r = ((float)_knob[index] / 4096.0 * -1.5 - 0.25) * PI;
-        int16_t knob_x = center_x + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * sin(theta_r));
-        int16_t knob_y = KNOB_Y + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * cos(theta_r));
-        _display.drawCircle(
-            knob_x, knob_y,
-            KNOB_INNER_RADIUS, 1
-        );
-    }
-    
     return true;
 };
 
@@ -797,11 +708,11 @@ bool ZeroStomp::isBypassed() {
     return digitalRead(PIN_SWITCH) == HIGH;
 };
 
-void ZeroStomp::setBypassChange(bypassChangeCallback cb) {
+void ZeroStomp::setBypassChange(BypassChangeCallback cb) {
     _bypass_change_cb = cb;
 };
 
-void ZeroStomp::setClick(clickCallback cb) {
+void ZeroStomp::setClick(ClickCallback cb) {
     _click_cb = cb;
 };
 
@@ -813,4 +724,78 @@ void ZeroStomp::setLed(uint16_t value) {
     _led_control = false;
     _led_value = value;
     analogWrite(PIN_LED, value);
+};
+
+bool ZeroStomp::addControl(Control *control) {
+    if (_num_controls >= MAX_CONTROLS) return false;
+    _controls[_num_controls++] = control;
+
+    // Draw control if visible
+    if (getPageCount() == _page + 1) {
+        control->set(analogRead(PIN_ADC_0 + ((_num_controls - 1) % CONTROL_COUNT)));
+        control->draw(&_display, _num_controls - 1, true);
+    }
+
+    return true;
+};
+
+bool ZeroStomp::addControls(int count, ...) {
+    bool result = true;
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count && result; i++) {
+        result = addControl(va_arg(args, Control*));
+    }
+    va_end(args);
+    return result;
+};
+
+size_t ZeroStomp::getPageCount() {
+    return (max(_num_controls - 1, 0) / CONTROL_COUNT) + 1;
+};
+
+size_t ZeroStomp::getPage() {
+    return _page;
+};
+
+size_t ZeroStomp::getPageControlCount() {
+    return min(max(_num_controls - _page * CONTROL_COUNT, 0), CONTROL_COUNT);
+};
+
+void ZeroStomp::previousPage(bool update) {
+    if (getPageCount() <= 1) return;
+    clearPage(false);
+    if (_page == 0) {
+        _page = getPageCount() - 1;
+    } else {
+        _page--;
+    }
+    drawPage(update);
+};
+
+void ZeroStomp::nextPage(bool update) {
+    if (getPageCount() <= 1) return;
+    clearPage(false);
+    _page = (_page + 1) % getPageCount();
+    drawPage(update);
+};
+
+void ZeroStomp::clearPage(bool update) {
+    for (size_t i = 0; i < getPageControlCount(); i++) {
+        Control *control = _controls[i + _page * CONTROL_COUNT];
+        control->clear(&_display, i, false);
+        control->reset();
+    }
+    if (update) {
+        _display.display();
+    }
+};
+
+void ZeroStomp::drawPage(bool update) {
+    for (size_t i = 0; i < getPageControlCount(); i++) {
+        _controls[i + _page * CONTROL_COUNT]->draw(&_display, i, false);
+    }
+    if (update) {
+        _display.display();
+    }
 };

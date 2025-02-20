@@ -5,6 +5,7 @@
 #include "ZeroStomp.h"
 #include "effects/Envelope.h"
 #include "effects/Filter.h"
+#include "controls/Knob.h"
 
 #define MIN_RISE (0.001)
 #define MAX_RISE (0.01)
@@ -22,6 +23,7 @@
 
 Envelope envelope;
 Filter filter(FilterMode::LOW_PASS, MIN_FREQUENCY, MIN_Q);
+Knob sensitivity("Sensitivity"), range("Range"), resonance("Q");
 
 void setup(void) {
   // Open Serial
@@ -34,27 +36,22 @@ void setup(void) {
   }
   
   zeroStomp.setTitle(F("Envelope Follower"));
-
-  zeroStomp.setLabel(0, F("Sensitivity"));
-  zeroStomp.setLabel(1, F("Range"));
-  zeroStomp.setLabel(2, F("Q"));
+  zeroStomp.addControls(3, &sensitivity, &range, &resonance);
 }
-
-float range = MIN_RANGE;
 
 void updateControl(uint32_t samples) {
   // Envelope rise rate
-  envelope.setRise(mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_RISE, MAX_RISE));
+  envelope.setRise(sensitivity.getFloat(MIN_RISE, MAX_RISE));
 
   // Filter range
-  range = mapFloat(min(zeroStomp.getValue(1) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MIN_RANGE, MAX_RANGE);
+  float current_range = mapControlFloat(range.get() + zeroStomp.getExpression(), MIN_RANGE, MAX_RANGE);
 
   // Resonance
-  filter.Q = mapFloat(zeroStomp.getValue(2), 0, 4096, MIN_Q, MAX_Q);
+  filter.Q = resonance.getFloat(MIN_Q, MAX_Q);
 
   // Set the filter frequency scaled by the envelope
   float level = min(envelope.get() * GAIN, 1.0);
-  filter.frequency = MIN_FREQUENCY + range * level;
+  filter.frequency = MIN_FREQUENCY + current_range * level;
 
   // Update the filter state
   filter.update();

@@ -3,8 +3,11 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
+#include "controls/Knob.h"
 
-int16_t gain;
+Knob knobGain("Gain"), knobClip("Clip"), knobLevel("Level");
+
+int16_t current_gain;
 int32_t clip_level;
 
 void setup(void) {
@@ -18,24 +21,21 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Distortion"));
-
-  zeroStomp.setLabel(0, F("Gain"));
-  zeroStomp.setLabel(1, F("Clip"));
-  zeroStomp.setLabel(2, F("Level"));
+  zeroStomp.addControls(3, &knobGain, &knobClip, &knobLevel);
 }
 
 void updateControl(uint32_t samples) {
-  gain = min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096);
-  clip_level = ((4096 - zeroStomp.getValue(1)) << 2) - 1;
+  current_gain = min(knobGain.get() + zeroStomp.getExpression(), CONTROL_MAX);
+  clip_level = knobClip.get(MAX_LEVEL / 2, 0);
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(knobLevel.get(255));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
   // Apply gain to signal
-  *l = scale(*l, gain, 6);
-  *r = scale(*r, gain, 6);
+  *l = scale(*l, current_gain, 6);
+  *r = scale(*r, current_gain, 6);
 
   // TODO: Soft clip?
 

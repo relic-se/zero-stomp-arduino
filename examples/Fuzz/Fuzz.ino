@@ -3,7 +3,12 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
+#include "controls/Knob.h"
 
+#define MIN_THRESHOLD (MAX_LEVEL >> 4)
+#define MAX_THRESHOLD (MAX_LEVEL >> 12)
+
+Knob gain("Fuzz"), level("Level");
 int32_t threshold;
 
 void setup(void) {
@@ -17,16 +22,14 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Fuzz"));
-
-  zeroStomp.setLabel(0, F("Fuzz"));
-  zeroStomp.setLabel(2, F("Level"));
+  zeroStomp.addControls(2, &gain, &level);
 }
 
 void updateControl(uint32_t samples) {
-  threshold = map(min(zeroStomp.getValue(0) + zeroStomp.getExpressionValue(), 4096), 0, 4096, MAX_LEVEL >> 4, MAX_LEVEL >> 12);
+  threshold = mapControl(gain.get() + zeroStomp.getExpression(), MIN_THRESHOLD, MAX_THRESHOLD);
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(level.get(255));
 }
 
 int32_t fuzz(int32_t sample) {
