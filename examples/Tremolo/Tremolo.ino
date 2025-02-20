@@ -5,6 +5,7 @@
 #include "ZeroStomp.h"
 #include "LFO.h"
 #include "controls/Knob.h"
+#include "controls/Selector.h"
 
 // BUG: Rate is too fast
 #define MIN_RATE (0.01)
@@ -14,9 +15,13 @@
 const LfoWaveform waveforms[NUM_WAVEFORMS] = {
   lfoWaveformTriangle, lfoWaveformSine, lfoWaveformSaw, lfoWaveformSquare,
 };
+const char *waveform_labels[NUM_WAVEFORMS] = {
+  "TRI", "SIN", "SAW", "SQ"
+};
 
 LFO lfo;
-Knob depth("Depth"), rate("Speed"), waveform("Shape");
+Knob depth("Depth"), rate("Speed");
+Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels);
 
 uint8_t waveform_index = 0;
 int16_t level;
@@ -24,7 +29,7 @@ int16_t level;
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
-  Serial.println("Zero Stomp - Loopback");
+  Serial.println("Zero Stomp - Tremolo");
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
@@ -34,7 +39,7 @@ void setup(void) {
   lfo.setOffset(1.0);
   lfo.setScale(0.0);
 
-  zeroStomp.setTitle(F("Loopback"));
+  zeroStomp.setTitle(F("Tremolo"));
   zeroStomp.addControls(3, &depth, &rate, &waveform);
 }
 
@@ -45,7 +50,7 @@ void updateControl(uint32_t samples) {
 
   lfo.setRate(rate.getFloat(MIN_RATE, MAX_RATE));
 
-  uint8_t current_waveform_index = waveform.get(NUM_WAVEFORMS);
+  uint8_t current_waveform_index = waveform.get();
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);

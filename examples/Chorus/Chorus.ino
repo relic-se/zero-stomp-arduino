@@ -6,6 +6,7 @@
 #include "LFO.h"
 #include "effects/Chorus.h"
 #include "controls/Knob.h"
+#include "controls/Selector.h"
 
 #define MIN_VOICES (1)
 #define MAX_VOICES (5)
@@ -19,14 +20,11 @@
 
 #define MAX_LFO_DEPTH (0.5)
 
-#define KNOB_VOICES (0)
-#define KNOB_RATE (1)
-#define KNOB (KNOB_VOICES)
-
 Chorus effect(MAX_DEPTH * (1.0 + MAX_LFO_DEPTH));
 LFO lfo;
-Knob level("Level"), voices("Voices"), depth("Depth");
-Knob lfoRate("LFO Rate"), lfoDepth("LFO Depth");
+Knob level("Level"), depth("Depth");
+Selector voices("Voices", MAX_VOICES - MIN_VOICES + 1);
+Knob lfoRate("Rate"), lfoDepth("Depth");
 
 void setup(void) {
   // Open Serial
@@ -48,7 +46,7 @@ void setup(void) {
 void updateControl(uint32_t samples) {
   zeroStomp.setMix(level.get(127));
 
-  effect.setVoices(voices.get(MIN_VOICES, MAX_VOICES));
+  effect.setVoices(voices.get() + MIN_VOICES);
   
   float current_depth = depth.getFloat(MIN_DEPTH, MAX_DEPTH);
   lfo.setOffset(current_depth);

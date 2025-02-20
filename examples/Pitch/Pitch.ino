@@ -11,6 +11,8 @@
 Pitch effect;
 Knob shift("Shift"), mix("Mix"), level("Level");
 
+// TODO: Use selector for semitones
+
 void setup(void) {
   // Open Serial
   Serial.begin(115200);

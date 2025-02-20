@@ -4,6 +4,7 @@
 
 #include "ZeroStomp.h"
 #include "controls/Knob.h"
+#include "controls/Selector.h"
 
 #define NUM_STEPS 16
 #define NUM_PATTERNS 8
@@ -25,7 +26,8 @@ const uint8_t patterns[NUM_PATTERNS][NUM_STEPS / (sizeof(uint8_t) * 8)] = {
 #define MIN_FADE (FADE_RATE(10))
 #define MAX_FADE (FADE_RATE(200))
 
-Knob knobPattern("Pattern"), knobRate("Rate"), knobProbability("Prob"), fade("Fade");
+Selector knobPattern("Pattern", NUM_PATTERNS);
+Knob knobRate("Rate"), knobProbability("Prob"), fade("Fade");
 
 void setup(void) {
   // Open Serial
@@ -52,7 +54,7 @@ size_t timer = 0, current_rate = MIN_RATE;
 int16_t fade_timer = 0, fade_rate = MIN_FADE;
 
 void updateControl(uint32_t samples) {
-  current_pattern = knobPattern.get(NUM_PATTERNS);
+  current_pattern = knobPattern.get();
   current_probability = knobProbability.get(1, UMAX_VALUE(uint8_t) - 1);
   current_rate = mapControl(knobRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
   fade_rate = fade.get(MIN_FADE, MAX_FADE);

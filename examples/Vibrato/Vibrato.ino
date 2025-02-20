@@ -6,6 +6,7 @@
 #include "effects/Pitch.h"
 #include "LFO.h"
 #include "controls/Knob.h"
+#include "controls/Selector.h"
 
 #define MAX_DEPTH (2.0) // semitones
 
@@ -17,10 +18,14 @@
 const LfoWaveform waveforms[NUM_WAVEFORMS] = {
   lfoWaveformTriangle, lfoWaveformSine, lfoWaveformSaw, lfoWaveformSquare,
 };
+const char *waveform_labels[NUM_WAVEFORMS] = {
+  "TRI", "SIN", "SAW", "SQ"
+};
 
 Pitch effect;
 LFO lfo;
-Knob rate("Rate"), depth("Depth"), waveform("Shape");
+Knob rate("Rate"), depth("Depth");
+Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels);
 
 uint8_t waveform_index = 0;
 
@@ -44,7 +49,7 @@ void updateControl(uint32_t samples) {
   float lfo_scale = depth.getFloat(MAX_DEPTH);
   lfo.setScale(lfo_scale);
 
-  uint8_t current_waveform_index = waveform.get(NUM_WAVEFORMS);
+  uint8_t current_waveform_index = waveform.get();
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);
