@@ -24,8 +24,8 @@ void Selector::draw(Adafruit_SSD1306 *display, size_t index, bool update) {
 
     // Clear area
     display->fillRect(
-        center_x - SELECTOR_OUTER_RADIUS, KNOB_Y - SELECTOR_OUTER_RADIUS,
-        SELECTOR_OUTER_RADIUS * 2, SELECTOR_OUTER_RADIUS * 2, 0
+        center_x - SELECTOR_OUTER_RADIUS - SELECTOR_INNER_RADIUS, KNOB_Y - SELECTOR_OUTER_RADIUS - SELECTOR_INNER_RADIUS,
+        (SELECTOR_OUTER_RADIUS + SELECTOR_INNER_RADIUS) * 2, (SELECTOR_OUTER_RADIUS + SELECTOR_INNER_RADIUS) * 2, 0
     );
 
     // Draw dots
