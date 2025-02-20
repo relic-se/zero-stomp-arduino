@@ -227,6 +227,22 @@ static float mapFloat(float x, float in_min, float in_max, float out_min, float 
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 };
 
+static int mapControl(int value, int min_value, int max_value) {
+    return map(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value);
+};
+
+static int mapControl(int value, int max_value) {
+    return mapControl(value, 0, max_value);
+};
+
+static float mapControlFloat(int value, float min_value, float max_value) {
+    return mapFloat(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value);
+};
+
+static float mapControlFloat(int value, float max_value) {
+    return mapControlFloat(value, 0.0, max_value);
+};
+
 inline float convert(int32_t sample) {
     return ldexp(sample, -SAMPLE_SHIFT);
 };

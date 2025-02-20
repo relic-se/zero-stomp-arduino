@@ -55,12 +55,4 @@ private:
 
 };
 
-static int mapControl(int value, int min_value, int max_value) {
-    return map(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value);
-};
-
-static float mapControlFloat(int value, float min_value, float max_value) {
-    return mapFloat(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value);
-};
-
 #endif
