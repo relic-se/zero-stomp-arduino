@@ -5,7 +5,7 @@
 #include "ZeroStomp.h"
 #include "controls/Knob.h"
 
-Knob gain("Gain"), clip("Clip"), level("Level");
+Knob knobGain("Gain"), knobClip("Clip"), knobLevel("Level");
 
 int16_t current_gain;
 int32_t clip_level;
@@ -21,15 +21,15 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Distortion"));
-  zeroStomp.addControls(3, &gain, &clip, &level);
+  zeroStomp.addControls(3, &knobGain, &knobClip, &knobLevel);
 }
 
 void updateControl(uint32_t samples) {
-  current_gain = min(gain.get() + zeroStomp.getExpression(), CONTROL_MAX);
-  clip_level = clip.get(MAX_LEVEL / 2, 0);
+  current_gain = min(knobGain.get() + zeroStomp.getExpression(), CONTROL_MAX);
+  clip_level = knobClip.get(MAX_LEVEL / 2, 0);
 
   // Update output level through codec
-  zeroStomp.setLevel(level.get(255));
+  zeroStomp.setLevel(knobLevel.get(255));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

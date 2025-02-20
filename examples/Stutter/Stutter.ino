@@ -25,7 +25,7 @@ const uint8_t patterns[NUM_PATTERNS][NUM_STEPS / (sizeof(uint8_t) * 8)] = {
 #define MIN_FADE (FADE_RATE(10))
 #define MAX_FADE (FADE_RATE(200))
 
-Knob pattern("Pattern"), rate("Rate"), probability("Prob"), fade("Fade");
+Knob knobPattern("Pattern"), knobRate("Rate"), knobProbability("Prob"), fade("Fade");
 
 void setup(void) {
   // Open Serial
@@ -40,7 +40,7 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Stutter"));
-  zeroStomp.addControls(3, &pattern, &probability, &rate);
+  zeroStomp.addControls(3, &knobPattern, &knobRate, &knobProbability);
   zeroStomp.addControl(&fade);
 }
 
@@ -52,9 +52,9 @@ size_t timer = 0, current_rate = MIN_RATE;
 int16_t fade_timer = 0, fade_rate = MIN_FADE;
 
 void updateControl(uint32_t samples) {
-  current_pattern = pattern.get(NUM_PATTERNS);
-  current_probability = probability.get(1, UMAX_VALUE(uint8_t) - 1);
-  current_rate = mapControl(rate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
+  current_pattern = knobPattern.get(NUM_PATTERNS);
+  current_probability = knobProbability.get(1, UMAX_VALUE(uint8_t) - 1);
+  current_rate = mapControl(knobRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
   fade_rate = fade.get(MIN_FADE, MAX_FADE);
 
   // Control led
@@ -67,9 +67,9 @@ void updateAudio(int32_t *l, int32_t *r) {
     timer = 0;
     
     if (++pattern_index >= NUM_STEPS) pattern_index = 0;
-    current_state = (bool)(patterns[pattern][pattern_index / (sizeof(uint8_t) * 8)] & (1 << (pattern_index % (sizeof(uint8_t) * 8))));
+    current_state = (bool)(patterns[current_pattern][pattern_index / (sizeof(uint8_t) * 8)] & (1 << (pattern_index % (sizeof(uint8_t) * 8))));
     
-    if (random(UMAX_VALUE(uint8_t)) < probability) current_state = false;
+    if (random(UMAX_VALUE(uint8_t)) < current_probability) current_state = false;
 
     if (last_state != current_state) fade_timer = MAX_VALUE(int16_t);
   }

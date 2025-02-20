@@ -38,7 +38,7 @@ const int8_t scales[NUM_SCALES][NUM_NOTES] = {
 #define MAX_RATE (DEFAULT_SAMPLE_RATE / 64)
 
 Pitch effect;
-Knob pattern("Pattern"), scale("Scale"), rate("Rate");
+Knob knobPattern("Pattern"), knobScale("Scale"), knobRate("Rate");
 size_t pattern_index = 0, timer = 0;
 
 void setup(void) {
@@ -52,19 +52,19 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Arpeggiator"));
-  zeroStomp.addControls(3, &pattern, &scale, &rate);
+  zeroStomp.addControls(3, &knobPattern, &knobScale, &knobRate);
 }
 
 void updateControl(uint32_t samples) {
-  size_t current_rate = mapControl(rate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
+  size_t current_rate = mapControl(knobRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
 
   if (timer > current_rate) {
     timer %= current_rate;
     if (++pattern_index >= NUM_STEPS) pattern_index = 0;
 
-    int8_t scale_index = patterns[pattern.get(NUM_PATTERNS)][pattern_index];
+    int8_t scale_index = patterns[knobPattern.get(NUM_PATTERNS)][pattern_index];
     int8_t octave = scale_index / NUM_NOTES;
-    int8_t scale_value = scales[scale.get(NUM_SCALES)][abs(scale_index) % NUM_NOTES];
+    int8_t scale_value = scales[knobScale.get(NUM_SCALES)][abs(scale_index) % NUM_NOTES];
     if (scale_value < 0) scale_value = random(12);
     if (scale_index < 0) scale_value *= -1;
 
