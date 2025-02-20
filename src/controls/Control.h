@@ -24,7 +24,7 @@ public:
 
     void setCallback(ControlCallback cb = nullptr);
 
-    int get();
+    virtual int get();
     int get(int max_value);
     int get(int min_value, int max_value);
 
