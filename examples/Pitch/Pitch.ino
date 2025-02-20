@@ -4,10 +4,12 @@
 
 #include "ZeroStomp.h"
 #include "effects/Pitch.h"
+#include "controls/Knob.h"
 
 #define SEMITONES (24)
 
 Pitch effect;
+Knob shift("Shift"), mix("Mix"), level("Level");
 
 void setup(void) {
   // Open Serial
@@ -20,18 +22,15 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Pitch Shifter"));
-
-  zeroStomp.setLabel(0, F("Shift"));
-  zeroStomp.setLabel(1, F("Mix"));
-  zeroStomp.setLabel(2, F("Level"));
+  zeroStomp.addControls(3, &shift, &mix, &level);
 }
 
 void updateControl(uint32_t samples) {
-  effect.setShift(map(zeroStomp.getValue(0), 0, 4096, -SEMITONES, SEMITONES));
+  effect.setShift(shift.get(-SEMITONES, SEMITONES));
 
   // Update mix and output level through codec
-  zeroStomp.setMix(zeroStomp.getValue(1) >> 4);
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setMix(mix.get(255));
+  zeroStomp.setLevel(level.get(255));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

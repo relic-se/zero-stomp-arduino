@@ -4,8 +4,10 @@
 
 #include "ZeroStomp.h"
 #include "effects/Reverb.h"
+#include "controls/Knob.h"
 
 Reverb effect;
+Knob size("Size"), damping("Damping"), mix("Mix");
 
 void setup(void) {
   // Open Serial
@@ -25,16 +27,13 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Reverb"));
-
-  zeroStomp.setLabel(0, F("Size"));
-  zeroStomp.setLabel(1, F("Damping"));
-  zeroStomp.setLabel(2, F("Mix"));
+  zeroStomp.addControls(3, &size, &damping, &mix);
 }
 
 void updateControl(uint32_t samples) {
-    effect.setRoomSize(mapFloat(zeroStomp.getValue(0), 0, 4096, 0.0, 1.0));
-    effect.setDamping(mapFloat(zeroStomp.getValue(1), 0, 4096, 0.0, 1.0));
-    zeroStomp.setMix(zeroStomp.getValue(2) >> 4);
+    effect.setRoomSize(size.getFloat());
+    effect.setDamping(damping.getFloat());
+    zeroStomp.setMix(mix.get(255));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

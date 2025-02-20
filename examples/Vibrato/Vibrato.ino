@@ -5,18 +5,24 @@
 #include "ZeroStomp.h"
 #include "effects/Pitch.h"
 #include "LFO.h"
+#include "controls/Knob.h"
 
 #define MAX_DEPTH (2.0) // semitones
 
 // BUG: Rate is too fast
-#define MIN_SPEED 0.01
-#define MAX_SPEED 0.2
+#define MIN_RATE (0.01)
+#define MAX_RATE (0.2)
+
+#define NUM_WAVEFORMS (4)
+const LfoWaveform waveforms[NUM_WAVEFORMS] = {
+  lfoWaveformTriangle, lfoWaveformSine, lfoWaveformSaw, lfoWaveformSquare,
+};
 
 Pitch effect;
 LFO lfo;
+Knob rate("Rate"), depth("Depth"), waveform("Shape");
 
 uint8_t waveform_index = 0;
-#define NUM_WAVEFORMS 4
 
 void setup(void) {
   // Open Serial
@@ -29,40 +35,19 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Vibrato"));
-
-  zeroStomp.setLabel(0, F("Rate"));
-  zeroStomp.setLabel(1, F("Depth"));
-  zeroStomp.setLabel(2, F("Shape"));
+  zeroStomp.addControls(3, &rate, &depth, &waveform);
 }
 
-float lfo_scale = 0.0;
-
 void updateControl(uint32_t samples) {
-  lfo.setRate(mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_SPEED, MAX_SPEED));
+  lfo.setRate(rate.getFloat(MIN_RATE, MAX_RATE));
 
-  lfo_scale = mapFloat(zeroStomp.getValue(1), 0, 4096, 0.0, MAX_DEPTH);
+  float lfo_scale = depth.getFloat(MAX_DEPTH);
   lfo.setScale(lfo_scale);
 
-  uint8_t current_waveform_index = map(zeroStomp.getValue(2), 0, 4096, 0, NUM_WAVEFORMS);
+  uint8_t current_waveform_index = waveform.get(NUM_WAVEFORMS);
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
-    LfoWaveform waveform;
-    switch (waveform_index) {
-      case 0:
-      default:
-        waveform = lfoWaveformTriangle;
-        break;
-      case 1:
-        waveform = lfoWaveformSine;
-        break;
-      case 2:
-        waveform = lfoWaveformSaw;
-        break;
-      case 3:
-        waveform = lfoWaveformSquare;
-        break;
-    }
-    lfo.setWaveform(waveform);
+    lfo.setWaveform(waveforms[waveform_index]);
   }
 
   float value = lfo.get();

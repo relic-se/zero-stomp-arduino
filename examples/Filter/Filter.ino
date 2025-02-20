@@ -4,11 +4,18 @@
 
 #include "ZeroStomp.h"
 #include "effects/Filter.h"
+#include "controls/Knob.h"
 
-Filter filter;
+#define MIN_FREQUENCY (20)
+#define MAX_FREQUENCY (20000)
 
 #define MIN_Q (0.7071067811865475)
 #define MAX_Q (8.0)
+
+Filter filter;
+Knob frequency("Freq"), resonance("Q"), mode("Mode");
+
+// TODO: LFO & controls
 
 void setup(void) {
   // Open Serial
@@ -21,21 +28,18 @@ void setup(void) {
   }
   
   zeroStomp.setTitle(F("Filter"));
-
-  zeroStomp.setLabel(0, F("Freq"));
-  zeroStomp.setLabel(1, F("Q"));
-  zeroStomp.setLabel(2, F("Mode"));
+  zeroStomp.addControls(3, &frequency, &resonance, &mode);
 }
 
 void updateControl(uint32_t samples) {
   // Frequency
-  filter.frequency = mapFloat(min(zeroStomp.getValue(0) + zeroStomp.getExpression(), 4096), 0, 4096, 20, 20000);
+  filter.frequency = mapControlFloat(frequency.get() + zeroStomp.getExpression(), MIN_FREQUENCY, MAX_FREQUENCY);
 
   // Resonance
-  filter.Q = mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_Q, MAX_Q);
+  filter.Q = resonance.getFloat(MIN_Q, MAX_Q);
 
   // Mode
-  filter.mode = (FilterMode)map(zeroStomp.getValue(2), 0, 4096, 0, FILTER_MODES);
+  filter.mode = (FilterMode)mode.get(FILTER_MODES);
 
   // Update the filter state
   filter.update();

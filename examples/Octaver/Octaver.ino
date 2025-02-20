@@ -3,10 +3,12 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
+#include "controls/Knob.h"
 
 #define MAX_DIST (DEFAULT_SAMPLE_RATE >> 9)
 
-uint16_t dist, counter = 0;
+Knob dist("Dist"), level("Level");
+uint16_t current_dist, counter = 0;
 int32_t last_l, last_r;
 
 void setup(void) {
@@ -20,21 +22,19 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Octaver"));
-
-  zeroStomp.setLabel(0, F("Dist"));
-  zeroStomp.setLabel(2, F("Level"));
+  zeroStomp.addControls(2, &dist, &level);
 }
 
 void updateControl(uint32_t samples) {
-  dist = map(min(zeroStomp.getValue(0) + zeroStomp.getExpression(), 4096), 0, 4096, 0, MAX_DIST);
+  current_dist = mapControl(dist.get() + zeroStomp.getExpression(), MAX_DIST);
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(level.get(255));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
   counter++;
-  if (counter >= dist) {
+  if (counter >= current_dist) {
     counter = 0;
     last_l = *l;
     last_r = *r;

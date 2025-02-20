@@ -4,6 +4,7 @@
 
 #include "ZeroStomp.h"
 #include "effects/Delay.h"
+#include "controls/Knob.h"
 
 #define DELAY_SIZE (DEFAULT_SAMPLE_RATE >> 1) // 500ms * channels
 
@@ -11,6 +12,9 @@
 #define MAX_TIME (1.0)
 
 Delay effect(DELAY_SIZE);
+Knob mix("Mix"), time("Time"), decay("Decay");
+
+// TODO: LFO & controls
 
 void setup(void) {
   // Open Serial
@@ -23,15 +27,13 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Delay"));
-  zeroStomp.setLabel(0, F("Mix"));
-  zeroStomp.setLabel(1, F("Time"));
-  zeroStomp.setLabel(2, F("Decay"));
+  zeroStomp.addControls(3, &mix, &time, &decay);
 }
 
 void updateControl(uint32_t samples) {
-  zeroStomp.setMix(zeroStomp.getValue(0) >> 4);
-  effect.setTime(mapFloat(zeroStomp.getValue(1), 0, 4096, MIN_TIME, MAX_TIME));
-  effect.setDecay(map(min(zeroStomp.getValue(2) + zeroStomp.getExpression(), 4096), 0, 4096, MIN_LEVEL, MAX_LEVEL));
+  zeroStomp.setMix(mix.get(255));
+  effect.setTime(time.getFloat(MIN_TIME, MAX_TIME));
+  effect.setDecay(mapControl(decay.get() + zeroStomp.getExpression(), MIN_LEVEL, MAX_LEVEL));
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

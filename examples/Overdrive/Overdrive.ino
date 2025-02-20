@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#define MIN_GAIN 0.0
-#define MAX_GAIN 40.0
-
 #include "ZeroStomp.h"
+#include "controls/Knob.h"
 
-float gain, preGain, postGain;
+#define MIN_GAIN (0.0)
+#define MAX_GAIN (40.0)
+
+Knob gain("Drive"), level("Level");
+float pre_gain, post_gain;
 
 void setup(void) {
   // Open Serial
@@ -25,22 +27,18 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Overdrive"));
-
-  zeroStomp.setLabel(0, F("Drive"));
-  //zeroStomp.setLabel(1, F("Tone"));
-  zeroStomp.setLabel(2, F("Level"));
+  zeroStomp.addControls(2, &gain, &level);
 }
 
 void updateControl(uint32_t samples) {
-  gain = mapFloat(zeroStomp.getValue(0), 0, 4096, MIN_GAIN, MAX_GAIN);
-  preGain = dbToLinear(gain);
-  postGain = dbToLinear(-gain);
+  float current_gain = gain.getFloat(MIN_GAIN, MAX_GAIN);
+  pre_gain = dbToLinear(current_gain);
+  post_gain = dbToLinear(-current_gain);
 
   // TODO: Tone EQ
-  //zeroStomp.getValue(1)
 
   // Update output level through codec
-  zeroStomp.setLevel(zeroStomp.getValue(2) >> 4);
+  zeroStomp.setLevel(level.get(255));
 }
 
 float applyDrive(float sample) {
@@ -57,13 +55,13 @@ void processSample(int32_t *sample) {
   float samplef = convert(*sample);
 
   // Apply pre-gain to signal
-  samplef *= preGain;
+  samplef *= pre_gain;
 
   // Apply overdrive
   samplef = applyDrive(samplef);
 
   // Apply post-gain to signal
-  samplef *= postGain;
+  samplef *= post_gain;
 
   // Convert back to integer format
   *sample = convert(samplef);
