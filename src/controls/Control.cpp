@@ -5,6 +5,8 @@
 #include "controls/Control.h"
 #include "ZeroStomp.h"
 
+// TODO: Load value from EEPROM
+
 Control::Control(const String &s, int value) : _value(value) {
     setTitle(s);
     reset();

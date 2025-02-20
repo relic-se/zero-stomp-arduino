@@ -13,8 +13,8 @@ class Selector : public Control
 {
 
 public:
-    Selector(const String &s, size_t count, const char *items[], int value = 0) : Control(s, value), _count(count), _items(items) { };
-    Selector(const char c[], size_t count, const char *items[], int value = 0) : Control(c, value), _count(count), _items(items) { };
+    Selector(const String &s, size_t count, const char *items[] = nullptr, int value = CONTROL_MIN) : Control(s, value), _count(count), _items(items) { };
+    Selector(const char c[], size_t count, const char *items[] = nullptr, int value = CONTROL_MIN) : Control(c, value), _count(count), _items(items) { };
 
     int get() override;
 
@@ -26,7 +26,7 @@ protected:
 private:
     int _previous_draw = -1;
     size_t _count;
-    const char **_items;
+    const char **_items = nullptr;
 
 };
 

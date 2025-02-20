@@ -50,14 +50,22 @@ void Selector::draw(Adafruit_SSD1306 *display, size_t index, bool update) {
     }
 
     // Draw Text
-    const char *text = _items[value];
     display->setTextSize(1);
     display->setTextColor(SSD1306_WHITE);
-    display->setCursor(
-        center_x - (STR_WIDTH(strlen(text)) / 2),
-        KNOB_Y - CHAR_HEIGHT / 2
-    );
-    display->write(text, strlen(text));
+    if (_items != nullptr) {
+        const char *text = _items[value];
+        display->setCursor(
+            center_x - (STR_WIDTH(strlen(text)) / 2),
+            KNOB_Y - CHAR_HEIGHT / 2
+        );
+        display->write(text, strlen(text));
+    } else {
+        display->setCursor(
+            center_x - (STR_WIDTH(value / 10) / 2),
+            KNOB_Y - CHAR_HEIGHT / 2
+        );
+        display->print(value + 1);
+    }
 
     if (update) {
         display->display();
