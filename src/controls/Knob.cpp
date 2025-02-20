@@ -29,7 +29,7 @@ void Knob::draw(Adafruit_SSD1306 *display, size_t index, bool update) {
 
     // Draw inner circle
     // TODO: Optimization with integer calculation?
-    float theta_r = ((float)_value / 4096.0 * -1.5 - 0.25) * PI;
+    float theta_r = mapControlFloat(_value, -0.25 * PI, -1.75 * PI);
     int16_t knob_x = center_x + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * sin(theta_r));
     int16_t knob_y = KNOB_Y + (int16_t)((KNOB_OUTER_RADIUS - KNOB_INNER_RADIUS) * cos(theta_r));
     display->drawCircle(

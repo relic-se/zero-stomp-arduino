@@ -510,11 +510,11 @@ int ZeroStomp::getExpression(int max_value) {
 };
 
 int ZeroStomp::getExpression(int min_value, int max_value) {
-    return map(getExpression(), 0, 4096, min_value, max_value);
+    return mapControl(getExpression(), min_value, max_value);
 };
 
 float ZeroStomp::getExpressionFloat() {
-    return (float)getExpression() / 4096;
+    return getExpressionFloat(0.0, 1.0);
 };
 
 float ZeroStomp::getExpressionFloat(float max_value) {
@@ -522,7 +522,7 @@ float ZeroStomp::getExpressionFloat(float max_value) {
 };
 
 float ZeroStomp::getExpressionFloat(float min_value, float max_value) {
-    return mapFloat(getExpression(), 0, 4096, min_value, max_value);
+    return mapControlFloat(getExpression(), min_value, max_value);
 };
 
 void ZeroStomp::update() {
