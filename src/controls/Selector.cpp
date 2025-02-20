@@ -32,7 +32,7 @@ void Selector::draw(Adafruit_SSD1306 *display, size_t index, bool update) {
     float theta_r;
     int16_t radius, dot_x, dot_y;
     for (size_t i = 0; i < _count; i++) {
-        theta_r = mapFloat(i, 0, _count - 1, -0.25 * PI, -1.75 * PI);
+        theta_r = mapFloat(i, -0.5, _count - 0.5, -0.25 * PI, -1.75 * PI);
         dot_x = center_x + (int16_t)(SELECTOR_OUTER_RADIUS * sin(theta_r));
         dot_y = KNOB_Y + (int16_t)(SELECTOR_OUTER_RADIUS * cos(theta_r));
         if (i == value) {
