@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#ifndef _ZERO_DELAY_H
-#define _ZERO_DELAY_H
+#ifndef _DELAY_H
+#define _DELAY_H
 
 #include "Arduino.h"
 #include "ZeroStomp.h"

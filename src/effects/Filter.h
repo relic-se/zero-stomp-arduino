@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#ifndef _ZERO_FILTER_H
-#define _ZERO_FILTER_H
+#ifndef _FILTER_H
+#define _FILTER_H
 
 #include "Arduino.h"
 #include "ZeroStomp.h"

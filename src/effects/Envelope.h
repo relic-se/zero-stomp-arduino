@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#ifndef _ZERO_ENVELOPE_H
-#define _ZERO_ENVELOPE_H
+#ifndef _ENVELOPE_H
+#define _ENVELOPE_H
 
 #include "Arduino.h"
 #include "ZeroStomp.h"

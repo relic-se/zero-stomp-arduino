@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPLv3
 
-#ifndef _ZERO_CHORUS_H
-#define _ZERO_CHORUS_H
+#ifndef _CHORUS_H
+#define _CHORUS_H
 
 #include "Arduino.h"
 #include "ZeroStomp.h"
