@@ -28,8 +28,7 @@ void loop() {
 bool core1_separate_stack = true;
 
 void setup1() {
-    // Wait for ready
-    while (!rp2040.fifo.pop()) { };
+    // Do nothing
 };
 
 void loop1() {
@@ -291,11 +290,6 @@ bool ZeroStomp::begin() {
     control_tick(_sampleRate, _control_timer);
 
     _running = true;
-
-    #ifndef SINGLE_CORE
-    // Notify that device is ready
-    rp2040.fifo.push(true);
-    #endif
 
     return true;
 };
@@ -606,8 +600,6 @@ void ZeroStomp::update() {
 };
 
 void ZeroStomp::updateControls(uint32_t samples) {
-    // BUG: samples (after rp2040.fifo.pop) is invalid
-
     // Update values needed for processing filters and LFOs
     control_tick(_sampleRate, samples);
 
