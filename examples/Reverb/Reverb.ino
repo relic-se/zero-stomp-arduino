@@ -21,13 +21,13 @@ void setup(void) {
   effect.setChannels(1);
   #endif
 
+  zeroStomp.setTitle("Reverb");
+  zeroStomp.addControls(3, &size, &damping, &mix);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Reverb"));
-  zeroStomp.addControls(3, &size, &damping, &mix);
 }
 
 void updateControl(uint32_t samples) {

@@ -7,9 +7,8 @@
 #include "controls/Knob.h"
 #include "controls/Selector.h"
 
-// BUG: Rate is too fast
 #define MIN_RATE (0.01)
-#define MAX_RATE (0.2)
+#define MAX_RATE (0.5)
 
 #define NUM_WAVEFORMS (4)
 const LfoWaveform waveforms[NUM_WAVEFORMS] = {
@@ -23,7 +22,7 @@ LFO lfo;
 Knob depth("Depth"), rate("Speed");
 Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels);
 
-uint8_t waveform_index = 0;
+int waveform_index = -1;
 int16_t level;
 
 void setup(void) {
@@ -31,16 +30,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Tremolo");
 
+  zeroStomp.setTitle("Tremolo");
+  zeroStomp.addControls(3, &depth, &rate, &waveform);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  lfo.setOffset(1.0);
-  lfo.setScale(0.0);
-
-  zeroStomp.setTitle(F("Tremolo"));
-  zeroStomp.addControls(3, &depth, &rate, &waveform);
 }
 
 void updateControl(uint32_t samples) {
@@ -50,7 +46,7 @@ void updateControl(uint32_t samples) {
 
   lfo.setRate(rate.getFloat(MIN_RATE, MAX_RATE));
 
-  uint8_t current_waveform_index = waveform.get();
+  int current_waveform_index = waveform.get();
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);

@@ -16,13 +16,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Octaver");
 
+  zeroStomp.setTitle("Octaver");
+  zeroStomp.addControls(2, &dist, &level);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Octaver"));
-  zeroStomp.addControls(2, &dist, &level);
 }
 
 void updateControl(uint32_t samples) {

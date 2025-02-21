@@ -10,9 +10,8 @@
 
 #define MAX_DEPTH (2.0) // semitones
 
-// BUG: Rate is too fast
 #define MIN_RATE (0.01)
-#define MAX_RATE (0.2)
+#define MAX_RATE (1.0)
 
 #define NUM_WAVEFORMS (4)
 const LfoWaveform waveforms[NUM_WAVEFORMS] = {
@@ -24,23 +23,23 @@ const char *waveform_labels[NUM_WAVEFORMS] = {
 
 Pitch effect;
 LFO lfo;
-Knob rate("Rate"), depth("Depth");
-Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels);
+Knob rate("Rate"), depth("Depth"), mix("Mix");
+Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels, CONTROL_MIN);
 
-uint8_t waveform_index = 0;
+int waveform_index = -1;
 
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
   Serial.println("Zero Stomp - Vibrato");
 
+  zeroStomp.setTitle("Vibrato");
+  zeroStomp.addControls(4, &rate, &depth, &mix, &waveform);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Vibrato"));
-  zeroStomp.addControls(3, &rate, &depth, &waveform);
 }
 
 void updateControl(uint32_t samples) {
@@ -49,7 +48,7 @@ void updateControl(uint32_t samples) {
   float lfo_scale = depth.getFloat(MAX_DEPTH);
   lfo.setScale(lfo_scale);
 
-  uint8_t current_waveform_index = waveform.get();
+  int current_waveform_index = waveform.get();
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);
@@ -57,6 +56,8 @@ void updateControl(uint32_t samples) {
 
   float value = lfo.get();
   effect.setShift(value);
+
+  zeroStomp.setMix(mix.get(255));
 
   // Control led
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (value / 2 + lfo_scale) / MAX_DEPTH)) : 0);

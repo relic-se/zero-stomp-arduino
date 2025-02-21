@@ -36,14 +36,14 @@ void setup(void) {
 
   randomSeed(analogRead(PIN_ADC_0));
 
+  zeroStomp.setTitle("Stutter");
+  zeroStomp.addControls(3, &knobPattern, &knobRate, &knobProbability);
+  zeroStomp.addControl(&fade);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Stutter"));
-  zeroStomp.addControls(3, &knobPattern, &knobRate, &knobProbability);
-  zeroStomp.addControl(&fade);
 }
 
 uint8_t current_pattern = 0, pattern_index = 0;

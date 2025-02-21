@@ -18,13 +18,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Pitch Shifter");
 
+  zeroStomp.setTitle("Pitch Shifter");
+  zeroStomp.addControls(3, &shift, &mix, &level);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Pitch Shifter"));
-  zeroStomp.addControls(3, &shift, &mix, &level);
 }
 
 void updateControl(uint32_t samples) {

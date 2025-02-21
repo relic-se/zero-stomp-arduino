@@ -15,13 +15,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Distortion");
 
+  zeroStomp.setTitle("Distortion");
+  zeroStomp.addControls(3, &knobGain, &knobClip, &knobLevel);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Distortion"));
-  zeroStomp.addControls(3, &knobGain, &knobClip, &knobLevel);
 }
 
 void updateControl(uint32_t samples) {

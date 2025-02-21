@@ -9,12 +9,12 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Loopback");
 
+  zeroStomp.setTitle("Loopback");
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Loopback"));
 }
 
 void updateControl(uint32_t samples) {
