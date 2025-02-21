@@ -764,6 +764,7 @@ void ZeroStomp::previousPage(bool update) {
     } else {
         _page--;
     }
+    drawPageTitle(false);
     drawPage(update);
 };
 
@@ -771,32 +772,85 @@ void ZeroStomp::nextPage(bool update) {
     if (getPageCount() <= 1) return;
     clearPage(false);
     _page = (_page + 1) % getPageCount();
+    drawPageTitle(false);
     drawPage(update);
 };
 
-void ZeroStomp::clearPage(bool update) {
+bool ZeroStomp::clearPage(bool update) {
+    if (!_active) {
+        return false;
+    }
+
     for (size_t i = 0; i < getPageControlCount(); i++) {
         Control *control = _controls[i + _page * CONTROL_COUNT];
         control->clear(&_display, i, false);
         control->reset();
     }
+
     if (update) {
         _display.display();
     }
+
+    return true;
 };
 
-void ZeroStomp::drawPage(bool update) {
+bool ZeroStomp::drawPage(bool update) {
+    if (!_active) {
+        return false;
+    }
+    
     for (size_t i = 0; i < getPageControlCount(); i++) {
         _controls[i + _page * CONTROL_COUNT]->draw(&_display, i, false);
     }
+
     if (update) {
         _display.display();
     }
+
+    return true;
+};
+
+bool ZeroStomp::drawPageTitle(bool update) {
+    if (!_active || _num_controls <= CONTROL_COUNT) {
+        return false;
+    }
+
+    char text[3] = { // 48 = '0', 49 = '1'
+        (char)(49 + _page),
+        '/',
+        (char)(48 + (char)getPageCount()),
+    };
+
+    // Clear area
+    _display.fillRect(
+        DISPLAY_WIDTH - TITLE_PAD - STR_WIDTH(3), TITLE_PAD,
+        STR_WIDTH(3), CHAR_HEIGHT,
+        0
+    );
+
+    /// Draw string
+    _display.setTextSize(1);
+    _display.setTextColor(SSD1306_WHITE);
+    _display.setCursor(
+        DISPLAY_WIDTH - TITLE_PAD - STR_WIDTH(3),
+        TITLE_PAD
+    );
+
+    if (!_display.write(text, 3)) {
+        return false;
+    }
+
+    if (update) {
+        _display.display();
+    }
+
+    return true;
 };
 
 void ZeroStomp::redraw() {
     clearPage(false);
     drawTitle(false);
+    drawPageTitle(false);
     drawPage(false);
     _display.display();
 };

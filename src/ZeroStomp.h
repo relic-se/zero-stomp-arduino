@@ -141,8 +141,9 @@ protected:
 
     bool drawTitle(bool update = true);
 
-    void clearPage(bool update = true);
-    void drawPage(bool update = true);
+    bool clearPage(bool update = true);
+    bool drawPage(bool update = true);
+    bool drawPageTitle(bool update = true);
 
     void redraw();
 
