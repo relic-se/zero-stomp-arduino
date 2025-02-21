@@ -11,7 +11,6 @@
 #define MIN_VOICES (1)
 #define MAX_VOICES (5)
 
-// BUG: Rate is too fast
 #define MIN_RATE (0.01)
 #define MAX_RATE (0.1)
 
@@ -24,7 +23,7 @@ Chorus effect(MAX_DEPTH * (1.0 + MAX_LFO_DEPTH));
 LFO lfo;
 Knob level("Level"), depth("Depth");
 Selector voices("Voices", MAX_VOICES - MIN_VOICES + 1);
-Knob lfoRate("Rate"), lfoDepth("Depth");
+Knob lfoRate("Rate", CONTROL_MIN), lfoDepth("Depth", CONTROL_MIN);
 
 void setup(void) {
   // Open Serial

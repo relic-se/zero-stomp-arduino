@@ -7,9 +7,8 @@
 #include "controls/Knob.h"
 #include "controls/Selector.h"
 
-// BUG: Rate is too fast
 #define MIN_RATE (0.01)
-#define MAX_RATE (0.2)
+#define MAX_RATE (0.5)
 
 #define NUM_WAVEFORMS (4)
 const LfoWaveform waveforms[NUM_WAVEFORMS] = {
@@ -35,9 +34,6 @@ void setup(void) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  lfo.setOffset(1.0);
-  lfo.setScale(0.0);
 
   zeroStomp.setTitle(F("Tremolo"));
   zeroStomp.addControls(3, &depth, &rate, &waveform);

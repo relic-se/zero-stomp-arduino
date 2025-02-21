@@ -15,13 +15,13 @@
 #define MIN_RATE (0.01)
 #define MAX_RATE (0.1)
 
-#define MAX_WIDTH (0.25)
+#define MAX_WIDTH (0.1)
 
 Delay effect(DELAY_SIZE);
 Knob knobMix("Mix"), knobTime("Time"), knobDecay("Decay");
 
 LFO lfo;
-Knob knobRate("Rate"), knobWidth("Width");
+Knob knobRate("Rate", CONTROL_MIN), knobWidth("Width", CONTROL_MIN);
 
 void setup(void) {
   // Open Serial

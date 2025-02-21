@@ -10,9 +10,8 @@
 
 #define MAX_DEPTH (2.0) // semitones
 
-// BUG: Rate is too fast
 #define MIN_RATE (0.01)
-#define MAX_RATE (0.2)
+#define MAX_RATE (1.0)
 
 #define NUM_WAVEFORMS (4)
 const LfoWaveform waveforms[NUM_WAVEFORMS] = {
@@ -24,8 +23,8 @@ const char *waveform_labels[NUM_WAVEFORMS] = {
 
 Pitch effect;
 LFO lfo;
-Knob rate("Rate"), depth("Depth");
-Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels);
+Knob rate("Rate"), depth("Depth"), mix("Mix");
+Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels, CONTROL_MIN);
 
 uint8_t waveform_index = 0;
 
@@ -40,7 +39,7 @@ void setup(void) {
   }
 
   zeroStomp.setTitle(F("Vibrato"));
-  zeroStomp.addControls(3, &rate, &depth, &waveform);
+  zeroStomp.addControls(4, &rate, &depth, &mix, &waveform);
 }
 
 void updateControl(uint32_t samples) {
@@ -57,6 +56,8 @@ void updateControl(uint32_t samples) {
 
   float value = lfo.get();
   effect.setShift(value);
+
+  zeroStomp.setMix(mix.get(255));
 
   // Control led
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (value / 2 + lfo_scale) / MAX_DEPTH)) : 0);
