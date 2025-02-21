@@ -32,14 +32,14 @@ void setup(void) {
 
   lfo.setWaveform(lfoWaveformSine);
 
+  zeroStomp.setTitle("Chorus");
+  zeroStomp.addControls(3, &level, &voices, &depth);
+  zeroStomp.addControls(2, &lfoRate, &lfoDepth);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Chorus"));
-  zeroStomp.addControls(3, &level, &voices, &depth);
-  zeroStomp.addControls(2, &lfoRate, &lfoDepth);
 }
 
 void updateControl(uint32_t samples) {

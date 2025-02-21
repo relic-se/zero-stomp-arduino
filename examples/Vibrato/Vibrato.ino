@@ -33,13 +33,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Vibrato");
 
+  zeroStomp.setTitle("Vibrato");
+  zeroStomp.addControls(4, &rate, &depth, &mix, &waveform);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Vibrato"));
-  zeroStomp.addControls(4, &rate, &depth, &mix, &waveform);
 }
 
 void updateControl(uint32_t samples) {

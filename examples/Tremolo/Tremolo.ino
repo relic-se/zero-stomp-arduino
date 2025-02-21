@@ -30,13 +30,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Tremolo");
 
+  zeroStomp.setTitle("Tremolo");
+  zeroStomp.addControls(3, &depth, &rate, &waveform);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Tremolo"));
-  zeroStomp.addControls(3, &depth, &rate, &waveform);
 }
 
 void updateControl(uint32_t samples) {

@@ -21,13 +21,13 @@ void setup(void) {
   zeroStomp.setChannels(1);
   #endif
 
+  zeroStomp.setTitle("Overdrive");
+  zeroStomp.addControls(2, &gain, &level);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Overdrive"));
-  zeroStomp.addControls(2, &gain, &level);
 }
 
 void updateControl(uint32_t samples) {

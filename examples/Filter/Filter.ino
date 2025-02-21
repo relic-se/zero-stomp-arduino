@@ -27,14 +27,14 @@ void setup(void) {
   // Open Serial
   Serial.begin(115200);
   Serial.println("Zero Stomp - Filter");
+  
+  zeroStomp.setTitle("Filter");
+  zeroStomp.addControls(3, &frequency, &resonance, &mode);
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-  
-  zeroStomp.setTitle(F("Filter"));
-  zeroStomp.addControls(3, &frequency, &resonance, &mode);
 }
 
 void updateControl(uint32_t samples) {

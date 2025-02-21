@@ -30,14 +30,14 @@ void setup(void) {
 
   lfo.setWaveform(lfoWaveformSine);
 
+  zeroStomp.setTitle("Delay");
+  zeroStomp.addControls(3, &knobMix, &knobTime, &knobDecay);
+  zeroStomp.addControls(2, &knobRate, &knobWidth);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Delay"));
-  zeroStomp.addControls(3, &knobMix, &knobTime, &knobDecay);
-  zeroStomp.addControls(2, &knobRate, &knobWidth);
 }
 
 void updateControl(uint32_t samples) {

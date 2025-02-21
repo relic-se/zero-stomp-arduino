@@ -16,13 +16,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Fuzz");
 
+  zeroStomp.setTitle("Fuzz");
+  zeroStomp.addControls(2, &gain, &level);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Fuzz"));
-  zeroStomp.addControls(2, &gain, &level);
 }
 
 void updateControl(uint32_t samples) {

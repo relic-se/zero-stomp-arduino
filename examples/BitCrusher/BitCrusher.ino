@@ -14,13 +14,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Bit Crusher");
 
+  zeroStomp.setTitle("Bit Crusher");
+  zeroStomp.addControls(3, &mix, &bits, &level);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Bit Crusher"));
-  zeroStomp.addControls(3, &mix, &bits, &level);
 }
 
 void updateControl(uint32_t samples) {

@@ -54,13 +54,13 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Arpeggiator");
 
+  zeroStomp.setTitle("Arpeggiator");
+  zeroStomp.addControls(3, &controlPattern, &controlScale, &controlRate);
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
   }
-
-  zeroStomp.setTitle(F("Arpeggiator"));
-  zeroStomp.addControls(3, &controlPattern, &controlScale, &controlRate);
 }
 
 void updateControl(uint32_t samples) {
