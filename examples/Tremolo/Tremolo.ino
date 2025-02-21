@@ -22,7 +22,7 @@ LFO lfo;
 Knob depth("Depth"), rate("Speed");
 Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels);
 
-uint8_t waveform_index = 0;
+int waveform_index = -1;
 int16_t level;
 
 void setup(void) {
@@ -46,7 +46,7 @@ void updateControl(uint32_t samples) {
 
   lfo.setRate(rate.getFloat(MIN_RATE, MAX_RATE));
 
-  uint8_t current_waveform_index = waveform.get();
+  int current_waveform_index = waveform.get();
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);

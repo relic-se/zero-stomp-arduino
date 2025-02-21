@@ -26,7 +26,7 @@ LFO lfo;
 Knob rate("Rate"), depth("Depth"), mix("Mix");
 Selector waveform("Shape", NUM_WAVEFORMS, waveform_labels, CONTROL_MIN);
 
-uint8_t waveform_index = 0;
+int waveform_index = -1;
 
 void setup(void) {
   // Open Serial
@@ -48,7 +48,7 @@ void updateControl(uint32_t samples) {
   float lfo_scale = depth.getFloat(MAX_DEPTH);
   lfo.setScale(lfo_scale);
 
-  uint8_t current_waveform_index = waveform.get();
+  int current_waveform_index = waveform.get();
   if (waveform_index != current_waveform_index) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);
