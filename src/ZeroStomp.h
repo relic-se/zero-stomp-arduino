@@ -144,6 +144,8 @@ protected:
     void clearPage(bool update = true);
     void drawPage(bool update = true);
 
+    void redraw();
+
 private:
     WM8960 _codec;
     I2S _i2s;

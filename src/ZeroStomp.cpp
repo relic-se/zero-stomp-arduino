@@ -288,8 +288,10 @@ bool ZeroStomp::begin() {
 
     // Allow filter and LFO updates to run during setup
     control_tick(_sampleRate, _control_timer);
-
     _running = true;
+
+    // Draw screen
+    redraw();
 
     return true;
 };
@@ -684,8 +686,8 @@ bool ZeroStomp::drawTitle(bool update) {
         (DISPLAY_WIDTH - STR_WIDTH(_title_len)) / 2,
         TITLE_PAD
     );
-    
-    if (!_display.println(_title)) {
+
+    if (!_display.write(_title, _title_len)) {
         return false;
     }
 
@@ -790,4 +792,11 @@ void ZeroStomp::drawPage(bool update) {
     if (update) {
         _display.display();
     }
+};
+
+void ZeroStomp::redraw() {
+    clearPage(false);
+    drawTitle(false);
+    drawPage(false);
+    _display.display();
 };
