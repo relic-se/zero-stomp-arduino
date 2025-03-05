@@ -31,6 +31,8 @@ public:
     void setReleaseCallback(EnvelopeReleaseCallback cb);
 
     bool isActive();
+    bool didAttack();
+    bool didRelease();
 
     void setRise(float value);
     void setFall(float value);
@@ -46,7 +48,7 @@ private:
     int16_t _attack, _release;
     EnvelopeAttackCallback _attack_cb = nullptr;
     EnvelopeReleaseCallback _release_cb = nullptr;
-    bool _active = false;
+    bool _active = false, _did_attack = false, _did_release = false;
 
     int16_t _rise, _fall;
     int32_t _accum;

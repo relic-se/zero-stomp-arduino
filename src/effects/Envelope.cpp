@@ -33,6 +33,14 @@ bool Envelope::isActive() {
     return _active;
 };
 
+bool Envelope::didAttack() {
+    return _did_attack;
+};
+
+bool Envelope::didRelease() {
+    return _did_release;
+};
+
 void Envelope::setRise(float value) {
     _rise = (int16_t)(value * MAX_VALUE(int16_t));
 };
@@ -42,6 +50,8 @@ void Envelope::setFall(float value) {
 };
 
 void Envelope::process(int32_t *l, int32_t *r) {
+    _did_attack = _did_release = false;
+
     int32_t sample = *l;
     if (_isStereo && r != nullptr) {
         sample += *r;
@@ -53,9 +63,11 @@ void Envelope::process(int32_t *l, int32_t *r) {
 
     if (!_active && _accum > _attack) {
         _active = true;
+        _did_attack = true;
         if (_attack_cb != nullptr) (*_attack_cb)();
     } else if (_active && _accum < _release) {
         _active = false;
+        _did_release = true;
         if (_release_cb != nullptr) (*_release_cb)();
     }
 };
