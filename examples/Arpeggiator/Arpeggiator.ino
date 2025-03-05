@@ -4,6 +4,7 @@
 
 #include "ZeroStomp.h"
 #include "effects/Pitch.h"
+#include "effects/Envelope.h"
 #include "controls/Selector.h"
 #include "controls/Knob.h"
 
@@ -45,9 +46,12 @@ const char *scale_labels[NUM_SCALES] = {
 #define MAX_RATE (DEFAULT_SAMPLE_RATE / 64)
 
 Pitch effect;
+Envelope envelope;
+
 Selector controlPattern("Pattern", NUM_PATTERNS, pattern_labels), controlScale("Scale", NUM_SCALES, scale_labels);
 Knob controlRate("Rate");
 size_t pattern_index = 0, timer = 0;
+size_t current_rate = 0, current_pattern = 0, current_scale = 0;
 
 void setup(void) {
   // Open Serial
@@ -56,6 +60,9 @@ void setup(void) {
 
   zeroStomp.setTitle("Arpeggiator");
   zeroStomp.addControls(3, &controlPattern, &controlScale, &controlRate);
+  // TODO: Envelope controls; retrigger
+
+  envelope.setAttackCallback(resetTimer);
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
@@ -63,20 +70,31 @@ void setup(void) {
   }
 }
 
+void updateShift() {
+  int8_t scale_index = patterns[current_pattern][pattern_index];
+  int8_t octave = scale_index / NUM_NOTES;
+  int8_t scale_value = scales[current_scale][abs(scale_index) % NUM_NOTES];
+  if (scale_value < 0) scale_value = random(12);
+  if (scale_index < 0) scale_value *= -1;
+
+  effect.setShift(scale_value + 12 * octave);
+}
+
+void resetTimer() {
+  pattern_index = 0;
+  timer = 0;
+  updateShift();
+}
+
 void updateControl(uint32_t samples) {
-  size_t current_rate = mapControl(controlRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
+  current_rate = mapControl(controlRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
+  current_pattern = controlPattern.get();
+  current_scale = controlScale.get();
 
   if (timer > current_rate) {
     timer %= current_rate;
     if (++pattern_index >= NUM_STEPS) pattern_index = 0;
-
-    int8_t scale_index = patterns[controlPattern.get()][pattern_index];
-    int8_t octave = scale_index / NUM_NOTES;
-    int8_t scale_value = scales[controlScale.get()][abs(scale_index) % NUM_NOTES];
-    if (scale_value < 0) scale_value = random(12);
-    if (scale_index < 0) scale_value *= -1;
-
-    effect.setShift(scale_value + 12 * octave);
+    updateShift();
   }
 
   // Control led
@@ -85,5 +103,6 @@ void updateControl(uint32_t samples) {
 
 void updateAudio(int32_t *l, int32_t *r) {
   timer++;
+  envelope.process(l, r);
   effect.process(l, r);
 }

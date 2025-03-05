@@ -5,6 +5,7 @@
 #include "ZeroStomp.h"
 #include "effects/Filter.h"
 #include "LFO.h"
+#include "effects/Envelope.h"
 #include "controls/Knob.h"
 #include "controls/Selector.h"
 
@@ -31,6 +32,7 @@ const char *waveform_labels[NUM_WAVEFORMS] = {
 
 Filter filter;
 LFO lfo;
+Envelope envelope;
 
 Knob frequency("Freq"), resonance("Q");
 Selector mode("Mode", FILTER_MODES, mode_labels);
@@ -51,6 +53,9 @@ void setup(void) {
   zeroStomp.setTitle("Filter");
   zeroStomp.addControls(3, &frequency, &resonance, &mode);
   zeroStomp.addControls(3, &lfoRate, &lfoDepth, &lfoWaveform);
+  // TODO: Envelope controls; retrigger, speed, etc
+
+  envelope.setAttackCallback(lfo.retrigger);
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
@@ -87,6 +92,9 @@ void updateControl(uint32_t samples) {
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
+  // Update envelope
+  envelope.process(l, r);
+
   // Process samples through filter biquad
   filter.process(l, r);
 }

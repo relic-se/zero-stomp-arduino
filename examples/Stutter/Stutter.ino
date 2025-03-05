@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPLv3
 
 #include "ZeroStomp.h"
+#include "effects/Envelope.h"
 #include "controls/Knob.h"
 #include "controls/Selector.h"
 
@@ -26,6 +27,8 @@ const uint8_t patterns[NUM_PATTERNS][NUM_STEPS / (sizeof(uint8_t) * 8)] = {
 #define MIN_FADE (FADE_RATE(10))
 #define MAX_FADE (FADE_RATE(200))
 
+Envelope envelope;
+
 Selector knobPattern("Pattern", NUM_PATTERNS);
 Knob knobRate("Rate"), knobProbability("Prob"), fade("Fade");
 
@@ -39,6 +42,9 @@ void setup(void) {
   zeroStomp.setTitle("Stutter");
   zeroStomp.addControls(3, &knobPattern, &knobRate, &knobProbability);
   zeroStomp.addControl(&fade);
+  // TODO: Envelope controls; retrigger
+
+  envelope.setAttackCallback(resetTimer);
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
@@ -53,6 +59,22 @@ bool current_state = true;
 size_t timer = 0, current_rate = MIN_RATE;
 int16_t fade_timer = 0, fade_rate = MIN_FADE;
 
+void updateState() {
+  bool last_state = current_state;
+  timer = 0;
+
+  current_state = (bool)(patterns[current_pattern][pattern_index / (sizeof(uint8_t) * 8)] & (1 << (pattern_index % (sizeof(uint8_t) * 8))));
+  
+  if (random(UMAX_VALUE(uint8_t)) < current_probability) current_state = false;
+
+  if (last_state != current_state) fade_timer = MAX_VALUE(int16_t);
+}
+
+void resetTimer() {
+  pattern_index = 0;
+  updateState();
+}
+
 void updateControl(uint32_t samples) {
   current_pattern = knobPattern.get();
   current_probability = knobProbability.get(1, UMAX_VALUE(uint8_t) - 1);
@@ -64,16 +86,12 @@ void updateControl(uint32_t samples) {
 }
 
 void updateAudio(int32_t *l, int32_t *r) {
-  if (++timer > current_rate) {
-    bool last_state = current_state;
-    timer = 0;
-    
-    if (++pattern_index >= NUM_STEPS) pattern_index = 0;
-    current_state = (bool)(patterns[current_pattern][pattern_index / (sizeof(uint8_t) * 8)] & (1 << (pattern_index % (sizeof(uint8_t) * 8))));
-    
-    if (random(UMAX_VALUE(uint8_t)) < current_probability) current_state = false;
+  // Update envelope
+  envelope.process(l, r);
 
-    if (last_state != current_state) fade_timer = MAX_VALUE(int16_t);
+  if (++timer > current_rate) {
+    if (++pattern_index >= NUM_STEPS) pattern_index = 0;
+    updateState();
   }
 
   if (fade_timer > 0) {
