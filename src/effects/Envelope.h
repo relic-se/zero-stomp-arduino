@@ -12,11 +12,27 @@
 #define ENVELOPE_DEFAULT_RISE (0.01)
 #define ENVELOPE_DEFAULT_FALL (0.0001)
 
+#define ENVELOPE_DEFAULT_ATTACK (0.05)
+#define ENVELOPE_DEFAULT_RELEASE (0.01)
+
+typedef void (*EnvelopeAttackCallback)(void);
+typedef void (*EnvelopeReleaseCallback)(void);
+
 class Envelope : public Effect
 {
 
 public:
-    Envelope(float rise = ENVELOPE_DEFAULT_RISE, float fall = ENVELOPE_DEFAULT_FALL, uint8_t channels = DEFAULT_CHANNELS);
+    Envelope(float attack = ENVELOPE_DEFAULT_ATTACK, float release = ENVELOPE_DEFAULT_RELEASE, float rise = ENVELOPE_DEFAULT_RISE, float fall = ENVELOPE_DEFAULT_FALL, uint8_t channels = DEFAULT_CHANNELS);
+
+    void setAttackLevel(float value);
+    void setAttackCallback(EnvelopeAttackCallback cb);
+    
+    void setReleaseLevel(float value);
+    void setReleaseCallback(EnvelopeReleaseCallback cb);
+
+    bool isActive();
+    bool didAttack();
+    bool didRelease();
 
     void setRise(float value);
     void setFall(float value);
@@ -29,6 +45,11 @@ protected:
     void reset();
 
 private:
+    int16_t _attack, _release;
+    EnvelopeAttackCallback _attack_cb = nullptr;
+    EnvelopeReleaseCallback _release_cb = nullptr;
+    bool _active = false, _did_attack = false, _did_release = false;
+
     int16_t _rise, _fall;
     int32_t _accum;
 
