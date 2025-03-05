@@ -6,11 +6,16 @@
 #include "effects/Gate.h"
 #include "controls/Knob.h"
 
-#define MIN_THRESHOLD (0.001)
-#define MAX_THRESHOLD (0.1)
+#define MIN_THRESHOLD (0.0)
+#define MAX_THRESHOLD (0.02)
 
-#define MIN_TIME (0.01)
-#define MAX_TIME (0.2)
+#define MIN_ATTACK_TIME (0.002)
+#define MAX_ATTACK_TIME (0.1)
+
+#define MIN_DECAY_TIME (0.05)
+#define MAX_DECAY_TIME (0.5)
+
+#define DIGITAL (0)
 
 Gate gate;
 Knob threshold("Threshold"), attack("Attack"), decay("Decay");
@@ -23,6 +28,11 @@ void setup(void) {
   zeroStomp.setTitle("Noise Gate");
   zeroStomp.addControls(3, &threshold, &attack, &decay);
 
+  #if !DIGITAL
+  zeroStomp.setMix(0);
+  gate.applyScale(false);
+  #endif
+
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
     while (1) { };
@@ -30,9 +40,21 @@ void setup(void) {
 }
 
 void updateControl(uint32_t samples) {
-  gate.setThreshold(threshold.getFloat(MIN_THRESHOLD, MAX_THRESHOLD));
-  gate.setAttackTime(attack.getFloat(MIN_TIME, MAX_TIME));
-  gate.setDecayTime(decay.getFloat(MIN_TIME, MAX_TIME));
+  // Update noise gate settings
+  gate.setThreshold(mapFloat(pow(threshold.getFloat(), 3), 0.0, 1.0, MIN_THRESHOLD, MAX_THRESHOLD));
+  gate.setAttackTime(attack.getFloat(MIN_ATTACK_TIME, MAX_ATTACK_TIME));
+  gate.setDecayTime(decay.getFloat(MIN_DECAY_TIME, MAX_DECAY_TIME));
+
+  // Control led
+  if (!zeroStomp.isBypassed()) {
+    zeroStomp.setLed((MAX_LED >> 1) + scale(MAX_LEVEL >> 1, gate.getLevel()));
+  } else {
+    zeroStomp.setLed(0);
+  }
+
+  #if !DIGITAL
+  zeroStomp.setLevel(gate.getLevel() >> (BITS_PER_SAMPLE - 9));
+  #endif
 }
 
 void updateAudio(int32_t *l, int32_t *r) {

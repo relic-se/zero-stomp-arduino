@@ -17,38 +17,37 @@ void Gate::setThreshold(float value) {
 };
 
 void Gate::setAttackTime(float value) {
-    _attack_time = (size_t)(value * _sampleRate);
+    _attack_rate = (int16_t)(MAX_LEVEL / (value * _sampleRate));
 };
 
 void Gate::setDecayTime(float value) {
-    _decay_time = (size_t)(value * _sampleRate);
+    _decay_rate = (size_t)(MAX_LEVEL / (value * _sampleRate));
 };
 
 bool Gate::isActive() {
     return !envelope.isActive();
 };
 
+int16_t Gate::getLevel() {
+    return (int16_t)_level;
+};
+
+void Gate::applyScale(bool value) {
+    _scale = value;
+};
+
 void Gate::process(int32_t *l, int32_t *r) {
     // Update envelope and set timer if state changed
     envelope.process(l, r);
-    if (envelope.didAttack()) {
-        _timer = _attack_time;
-    } else if (envelope.didRelease()) {
-        _timer = _decay_time;
+
+    if (envelope.isActive() && _level < MAX_LEVEL) {
+        _level = min(_level + _attack_rate, MAX_LEVEL);
+    } else if (!envelope.isActive() && _level > 0) {
+        _level = max(_level - _decay_rate, 0);
     }
 
-    if (!isActive() && !_timer) {
-        // Gate active
-        *l = *r = 0;
-    } else if (isActive() && _timer) {
-        // Gate rising
-        *l = *l * (_attack_time - _timer) / _attack_time;
-        *r = *r * (_attack_time - _timer) / _attack_time;
-    } else if (!isActive() && _timer) {
-        // Gate falling
-        *l = *l * _timer / _decay_time;
-        *r = *r * _timer / _decay_time;
+    if (_scale) {
+        *l = scale(*l, (int16_t)_level);
+        *r = scale(*r, (int16_t)_level);
     }
-
-    if (_timer) _timer--;
 };

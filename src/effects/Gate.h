@@ -25,14 +25,17 @@ public:
     void setDecayTime(float value);
 
     bool isActive();
+    int16_t getLevel();
 
+    void applyScale(bool value);
     void process(int32_t *l, int32_t *r = nullptr);
 
 private:
     Envelope envelope;
-    size_t _sampleRate, _timer;
-    size_t _attack_time, _decay_time;
-    int16_t _level;
+    size_t _sampleRate;
+    int16_t _attack_rate, _decay_rate;
+    int32_t _level = 0;
+    bool _scale = true;
 
 };
 
