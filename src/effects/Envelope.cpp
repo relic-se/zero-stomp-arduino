@@ -4,11 +4,33 @@
 
 #include "Envelope.h"
 
-Envelope::Envelope(float rise, float fall, uint8_t channels) :
+Envelope::Envelope(float attack, float release, float rise, float fall, uint8_t channels) :
     Effect(0, channels) {
+    setAttackLevel(attack);
+    setReleaseLevel(release);
     setRise(rise);
     setFall(fall);
     reset();
+};
+
+void Envelope::setAttackLevel(float value) {
+    _attack = (int16_t)(value * MAX_VALUE(int16_t));
+};
+
+void Envelope::setAttackCallback(EnvelopeAttackCallback cb) {
+    _attack_cb = cb;
+};
+
+void Envelope::setReleaseLevel(float value) {
+    _release = (int16_t)(value * MAX_VALUE(int16_t));
+};
+
+void Envelope::setReleaseCallback(EnvelopeAttackCallback cb) {
+    _release_cb = cb;
+};
+
+bool Envelope::isActive() {
+    return _active;
 };
 
 void Envelope::setRise(float value) {
@@ -28,6 +50,14 @@ void Envelope::process(int32_t *l, int32_t *r) {
 
     int16_t mix = (_accum < sample ? _rise : _fall);
     _accum = applyLinearMix<int16_t>(_accum, max(sample, 0), mix);
+
+    if (!_active && _accum > _attack) {
+        _active = true;
+        if (_attack_cb != nullptr) (*_attack_cb)();
+    } else if (_active && _accum < _release) {
+        _active = false;
+        if (_release_cb != nullptr) (*_release_cb)();
+    }
 };
 
 float Envelope::get() {
@@ -40,4 +70,5 @@ int32_t Envelope::get_scaled() {
 
 void Envelope::reset() {
     _accum = 0;
+    _active = false;
 };
