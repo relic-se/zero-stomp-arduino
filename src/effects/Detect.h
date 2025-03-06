@@ -25,6 +25,7 @@ public:
     float getFrequency();
 
     void process(int32_t *l, int32_t *r = nullptr);
+    void flush();
 
 protected:
     void reset();
@@ -35,6 +36,7 @@ private:
     float *_imag;
     size_t _size, _sampleRate;
     size_t _pos = 0;
+    float _freq = 0.0;
     
 };
 

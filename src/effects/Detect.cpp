@@ -21,6 +21,8 @@ Detect::Detect(size_t size, size_t sample_rate, uint8_t channels) :
 };
 
 void Detect::process(int32_t *l, int32_t *r) {
+    if (_pos >= _size) return;
+
     int32_t sample = *l;
     if (_isStereo) {
         sample += *r;
@@ -28,15 +30,19 @@ void Detect::process(int32_t *l, int32_t *r) {
     }
 
     _real[_pos++] = convert(sample);
+};
 
+void Detect::flush() {
+    _pos = 0;
+};
+
+float Detect::getFrequency() {
     if (_pos >= _size) {
         _fft->windowing(FFTWindow::Hamming, FFTDirection::Forward);
         _fft->compute(FFTDirection::Forward);
         _fft->complexToMagnitude();
+        _freq = _fft->majorPeak();
         _pos = 0;
     }
-};
-
-float Detect::getFrequency() {
-    return _fft->majorPeak();
+    return _freq;
 };
