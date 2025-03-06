@@ -48,7 +48,7 @@ void setup(void) {
 }
 
 void updateControl(uint32_t samples) {
-  if (envelope.isActive() && detect.ready()) {
+  if (envelope.isActive() && detect.ready() && !note.velocity) {
     // Get note properties
     float freq = detect.getFrequency();
     float level = min(envelope.get() / LEVEL, 1.0);
