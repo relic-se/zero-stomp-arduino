@@ -40,7 +40,7 @@ void loop1() {
 ZeroStomp::ZeroStomp() :
     _codec(),
     _i2s(INPUT_PULLUP),
-    _display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &DISPLAY_SPI, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_CS) {
+    display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &DISPLAY_SPI, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_CS) {
     setSampleRate(DEFAULT_SAMPLE_RATE);
     setChannels(DEFAULT_CHANNELS);
     setBitsPerSample(BITS_PER_SAMPLE);
@@ -69,64 +69,64 @@ bool ZeroStomp::begin() {
     }
 
     // Display
-    if (!_display.begin(SSD1306_SWITCHCAPVCC)) {
+    if (!display.begin(SSD1306_SWITCHCAPVCC)) {
         return false;
     }
 
     /// Clear display buffer
-    _display.clearDisplay();
+    display.clearDisplay();
 
     #ifndef NO_SPLASH
 
     /// Draw splash bitmap
-    _display.drawBitmap(
+    display.drawBitmap(
         0, 0,
         splash_bmp, DISPLAY_WIDTH, DISPLAY_HEIGHT, 1
     );
 
     /// Draw title
-    _display.setTextSize(1);
-    _display.setTextColor(SSD1306_BLACK);
-    _display.setCursor(DISPLAY_WIDTH - STR_WIDTH(TITLE1_LEN) - TITLE_PAD, TITLE_PAD);
-    _display.println(TITLE1_STR);
-    _display.setCursor(DISPLAY_WIDTH - STR_WIDTH(TITLE2_LEN) - TITLE_PAD, TITLE_PAD + CHAR_HEIGHT + 1);
-    _display.println(TITLE2_STR);
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_BLACK);
+    display.setCursor(DISPLAY_WIDTH - STR_WIDTH(TITLE1_LEN) - TITLE_PAD, TITLE_PAD);
+    display.println(TITLE1_STR);
+    display.setCursor(DISPLAY_WIDTH - STR_WIDTH(TITLE2_LEN) - TITLE_PAD, TITLE_PAD + CHAR_HEIGHT + 1);
+    display.println(TITLE2_STR);
 
     /// Update display
-    _display.display();
+    display.display();
     delay(SPLASH_DURATION / 3);
 
     /// Draw animation frame bitmap
-    _display.fillRect(
+    display.fillRect(
         SPLASH_ANIM_X, SPLASH_ANIM_Y,
         SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 0
     );
-    _display.drawBitmap(
+    display.drawBitmap(
         SPLASH_ANIM_X, SPLASH_ANIM_Y,
         splash_anim_bmp, SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 1
     );
 
     /// Update display
-    _display.display();
+    display.display();
     delay(SPLASH_DURATION / 3);
 
     /// Redraw splash
-    _display.fillRect(
+    display.fillRect(
         SPLASH_ANIM_X, SPLASH_ANIM_Y,
         SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 0
     );
-    _display.drawBitmap(
+    display.drawBitmap(
         SPLASH_ANIM_X, SPLASH_ANIM_Y,
         splash_reset_bmp, SPLASH_ANIM_WIDTH, SPLASH_ANIM_HEIGHT, 1
     );
 
     /// Update display
-    _display.display();
+    display.display();
     delay(SPLASH_DURATION / 3);
 
     /// Clear display
-    _display.clearDisplay();
-    _display.display();
+    display.clearDisplay();
+    display.display();
 
     #endif
 
@@ -634,7 +634,7 @@ void ZeroStomp::updateControls(uint32_t samples) {
     for (size_t i = 0; i < getPageControlCount(); i++) {
         Control *control = _controls[i + _page * CONTROL_COUNT];
         if (control->update(analogRead(PIN_ADC_0 + i))) {
-            control->draw(&_display, i, false);
+            control->draw(&display, i, false);
         }
     }
 
@@ -645,7 +645,7 @@ void ZeroStomp::updateControls(uint32_t samples) {
     updateControl(samples);
 
     // Update display
-    _display.display();
+    display.display();
 };
 
 void ZeroStomp::setTitle(const String &s, bool update) {
@@ -666,33 +666,33 @@ bool ZeroStomp::drawTitle(bool update) {
     }
 
     // Clear area
-    _display.fillRect(
+    display.fillRect(
         0, 0,
         DISPLAY_WIDTH, TITLE_PAD * 2 + CHAR_HEIGHT, 0
     );
 
     // Draw border
     #if TITLE_BORDER > 0
-    _display.fillRect(
+    display.fillRect(
         0, TITLE_PAD * 2 + CHAR_HEIGHT,
         DISPLAY_WIDTH, TITLE_BORDER, 1
     );
     #endif
 
     /// Draw string
-    _display.setTextSize(1);
-    _display.setTextColor(SSD1306_WHITE);
-    _display.setCursor(
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(
         (DISPLAY_WIDTH - STR_WIDTH(_title_len)) / 2,
         TITLE_PAD
     );
 
-    if (!_display.write(_title, _title_len)) {
+    if (!display.write(_title, _title_len)) {
         return false;
     }
 
     if (update) {
-        _display.display();
+        display.display();
     }
 
     return true;
@@ -727,7 +727,7 @@ bool ZeroStomp::addControl(Control *control) {
     // Draw control if visible
     if (getPageCount() == _page + 1) {
         control->set(analogRead(PIN_ADC_0 + ((_num_controls - 1) % CONTROL_COUNT)));
-        control->draw(&_display, _num_controls - 1, true);
+        control->draw(&display, _num_controls - 1, true);
     }
 
     return true;
@@ -783,12 +783,12 @@ bool ZeroStomp::clearPage(bool update) {
 
     for (size_t i = 0; i < getPageControlCount(); i++) {
         Control *control = _controls[i + _page * CONTROL_COUNT];
-        control->clear(&_display, i, false);
+        control->clear(&display, i, false);
         control->reset();
     }
 
     if (update) {
-        _display.display();
+        display.display();
     }
 
     return true;
@@ -800,11 +800,11 @@ bool ZeroStomp::drawPage(bool update) {
     }
     
     for (size_t i = 0; i < getPageControlCount(); i++) {
-        _controls[i + _page * CONTROL_COUNT]->draw(&_display, i, false);
+        _controls[i + _page * CONTROL_COUNT]->draw(&display, i, false);
     }
 
     if (update) {
-        _display.display();
+        display.display();
     }
 
     return true;
@@ -822,26 +822,26 @@ bool ZeroStomp::drawPageTitle(bool update) {
     };
 
     // Clear area
-    _display.fillRect(
+    display.fillRect(
         DISPLAY_WIDTH - TITLE_PAD - STR_WIDTH(3), TITLE_PAD,
         STR_WIDTH(3), CHAR_HEIGHT,
         0
     );
 
     /// Draw string
-    _display.setTextSize(1);
-    _display.setTextColor(SSD1306_WHITE);
-    _display.setCursor(
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(
         DISPLAY_WIDTH - TITLE_PAD - STR_WIDTH(3),
         TITLE_PAD
     );
 
-    if (!_display.write(text, 3)) {
+    if (!display.write(text, 3)) {
         return false;
     }
 
     if (update) {
-        _display.display();
+        display.display();
     }
 
     return true;
@@ -852,5 +852,5 @@ void ZeroStomp::redraw() {
     drawTitle(false);
     drawPageTitle(false);
     drawPage(false);
-    _display.display();
+    display.display();
 };

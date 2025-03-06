@@ -132,6 +132,8 @@ public:
     void previousPage(bool update = true);
     void nextPage(bool update = true);
 
+    Adafruit_SSD1306 display;
+
 protected:
     bool updateSampleRate();
     bool updateBitsPerSample();
@@ -172,8 +174,6 @@ private:
     uint32_t *_buffer;
     size_t _buffer_size;
     uint32_t _control_timer = 0;
-
-    Adafruit_SSD1306 _display;
 
     const char *_title;
     size_t _title_len = 0;
