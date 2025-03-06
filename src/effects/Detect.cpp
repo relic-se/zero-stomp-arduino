@@ -42,6 +42,10 @@ void Detect::process(int32_t *l, int32_t *r) {
     _imag[_pos++] = 0.0;
 };
 
+bool Detect::ready() {
+    return _pos >= _size;
+};
+
 void Detect::flush() {
     _pos = 0;
 };
@@ -52,36 +56,34 @@ float Detect::getFrequency() {
 };
 
 int Detect::getNoteNum() {
-    if (recompute()) {
-        _notenum = round(12.0 * (log(_freq) / LOG2 - LOG2_A4) + 69.0);
-    }
+    recompute();
+    if (!_notenum) _notenum = round(12.0 * (log10(_freq) / LOG2 - LOG2_A4) + 69.0);
     return _notenum;
 };
 
-const char *Detect::getNoteName() {
+void Detect::getNoteName(char *buffer, size_t size) {
     int notenum = getNoteNum();
+    int namenum = notenum;
+    while (namenum < 21) {
+        namenum += 12;
+    }
+    namenum = (notenum - 21) % 12;
     snprintf(
-        _note_name,
-        sizeof(_note_name),
-        "%s%d",
-        _note_names[(notenum - 21) % 12],
+        buffer, size, "%s%d",
+        _note_names[namenum],
         (notenum - 12) / 12
     );
-    return (const char *)&_note_name;
-};
-
-bool Detect::needsRecompute() {
-    return _pos >= _size;
 };
 
 bool Detect::recompute() {
-    if (!needsRecompute()) return false;
+    if (!ready()) return false;
     computeFFT();
     #ifdef DETECT_DEFAULT_ANALYZE
     _freq = _fft->majorPeak();
     #else
     analyze(); // BUG: Not ready!
     #endif
+    _notenum = 0; // Allow recalculation of note number
     flush();
     return true;
 };

@@ -40,9 +40,10 @@ public:
 
     float getFrequency();
     int getNoteNum();
-    const char *getNoteName();
+    void getNoteName(char *buffer, size_t size);
 
     void process(int32_t *l, int32_t *r = nullptr);
+    bool ready();
     void flush();
 
     #ifndef DETECT_DEFAULT_ANALYZE
@@ -51,7 +52,6 @@ public:
     #endif
 
 protected:
-    bool needsRecompute();
     bool recompute();
     void computeFFT();
 
@@ -73,7 +73,6 @@ private:
     const char *_note_names[12] = {
         "A", "A#/Bb", "B", "C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab"
     };
-    char _note_name[8];
 
     #ifndef DETECT_DEFAULT_ANALYZE
     float *_data;
