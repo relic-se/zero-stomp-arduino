@@ -12,8 +12,8 @@
 #define ENVELOPE_DEFAULT_RISE (0.01)
 #define ENVELOPE_DEFAULT_FALL (0.0001)
 
-#define ENVELOPE_DEFAULT_ATTACK (0.05)
-#define ENVELOPE_DEFAULT_RELEASE (0.01)
+#define ENVELOPE_DEFAULT_ATTACK (0.01)
+#define ENVELOPE_DEFAULT_RELEASE (0.0001)
 
 typedef void (*EnvelopeAttackCallback)(void);
 typedef void (*EnvelopeReleaseCallback)(void);
