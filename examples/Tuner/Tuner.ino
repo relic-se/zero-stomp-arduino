@@ -25,6 +25,7 @@ void setup(void) {
 
 float freq;
 char buf[10];
+const char *notename;
 
 void updateControl(uint32_t samples) {
   // Get detected frequency and convert to string
@@ -38,14 +39,24 @@ void updateControl(uint32_t samples) {
       0
   );
 
-  // Print frequency
+  // Setup font
   zeroStomp.display.setTextSize(1);
   zeroStomp.display.setTextColor(SSD1306_WHITE);
+
+  // Print frequency
   zeroStomp.display.setCursor(
     (DISPLAY_WIDTH / 2) - (STR_WIDTH(strlen(buf)) / 2),
-    (DISPLAY_HEIGHT / 2) - (CHAR_HEIGHT / 2)
+    CONTROL_Y + (DISPLAY_HEIGHT - CONTROL_Y) / 2 - CHAR_HEIGHT / 2 - 2
   );
   zeroStomp.display.write(buf, strlen(buf));
+
+  // Print note
+  notename = detect.getNoteName();
+  zeroStomp.display.setCursor(
+    (DISPLAY_WIDTH / 2) - (STR_WIDTH(strlen(notename)) / 2),
+    CONTROL_Y + (DISPLAY_HEIGHT - CONTROL_Y) / 2 + CHAR_HEIGHT / 2 + 2
+  );
+  zeroStomp.display.write(notename, strlen(notename));
 
   // Update display
   zeroStomp.display.display();
