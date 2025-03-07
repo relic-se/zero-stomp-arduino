@@ -17,8 +17,6 @@ Envelope envelope;
 int16_t * buffer = nullptr;
 size_t buffer_index = AMY_BLOCK_SIZE;
 
-struct event note;
-
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
@@ -36,9 +34,11 @@ void setup(void) {
   // Start up AMY
   amy.begin(1, 0, 0, 0);
 
-  note = amy.default_event();
-  note.osc = 0;
-  note.wave = SINE;
+  // Load Patch
+  struct event e = amy.default_event();
+  e.osc = 0;
+  e.wave = SINE;
+  amy.add_event(e);
 
   // Initialize codec, etc
   if (!zeroStomp.begin()) {
@@ -47,25 +47,32 @@ void setup(void) {
   }
 }
 
+float freq, level;
+
 void updateControl(uint32_t samples) {
-  if (envelope.isActive() && detect.ready() && !note.velocity) {
+  if (envelope.isActive() && detect.ready() && !level) {
     // Get note properties
-    float freq = detect.getFrequency();
-    float level = min(envelope.get() / LEVEL, 1.0);
+    freq = detect.getFrequency();
+    level = min(envelope.get() / LEVEL, 1.0);
 
     // Press note
-    note.freq_coefs[COEF_CONST] = freq;
-    note.velocity = level;
-    amy.add_event(note);
+    struct event e = amy.default_event();
+    e.freq_coefs[COEF_CONST] = freq;
+    e.velocity = level;
+    amy.add_event(e);
   } else if (!envelope.isActive()) {
+    // Reset note properties
+    freq = level = 0.0;
+
     // Release note
-    note.velocity = 0;
-    amy.add_event(note);
+    struct event e = amy.default_event();
+    e.velocity = 0.0;
+    amy.add_event(e);
   }
 
   // Control led
   if (!zeroStomp.isBypassed()) {
-    zeroStomp.setLed(envelope.isActive() ? MAX_LED : (MAX_LED >> 1));
+    zeroStomp.setLed(level * MAX_LED);
   } else {
     zeroStomp.setLed(0);
   }
