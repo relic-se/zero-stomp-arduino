@@ -14,33 +14,44 @@
 // Eighth note positions
 const Tap taps[8] = {
     { 0.125, MAX_LEVEL },
-    { 0.25,  1.0 },
-    { 0.375, 1.0 },
-    { 0.5,   1.0 },
-    { 0.625, 1.0 },
-    { 0.75,  1.0 },
-    { 0.875, 1.0 },
-    DefaultTap,
+    { 0.25,  MAX_LEVEL },
+    { 0.375, MAX_LEVEL },
+    { 0.5,   MAX_LEVEL },
+    { 0.625, MAX_LEVEL },
+    { 0.75,  MAX_LEVEL },
+    { 0.875, MAX_LEVEL },
+    { 1.0,   MAX_LEVEL },
 };
 
 typedef struct tap_pattern_t {
     size_t count;
-    Tap **pattern;
+    const Tap **pattern;
 } TapPattern;
 
 #define NUM_PATTERNS (8)
+
+const Tap *pattern_whole[1]          = { &taps[7] };
+const Tap *pattern_half[2]           = { &taps[3], &taps[7] };
+const Tap *pattern_dotted_quarter[3] = { &taps[2], &taps[5], &taps[7] };
+const Tap *pattern_quarter[4]        = { &taps[1], &taps[3], &taps[5], &taps[7] };
+const Tap *pattern_eighth[8]         = { &taps[0], &taps[1], &taps[2], &taps[3], &taps[4], &taps[5], &taps[6], &taps[7] };
+
+const Tap *pattern_extra_1[4]        = { &taps[0], &taps[1], &taps[4], &taps[5] };
+const Tap *pattern_extra_2[3]        = { &taps[1], &taps[6], &taps[7] };
+const Tap *pattern_extra_3[5]        = { &taps[1], &taps[2], &taps[4], &taps[5], &taps[7] };
+
 const TapPattern patterns[NUM_PATTERNS] = {
-    { 1, { &taps[7] } },                                // whole
-    { 2, { &taps[3], &taps[7] } },                      // half
-    { 3, { &taps[2], &taps[5], &taps[7] } },            // dotted quarter
-    { 4, { &taps[1], &taps[3], &taps[5], &taps[7] } },  // quarter
-    { 8, &taps },                                       // eighth
-    { 4, { &taps[0], &taps[1], &taps[4], &taps[5] } },
-    { 3, { &taps[1], &taps[6], &taps[7] } },
-    { 5, { &taps[1], &taps[2], &taps[4], &taps[5], &taps[7] } },
+    { 1, pattern_whole },
+    { 2, pattern_half },
+    { 3, pattern_dotted_quarter },
+    { 4, pattern_quarter },
+    { 8, pattern_eighth },
+    { 4, pattern_extra_1 },
+    { 3, pattern_extra_2 },
+    { 5, pattern_extra_3 },
 };
 
-MultiTapDelay effect();
+MultiTapDelay effect(MAX_TIME);
 Knob knobMix("Mix"), knobDecay("Decay"), knobTime("Time");
 Selector knobPattern("Pattern", NUM_PATTERNS);
 
@@ -74,7 +85,7 @@ void updateControl(uint32_t samples) {
   size_t current_pattern = knobPattern.get();
   if (pattern != current_pattern) {
     pattern = current_pattern;
-    effect.setTaps(patterns[pattern].count, patterns[pattern].pattern)
+    effect.setTaps(patterns[pattern].count, patterns[pattern].pattern);
   }
 }
 

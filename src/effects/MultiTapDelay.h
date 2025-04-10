@@ -14,14 +14,12 @@ typedef struct tap_t {
     int16_t level;
 } Tap;
 
-const Tap DefaultTap = { 1.0, MAX_LEVEL };
-const Tap *DefaultTaps[1] = { &DefaultTap };
-
 class MultiTapDelay : public Effect
 {
 
 public:
     MultiTapDelay(
+        float max_time,
         float time = 0.1,
         int16_t decay = MIN_LEVEL,
         int16_t mix = MAX_VALUE(int16_t),
@@ -36,26 +34,27 @@ public:
     float getTime();
     
     void setDecay(int16_t value);
-    void setTaps(size_t count, Tap *taps);
+    void setTaps(size_t count, const Tap **taps);
 
     void process(int32_t *l, int32_t *r = nullptr);
 
 protected:
     int32_t processChannel(int32_t sample, uint8_t channel);
     void reset();
+    void updateSize();
     void updateTapOffsets();
 
 private:
-    float _time;
+    float _max_time, _time;
     size_t _sample_rate;
     int16_t _decay;
 
     sample_t *_buffer;
-    size_t _size, _pos;
+    size_t _max_size, _size, _pos;
 
-    Tap **_taps = &DefaultTaps;
-    size_t _tap_count = 1;
-    size_t _tap_offsets;
+    const Tap **_taps = nullptr;
+    size_t _tap_count = 0;
+    size_t *_tap_offsets;
     int32_t _scale; // For mixDown
 
 };
