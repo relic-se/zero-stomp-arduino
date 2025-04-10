@@ -10,6 +10,13 @@
 #include "effects/Effect.h"
 #include "effects/Filter.h"
 
+/*
+Resources:
+- http://recherche.ircam.fr/pub/dafx11/Papers/39_e.pdf
+- https://asp-eurasipjournals.springeropen.com/counter/pdf/10.1155/2011/646134.pdf
+- https://github.com/tomas-gajarsky/parametric-spring-reverb/blob/master/parametricSpring.m
+*/
+
 class SpringReverb : public Effect
 {
 
