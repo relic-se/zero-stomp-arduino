@@ -12,6 +12,8 @@
 extern float global_W_scale;
 
 #define BIQUAD_SHIFT (15)
+#define DEFAULT_FILTER_FREQUENCY (20000.0)
+#define DEFAULT_FILTER_Q (0.7071067811865475)
 
 typedef enum {
     LOW_PASS = 0,
@@ -51,7 +53,7 @@ class Filter : public Effect
 {
 
 public:
-    Filter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475, int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS);
+    Filter(FilterMode m = LOW_PASS, float f = DEFAULT_FILTER_FREQUENCY, float q = DEFAULT_FILTER_Q, int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS);
     
     FilterMode mode;
     float frequency, Q;
