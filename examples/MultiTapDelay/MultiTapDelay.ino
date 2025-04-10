@@ -52,7 +52,7 @@ const TapPattern patterns[NUM_PATTERNS] = {
 };
 
 MultiTapDelay effect(MAX_TIME);
-Knob knobMix("Mix"), knobDecay("Decay"), knobTime("Time");
+Knob knobMix("Mix"), knobTime("Time"), knobDecay("Decay", CONTROL_MIN);
 Selector knobPattern("Pattern", NUM_PATTERNS);
 
 void setup(void) {
@@ -60,7 +60,7 @@ void setup(void) {
   Serial.begin(115200);
   Serial.println("Zero Stomp - Multi Tap Delay");
 
-  zeroStomp.setTitle("Multi Tap Delay");
+  zeroStomp.setTitle("Multi Tap");
   zeroStomp.addControls(3, &knobMix, &knobTime, &knobPattern);
   zeroStomp.addControls(1, &knobDecay);
 

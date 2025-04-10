@@ -46,9 +46,9 @@ void MultiTapDelay::setTaps(size_t count, const Tap **taps) {
 void MultiTapDelay::process(int32_t *l, int32_t *r) {
     *l = processChannel(*l, 0);
     if (_isStereo) {
-        *r = processChannel(*r, 0);
+        *r = processChannel(*r, 1);
     }
-    if (++_pos >= _max_size) _pos = 0;
+    if (++_pos >= _size) _pos = 0;
 };
 
 int32_t MultiTapDelay::processChannel(int32_t sample, uint8_t channel) {
@@ -58,9 +58,9 @@ int32_t MultiTapDelay::processChannel(int32_t sample, uint8_t channel) {
     if (_tap_count) {
         size_t pos;
         for (size_t i = 0; i < _tap_count; i++) {
-            pos = (_pos + _max_size - _tap_offsets[i]) % _max_size;
-            echo = _buffer[pos + _max_size * channel];
-            output += scale<int16_t>(echo, _taps[i]->level);
+            pos = ((_pos + _size - _tap_offsets[i]) % _size);
+            echo = (int32_t)_buffer[pos + _max_size * channel];
+            output += scale<int16_t>(_buffer[pos + _max_size * channel], _taps[i]->level);
         }
         
         // Apply dynamic range compression
