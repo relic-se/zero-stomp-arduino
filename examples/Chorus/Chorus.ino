@@ -42,7 +42,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   zeroStomp.setMix(level.get(127));
 
   effect.setVoices(voices.get() + MIN_VOICES);
@@ -57,6 +57,6 @@ void updateControl(uint32_t samples) {
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * (1.0 - (lfo.get() - current_depth / 2) / MAX_DEPTH)) : 0);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   effect.process(l, r);
 }

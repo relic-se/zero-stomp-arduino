@@ -41,7 +41,7 @@ public:
 
     float get();
     float get_limited(float lo, float hi);
-    int32_t get_scaled(float lo, float hi);
+    int16_t get_scaled(float lo, float hi);
 
     void retrigger();
 

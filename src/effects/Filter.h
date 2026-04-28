@@ -47,6 +47,20 @@ static bool float_equal_or_update(float *cached, float value) {
     return true;
 };
 
+static int16_t sat16(int32_t n, int rshift) {
+    if (n < 0) {
+        n = n + (~(0xFFFFFFFFUL << rshift));
+    }
+    n = n >> rshift;
+    if (n > 32767) {
+        return 32767;
+    }
+    if (n < -32768) {
+        return -32768;
+    }
+    return n;
+}
+
 class Filter : public Effect
 {
 
@@ -59,17 +73,17 @@ public:
     void update();
     void assign(float a1, float a2, float b0, float b1, float b2);
     
-    void process(int32_t *l, int32_t *r = nullptr);
+    void process(int16_t *l, int16_t *r = nullptr);
     void reset();
 
 protected:
-    int32_t processSample(int32_t input);
+    int16_t processSample(int16_t input);
 
 private:
     FilterMode _mode;
     float _W0, _Q;
     int32_t _a1, _a2, _b0, _b1, _b2;
-    int32_t _x[2], _y[2];
+    int16_t _x[2], _y[2];
 
 };
 

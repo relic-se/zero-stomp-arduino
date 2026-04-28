@@ -39,7 +39,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   float current_depth = depth.getFloat(0.0, 0.5);
   lfo.setOffset(1.0 - current_depth);
   lfo.setScale(current_depth);
@@ -60,8 +60,8 @@ void updateControl(uint32_t samples) {
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * level) : 0);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   // Level controlled by DSP
-  //*l = scale<int16_t>(*l, level);
-  //*r = scale<int16_t>(*r, level);
+  //*l = scale(*l, level);
+  //*r = scale(*r, level);
 }

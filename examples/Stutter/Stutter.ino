@@ -75,7 +75,7 @@ void resetTimer() {
   updateState();
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   current_pattern = knobPattern.get();
   current_probability = knobProbability.get(1, UMAX_VALUE(uint8_t) - 1);
   current_rate = mapControl(knobRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
@@ -85,7 +85,7 @@ void updateControl(uint32_t samples) {
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * current_state) : 0);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   // Update envelope
   envelope.process(l, r);
 
@@ -96,8 +96,8 @@ void updateAudio(int32_t *l, int32_t *r) {
 
   if (fade_timer > 0) {
     int16_t level = current_state ? (MAX_VALUE(int16_t) - fade_timer) : fade_timer;
-    *l = scale<int16_t>(*l, level);
-    *r = scale<int16_t>(*r, level);
+    *l = scale(*l, level);
+    *r = scale(*r, level);
     fade_timer -= fade_rate;
   } else if (!current_state) {
     *l = 0;

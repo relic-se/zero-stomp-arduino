@@ -88,8 +88,8 @@ float LFO::get_limited(float lo, float hi) {
     return _value;
 };
 
-int32_t LFO::get_scaled(float lo, float hi) {
-    return convert(get_limited(lo, hi), SAMPLE_SHIFT);
+int16_t LFO::get_scaled(float lo, float hi) {
+    return convertToInt(get_limited(lo, hi), SAMPLE_SHIFT);
 };
 
 void LFO::retrigger() {

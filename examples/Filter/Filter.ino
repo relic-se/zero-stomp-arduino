@@ -57,7 +57,6 @@ void setup(void) {
   zeroStomp.setTitle("Filter");
   zeroStomp.addControls(3, &frequency, &resonance, &mode);
   zeroStomp.addControls(3, &lfoRate, &lfoDepth, &lfoWaveform);
-  // TODO: Envelope controls; retrigger, speed, etc
 
   envelope.setAttackCallback(retrigger);
 
@@ -67,7 +66,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   // Frequency
   float freq = mapControlFloat(frequency.get() + zeroStomp.getExpression(), MIN_FREQUENCY, MAX_FREQUENCY);
   lfo.setOffset(freq);
@@ -95,7 +94,7 @@ void updateControl(uint32_t samples) {
   filter.update();
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   // Update envelope
   envelope.process(l, r);
 

@@ -50,7 +50,7 @@ void setup(void) {
 
 float freq, level;
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   if (envelope.isActive() && detect.ready() && !level) {
     // Get note properties
     freq = detect.getFrequency();
@@ -79,7 +79,7 @@ void updateControl(uint32_t samples) {
   }
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   // Check to see if envelope is active
   envelope.process(l, r);
 

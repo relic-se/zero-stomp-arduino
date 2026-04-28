@@ -30,7 +30,7 @@ void Pitch::setChannels(uint8_t value) {
     if (_buffer) reset();
 };
 
-void Pitch::process(int32_t *l, int32_t *r) {
+void Pitch::process(int16_t *l, int16_t *r) {
     *l = processChannel(*l, 0);
     if (_isStereo) {
         *r = processChannel(*r, 1);
@@ -75,7 +75,7 @@ int32_t Pitch::processChannel(int32_t sample, uint8_t channel) {
     }
 
     // Mix with dry signal and return
-    return applyMix<int16_t>(sample, output, _mix);
+    return applyMix(sample, output, _mix);
 };
 
 void Pitch::reset() {

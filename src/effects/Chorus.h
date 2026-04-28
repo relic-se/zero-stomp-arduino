@@ -23,7 +23,7 @@ public:
     void setSampleRate(size_t value);
     void setChannels(uint8_t value) override;
 
-    void process(int32_t *l, int32_t *r = nullptr);
+    void process(int16_t *l, int16_t *r = nullptr);
 
 protected:
     int32_t processChannel(int32_t sample, uint8_t channel);

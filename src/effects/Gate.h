@@ -28,7 +28,7 @@ public:
     int16_t getLevel();
 
     void applyScale(bool value);
-    void process(int32_t *l, int32_t *r = nullptr);
+    void process(int16_t *l, int16_t *r = nullptr);
 
 private:
     Envelope envelope;

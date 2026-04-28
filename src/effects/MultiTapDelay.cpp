@@ -43,7 +43,7 @@ void MultiTapDelay::setTaps(size_t count, const Tap **taps) {
     updateTapOffsets();
 };
 
-void MultiTapDelay::process(int32_t *l, int32_t *r) {
+void MultiTapDelay::process(int16_t *l, int16_t *r) {
     *l = processChannel(*l, 0);
     if (_isStereo) {
         *r = processChannel(*r, 1);
@@ -60,7 +60,7 @@ int32_t MultiTapDelay::processChannel(int32_t sample, uint8_t channel) {
         for (size_t i = 0; i < _tap_count; i++) {
             pos = ((_pos + _size - _tap_offsets[i]) % _size);
             echo = (int32_t)_buffer[pos + _max_size * channel];
-            output += scale<int16_t>(_buffer[pos + _max_size * channel], _taps[i]->level);
+            output += scale(_buffer[pos + _max_size * channel], _taps[i]->level);
         }
         
         // Apply dynamic range compression
@@ -71,7 +71,7 @@ int32_t MultiTapDelay::processChannel(int32_t sample, uint8_t channel) {
     echo = (int32_t)_buffer[_pos + _max_size * channel];
 
     // Apply decay to echo and add current sample
-    echo = scale<int16_t>(echo, _decay) + sample;
+    echo = scale(echo, _decay) + sample;
 
     // Apply dynamic range compression
     echo = mixDown(echo, MIX_DOWN_SCALE(2));
@@ -80,7 +80,7 @@ int32_t MultiTapDelay::processChannel(int32_t sample, uint8_t channel) {
     _buffer[_pos + _max_size * channel] = (sample_t)clip(echo);
 
     // Mix with dry signal and return
-    return applyMix<int16_t>(sample, output, _mix);
+    return applyMix(sample, output, _mix);
 };
 
 void MultiTapDelay::reset() {

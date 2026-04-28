@@ -67,22 +67,27 @@ void Filter::update() {
 };
 
 void Filter::assign(float a1, float a2, float b0, float b1, float b2) {
-    _a1 = convert(a1, BIQUAD_SHIFT);
-    _a2 = convert(a2, BIQUAD_SHIFT);
-    _b0 = convert(b0, BIQUAD_SHIFT);
-    _b1 = convert(b1, BIQUAD_SHIFT);
-    _b2 = convert(b2, BIQUAD_SHIFT);
+    _a1 = convertToInt(a1, BIQUAD_SHIFT);
+    _a2 = convertToInt(a2, BIQUAD_SHIFT);
+    _b0 = convertToInt(b0, BIQUAD_SHIFT);
+    _b1 = convertToInt(b1, BIQUAD_SHIFT);
+    _b2 = convertToInt(b2, BIQUAD_SHIFT);
 };
 
-void Filter::process(int32_t *l, int32_t *r) {
+void Filter::process(int16_t *l, int16_t *r) {
     *l = processSample(*l);
     if (_isStereo) {
         *r = processSample(*r);
     }
 };
 
-int32_t Filter::processSample(int32_t input) {
-    int32_t output = (_b0 * input + _b1 * _x[0] + _b2 * _x[1] - _a1 * _y[0] - _a2 * _y[1] + (1 << (BIQUAD_SHIFT - 1))) >> BIQUAD_SHIFT;
+int16_t Filter::processSample(int16_t input) {
+    int32_t x0 = _x[0];
+    int32_t x1 = _x[1];
+    int32_t y0 = _y[0];
+    int32_t y1 = _y[1];
+
+    int16_t output = sat16(_b0 * input + _b1 * _x[0] + _b2 * _x[1] - _a1 * _y[0] - _a2 * _y[1] + (1 << (BIQUAD_SHIFT - 1)), BIQUAD_SHIFT);
 
     _x[1] = _x[0];
     _x[0] = input;
@@ -93,5 +98,6 @@ int32_t Filter::processSample(int32_t input) {
 };
 
 void Filter::reset() {
-    memset(_x, 0, 2 * sizeof(int32_t));
+    memset(_x, 0, 2 * sizeof(int16_t));
+    memset(_y, 0, 2 * sizeof(int16_t));
 };

@@ -30,7 +30,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   float current_gain = gain.getFloat(MIN_GAIN, MAX_GAIN);
   pre_gain = dbToLinear(current_gain);
   post_gain = dbToLinear(-current_gain);
@@ -52,7 +52,7 @@ float applyDrive(float sample) {
 
 void processSample(int32_t *sample) {
   // Convert sample to float (-1.0 to 1.0)
-  float samplef = convert(*sample);
+  float samplef = convertToFloat(*sample);
 
   // Apply pre-gain to signal
   samplef *= pre_gain;
@@ -64,10 +64,10 @@ void processSample(int32_t *sample) {
   samplef *= post_gain;
 
   // Convert back to integer format
-  *sample = convert(samplef);
+  *sample = convertToInt(samplef);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   processSample(l);
   #if PICO_RP2350
   processSample(r);

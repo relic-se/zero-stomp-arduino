@@ -86,7 +86,7 @@ void resetTimer() {
   updateShift();
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   current_rate = mapControl(controlRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
   current_pattern = controlPattern.get();
   current_scale = controlScale.get();
@@ -101,7 +101,7 @@ void updateControl(uint32_t samples) {
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * ((pattern_index + 1) % 2)) : 0);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   timer++;
   envelope.process(l, r);
   effect.process(l, r);

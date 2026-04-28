@@ -25,7 +25,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   threshold = mapControl(gain.get() + zeroStomp.getExpression(), MIN_THRESHOLD, MAX_THRESHOLD);
 
   // Update output level through codec
@@ -36,7 +36,7 @@ int32_t fuzz(int32_t sample) {
   return map(sample, -threshold, threshold, -MAX_LEVEL, MAX_LEVEL);
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   *l = fuzz(*l);
   *r = fuzz(*r);
 }

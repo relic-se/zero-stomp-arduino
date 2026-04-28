@@ -285,11 +285,8 @@ bool ZeroStomp::begin() {
     _i2s.setBuffers(NUM_DMA_BUFFERS, _buffer_size / sizeof(uint32_t));
     _i2s.begin();
 
-    _buffer = (uint32_t *)malloc(_buffer_size);
-    memset((void *)_buffer, 0, _buffer_size);
-    _control_timer = _sampleRate / CONTROL_RATE; // Initiate first control update
-
     // Allow filter and LFO updates to run during setup
+    _control_timer = _sampleRate / CONTROL_RATE; // Initiate first control update
     control_tick(_sampleRate, _control_timer);
     _running = true;
 
@@ -392,7 +389,7 @@ bool ZeroStomp::setBitsPerSample(uint8_t value) {
     if (_running) {
         return false;
     }
-    if (value != 16 && value != 24 && value != 32) {
+    if (value != 16) {
         return false;
     }
     _bits_per_sample = value;
@@ -541,70 +538,22 @@ void ZeroStomp::update() {
         _control_timer = 0;
     }
 
-    // Fill buffers
-    uint8_t buffer_count = NUM_DMA_BUFFERS;
-    size_t count, index;
-    int32_t l, r;
-    while (buffer_count-- && _i2s.available()) {
-        // Read single buffer
-        count = _i2s.read((uint8_t *)_buffer, _buffer_size);
-        index = 0;
-        while (index < count) {
-
-            // Get samples from buffer
-            #if BITS_PER_SAMPLE == 16
-            l = (int16_t)((_buffer[index] >> 16) & 0xffff);
-            r = (int16_t)((_buffer[index] >> 0) & 0xffff);
-            #else
-            l = (int32_t)_buffer[index];
-            r = (int32_t)_buffer[index + 1];
-            #endif
-
-            #if BITS_PER_SAMPLE == 24
-            // 24-bit samples are read right-aligned, so left-align them to keep the binary point between 33.32
-            l <<= 8;
-            r <<= 8;
-            #endif
-
-            // Process samples through user code
-            if (_isStereo) {
-                updateAudio(&l, &r);
-            } else {
-                updateAudio(&l, &l);
-                updateAudio(&r, &r);
-            }
-
-            // Apply hard clip
-            // BUG: Distortion occurs when using full max value
-            l = clip(l, SAMPLE_MAX_VALUE >> 1);
-            r = clip(r, SAMPLE_MAX_VALUE >> 1);
-
-            // Update buffer
-            #if BITS_PER_SAMPLE == 16
-            _buffer[index] = (uint32_t)(((int16_t)l << 16) | ((int16_t)r & 0xffff));
-            #else
-            _buffer[index] = (uint32_t)l;
-            _buffer[index + 1] = (uint32_t)r;
-            #endif
-
-            // Increment to next 32-bit word
-            #if BITS_PER_SAMPLE == 16
-            index++;
-            #else
-            index += 2;
-            #endif
+    // Fill buffer
+    size_t count = 0;
+    int16_t l, r;
+    while (count++ < _buffer_size && _i2s.available()) {
+        _i2s.read16(&l, &r);
+        if (_isStereo) {
+            updateAudio(&l, &r);
+        } else {
+            updateAudio(&l, nullptr);
         }
-        _i2s.write((const uint8_t *)_buffer, count * sizeof(int32_t));
+        _i2s.write16(l, r);
     }
-
-    #if BITS_PER_SAMPLE == 16
-    _control_timer += count << (1 - _isStereo);
-    #else
-    _control_timer += count >> _isStereo;
-    #endif
+    _control_timer += count;
 };
 
-void ZeroStomp::updateControls(uint32_t samples) {
+void ZeroStomp::updateControls(size_t samples) {
     // Update values needed for processing filters and LFOs
     control_tick(_sampleRate, samples);
 
