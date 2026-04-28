@@ -10,8 +10,6 @@
 
 #define LEVEL (0.1)
 
-AMY amy;
-
 Detect detect(DEFAULT_FFT_SIZE, AMY_SAMPLE_RATE);
 Envelope envelope;
 
@@ -33,13 +31,16 @@ void setup(void) {
   // TODO: Set num buffers?
 
   // Start up AMY
-  amy.begin(1, 0, 0, 0);
+  amy_config_t amy_config = amy_default_config();
+  amy_config.audio = AMY_AUDIO_IS_NONE;
+  amy_config.midi = AMY_MIDI_IS_NONE;
+  amy_start(amy_config);
 
   // Load Patch
-  struct event e = amy.default_event();
+  amy_event e = amy_default_event();
   e.osc = 0;
   e.wave = SINE;
-  amy.add_event(e);
+  amy_add_event(&e);
 
   // Initialize codec, etc
   if (!zeroStomp.begin()) {
@@ -57,18 +58,18 @@ void updateControl(size_t samples) {
     level = min(envelope.get() / LEVEL, 1.0);
 
     // Press note
-    struct event e = amy.default_event();
+    amy_event e = amy_default_event();
     e.freq_coefs[COEF_CONST] = freq;
     e.velocity = level;
-    amy.add_event(e);
+    amy_add_event(&e);
   } else if (!envelope.isActive()) {
     // Reset note properties
     freq = level = 0.0;
 
     // Release note
-    struct event e = amy.default_event();
+    amy_event e = amy_default_event();
     e.velocity = 0.0;
-    amy.add_event(e);
+    amy_add_event(&e);
   }
 
   // Control led
@@ -95,7 +96,7 @@ void updateAudio(int16_t *l, int16_t *r) {
     *r = buffer[buffer_index++];
   } else {
     // Update AMY buffer
-    buffer = (int16_t *)amy.render_to_buffer();
+    buffer = (int16_t *)amy_update();
     buffer_index = 0;
   }
 }

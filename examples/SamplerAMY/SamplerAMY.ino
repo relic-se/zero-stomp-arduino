@@ -13,22 +13,20 @@
 
 #define LEVEL (0.1) // Higher is less sensitive
 
-AMY amy;
-
 Detect detect(DEFAULT_FFT_SIZE, AMY_SAMPLE_RATE);
 Envelope envelope;
 
 int16_t * buffer = nullptr;
 size_t buffer_index = AMY_BLOCK_SIZE;
 
-bool load_sample(size_t size, size_t sample_rate, const int16_t *data, size_t patch = 0, int notenum = 60, size_t loopstart = 0, size_t loopend = 0) {
+bool load_sample(size_t size, size_t sample_rate, const int16_t *data, uint8_t channels = AMY_NCHANS, size_t patch = 0, int notenum = 60, size_t loopstart = 0, size_t loopend = 0) {
   // Validate looping points
   if (!loopend) loopend = size;
   if (loopstart > size - 2) loopstart = size - 2;
   if (loopend <= loopstart) loopend = loopstart + 1;
 
   // Copy data to PCM RAM location
-  int16_t * ram = pcm_load(patch, size, sample_rate, notenum, loopstart, loopend);
+  int16_t * ram = pcm_load(patch, size, sample_rate, channels, notenum, loopstart, loopend);
   if (ram == NULL) return false;
   memcpy(ram, data, size * sizeof(int16_t));
   return true;
@@ -48,17 +46,19 @@ void setup(void) {
   zeroStomp.setBufferSize(AMY_BLOCK_SIZE / AMY_NCHANS);
   // TODO: Set num buffers?
 
-  // Start up AMY
-  amy.begin(1, 0, 0, 0);
+  amy_config_t amy_config = amy_default_config();
+  amy_config.audio = AMY_AUDIO_IS_NONE;
+  amy_config.midi = AMY_MIDI_IS_NONE;
+  amy_start(amy_config);
 
   // Load sample data into RAM (wave=PCM, patch=0)
   load_sample(MEOW_LENGTH, MEOW_SAMPLE_RATE, meow);
 
   // Setup oscillator
-  struct event e = amy.default_event();
+  amy_event e = amy_default_event();
   e.wave = PCM;
-  e.patch = 0;
-  amy.add_event(e);
+  e.patch_number = 0;
+  amy_add_event(&e);
 
   // Initialize codec, etc
   if (!zeroStomp.begin()) {
@@ -75,18 +75,18 @@ void updateControl(size_t samples) {
     level = min(envelope.get() / LEVEL, 1.0);
 
     // Press note
-    struct event e = amy.default_event();
+    amy_event e = amy_default_event();
     e.midi_note = detect.getNoteNum();
     e.velocity = level;
-    amy.add_event(e);
+    amy_add_event(&e);
   } else if (!envelope.isActive()) {
     // Reset note properties
     level = 0.0;
 
     // Release note
-    struct event e = amy.default_event();
+    amy_event e = amy_default_event();
     e.velocity = 0.0;
-    amy.add_event(e);
+    amy_add_event(&e);
   }
 
   // Control led
@@ -113,7 +113,7 @@ void updateAudio(int16_t *l, int16_t *r) {
     *r = buffer[buffer_index++];
   } else {
     // Update AMY buffer
-    buffer = (int16_t *)amy.render_to_buffer();
+    buffer = (int16_t *)amy_update();
     buffer_index = 0;
   }
 }
