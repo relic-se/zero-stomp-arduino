@@ -15,7 +15,7 @@ class Chorus : public Effect
 {
 
 public:
-    Chorus(float max_time = 0.1, float time = 0.1, uint8_t voices = 2, int16_t mix = MAX_VALUE(int16_t), size_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS);
+    Chorus(float max_time = 0.1, float time = 0.1, uint8_t voices = 2, int16_t mix = MAX_LEVEL, size_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS);
 
     void setMaxTime(float value);
     void setTime(float value);

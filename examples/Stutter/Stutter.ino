@@ -23,7 +23,7 @@ const uint8_t patterns[NUM_PATTERNS][NUM_STEPS / (sizeof(uint8_t) * 8)] = {
 #define MIN_RATE (DEFAULT_SAMPLE_RATE / 4)
 #define MAX_RATE (DEFAULT_SAMPLE_RATE / 64)
 
-#define FADE_RATE(x) (DEFAULT_SAMPLE_RATE / (MAX_VALUE(int16_t) * x / 1000)) // x=ms
+#define FADE_RATE(x) (DEFAULT_SAMPLE_RATE / (MAX_LEVEL * x / 1000)) // x=ms
 #define MIN_FADE (FADE_RATE(10))
 #define MAX_FADE (FADE_RATE(200))
 
@@ -65,9 +65,9 @@ void updateState() {
 
   current_state = (bool)(patterns[current_pattern][pattern_index / (sizeof(uint8_t) * 8)] & (1 << (pattern_index % (sizeof(uint8_t) * 8))));
   
-  if (random(UMAX_VALUE(uint8_t)) < current_probability) current_state = false;
+  if (random(255) < current_probability) current_state = false;
 
-  if (last_state != current_state) fade_timer = MAX_VALUE(int16_t);
+  if (last_state != current_state) fade_timer = MAX_LEVEL;
 }
 
 void resetTimer() {
@@ -77,7 +77,7 @@ void resetTimer() {
 
 void updateControl(size_t samples) {
   current_pattern = knobPattern.get();
-  current_probability = knobProbability.get(1, UMAX_VALUE(uint8_t) - 1);
+  current_probability = knobProbability.get(1, 254);
   current_rate = mapControl(knobRate.get() + zeroStomp.getExpression(), MIN_RATE, MAX_RATE);
   fade_rate = fade.get(MIN_FADE, MAX_FADE);
 
@@ -95,7 +95,7 @@ void updateAudio(int16_t *l, int16_t *r) {
   }
 
   if (fade_timer > 0) {
-    int16_t level = current_state ? (MAX_VALUE(int16_t) - fade_timer) : fade_timer;
+    int16_t level = current_state ? (MAX_LEVEL - fade_timer) : fade_timer;
     *l = scale(*l, level);
     *r = scale(*r, level);
     fade_timer -= fade_rate;

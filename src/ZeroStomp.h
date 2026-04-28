@@ -24,6 +24,7 @@
 
 #define MIN_LEVEL 0
 #define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)
+#define MID_LEVEL ((MAX_LEVEL - MIN_LEVEL) >> 1)
 
 // Codec
 
@@ -216,18 +217,6 @@ static void control_tick(size_t sample_rate, size_t samples) {
 
 // Global Helper Functions
 
-#define SHIFT(T) (sizeof(T) * 8 - 1)
-#define MAX_VALUE(T) ((1 << SHIFT(T)) - 1)
-#define MID_VALUE(T) (1 << (SHIFT(T) - 1))
-
-#define USHIFT(T) (sizeof(T) * 8)
-#define UMAX_VALUE(T) ((1 << USHIFT(T)) - 1)
-#define UMID_VALUE(T) (1 << (USHIFT(T) - 1))
-
-#define SAMPLE_SHIFT (SHIFT(int16_t))
-#define SAMPLE_MAX_VALUE (MAX_VALUE(int16_t))
-#define SAMPLE_MID_VALUE (MID_VALUE(int16_t))
-
 static float dbToLinear(float value) {
     return exp(value * 0.11512925464970228420089957273422);
 };
@@ -261,11 +250,11 @@ static float mapControlFloat(int value, float max_value) {
 };
 
 inline float convertToFloat(int32_t sample) {
-    return ldexp(sample, -SAMPLE_SHIFT);
+    return ldexp(sample, -15);
 };
 
 inline int16_t convertToInt(float sample) {
-    return (int16_t)round(ldexp(sample, SAMPLE_SHIFT));
+    return (int16_t)round(ldexp(sample, 15));
 };
 
 inline int32_t convertToInt(float value, int8_t shift) {
@@ -276,12 +265,12 @@ inline float clip(float sample, float level = 1.0) {
     return min(max(sample, -level), level);
 };
 
-inline int16_t clip(int32_t sample, int16_t level = SAMPLE_MAX_VALUE) {
+inline int16_t clip(int32_t sample, int16_t level = MAX_LEVEL) {
     return min(max(sample, -level), level);
 };
 
 inline int16_t scale(int16_t sample, int16_t value) {
-    return (int16_t)((sample * (int32_t)value) >> SAMPLE_SHIFT);
+    return (int16_t)((sample * (int32_t)value) >> 15);
 };
 
 inline int16_t scale(int16_t sample, int16_t value, int8_t shift) {
@@ -302,15 +291,15 @@ static int16_t mixDown(int16_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
 
 static int16_t applyMix(int16_t dry, int16_t wet, int16_t mix) {
     return mixDown(
-        scale(dry, mix <= SAMPLE_MID_VALUE ? SAMPLE_MAX_VALUE : ((SAMPLE_MAX_VALUE - mix) << 1))
-        + scale(wet, mix >= SAMPLE_MID_VALUE ? SAMPLE_MAX_VALUE : mix << 1),
+        scale(dry, mix <= MID_LEVEL ? MAX_LEVEL : ((MAX_LEVEL - mix) << 1))
+        + scale(wet, mix >= MID_LEVEL ? MAX_LEVEL : mix << 1),
         MIX_DOWN_SCALE(2)
     );
 };
 
 static int16_t applyLinearMix(int16_t dry, int16_t wet, int16_t mix) {
     return mixDown(
-        scale(dry, SAMPLE_MAX_VALUE - mix)
+        scale(dry, MAX_LEVEL - mix)
         + scale(wet, mix),
         MIX_DOWN_SCALE(2)
     );

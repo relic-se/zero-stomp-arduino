@@ -11,7 +11,7 @@
 class Effect
 {
 public:
-    Effect(int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS) {
+    Effect(int16_t mix = MAX_LEVEL, uint8_t channels = DEFAULT_CHANNELS) {
         setMix(mix);
         setChannels(channels);
     }

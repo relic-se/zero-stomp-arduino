@@ -51,7 +51,7 @@ class Filter : public Effect
 {
 
 public:
-    Filter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475, int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS);
+    Filter(FilterMode m = LOW_PASS, float f = 20000.0, float q = 0.7071067811865475, int16_t mix = MAX_LEVEL, uint8_t channels = DEFAULT_CHANNELS);
     
     FilterMode mode;
     float frequency, Q;
