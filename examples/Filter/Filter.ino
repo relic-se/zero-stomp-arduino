@@ -9,11 +9,13 @@
 #include "controls/Knob.h"
 #include "controls/Selector.h"
 
-#define MIN_FREQUENCY (20) // hz
-#define MAX_FREQUENCY (20000) // hz
+#define STAGES (4)
+
+#define MIN_FREQUENCY (80) // hz
+#define MAX_FREQUENCY (8000) // hz
 
 #define MIN_Q (0.7071067811865475)
-#define MAX_Q (8.0)
+#define MAX_Q (3.0)
 
 const char *mode_labels[FILTER_MODES] = {
   "LP", "HP", "BP", "Ntc"
@@ -30,7 +32,7 @@ const char *waveform_labels[NUM_WAVEFORMS] = {
   "TRI", "SIN", "SAW", "SQ"
 };
 
-Filter filter;
+Filter filters[STAGES];
 LFO lfo;
 Envelope envelope;
 
@@ -68,7 +70,7 @@ void setup(void) {
 
 void updateControl(size_t samples) {
   // Frequency
-  float freq = mapControlFloat(frequency.get() + zeroStomp.getExpression(), MIN_FREQUENCY, MAX_FREQUENCY);
+  float freq = mapControlFloat(frequency.get() + zeroStomp.getExpression(), MIN_FREQUENCY, MAX_FREQUENCY, 3.0);
   lfo.setOffset(freq);
 
   // LFO
@@ -80,24 +82,27 @@ void updateControl(size_t samples) {
     waveform_index = current_waveform_index;
     lfo.setWaveform(waveforms[waveform_index]);
   }
+
+  // Get current filter state
+  float ffreq = min(max(lfo.get(), MIN_FREQUENCY), MAX_FREQUENCY);
+  float fq = resonance.getFloat(MIN_Q, MAX_Q);
+  FilterMode fmode = (FilterMode)mode.get();
   
-  // Apply frequency from LFO
-  filter.frequency = min(max(lfo.get(), MIN_FREQUENCY), MAX_FREQUENCY);
-
-  // Resonance
-  filter.Q = resonance.getFloat(MIN_Q, MAX_Q);
-
-  // Mode
-  filter.mode = (FilterMode)mode.get();
-
-  // Update the filter state
-  filter.update();
+  // Update each stage
+  for (size_t i = 0; i < STAGES; i++) {
+    filters[i].frequency = ffreq;
+    filters[i].Q = fq;
+    filters[i].mode = fmode;
+    filters[i].update();
+  }
 }
 
 void updateAudio(int16_t *l, int16_t *r) {
   // Update envelope
   envelope.process(l, r);
 
-  // Process samples through filter biquad
-  filter.process(l, r);
+  // Process samples through filter biquads
+  for (size_t i = 0; i < STAGES; i++) {
+    filters[i].process(l, r);
+  }
 }

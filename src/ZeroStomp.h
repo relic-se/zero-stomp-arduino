@@ -232,6 +232,10 @@ static float dbToLinear(float value) {
     return exp(value * 0.11512925464970228420089957273422);
 };
 
+static float mapFloat(float x, float in_min, float in_max, float out_min, float out_max, float scale) {
+    return pow((x - in_min) / (in_max - in_min), scale) * (out_max - out_min) + out_min;
+};
+
 static float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 };
@@ -242,6 +246,10 @@ static int mapControl(int value, int min_value, int max_value) {
 
 static int mapControl(int value, int max_value) {
     return mapControl(value, 0, max_value);
+};
+
+static float mapControlFloat(int value, float min_value, float max_value, float scale) {
+    return mapFloat(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value, scale);
 };
 
 static float mapControlFloat(int value, float min_value, float max_value) {
