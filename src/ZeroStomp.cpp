@@ -68,6 +68,9 @@ bool ZeroStomp::begin() {
         return false;
     }
 
+    // Configure SysClk
+    _i2s.setSysClk(_sampleRate);
+
     // Display
     if (!display.begin(SSD1306_SWITCHCAPVCC)) {
         return false;
