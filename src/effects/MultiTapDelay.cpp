@@ -45,7 +45,7 @@ void MultiTapDelay::setTaps(size_t count, const Tap **taps) {
 
 void MultiTapDelay::process(int16_t *l, int16_t *r) {
     *l = processChannel(*l, 0);
-    if (_isStereo) {
+    if (_isStereo && r != nullptr) {
         *r = processChannel(*r, 1);
     }
     if (++_pos >= _size) _pos = 0;

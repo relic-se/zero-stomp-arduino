@@ -33,7 +33,7 @@ void Detect::process(int16_t *l, int16_t *r) {
     if (_pos >= _size) return;
 
     int32_t sample = *l;
-    if (_isStereo) {
+    if (_isStereo && r != nullptr) {
         sample += *r;
         sample = mixDown(sample, MIX_DOWN_SCALE(2));
     }
