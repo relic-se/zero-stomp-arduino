@@ -41,6 +41,10 @@ Selector lfoWaveform("Shape", NUM_WAVEFORMS, waveform_labels, CONTROL_MIN);
 
 int waveform_index = -1;
 
+void retrigger(void) {
+  lfo.retrigger();
+}
+
 void setup(void) {
   // Open Serial
   Serial.begin(115200);
@@ -55,7 +59,7 @@ void setup(void) {
   zeroStomp.addControls(3, &lfoRate, &lfoDepth, &lfoWaveform);
   // TODO: Envelope controls; retrigger, speed, etc
 
-  envelope.setAttackCallback(lfo.retrigger);
+  envelope.setAttackCallback(retrigger);
 
   if (!zeroStomp.begin()) {
     Serial.println("Failed to initiate device");
