@@ -310,6 +310,10 @@ bool ZeroStomp::setSampleRate(uint32_t value) {
     return true;
 };
 
+uint32_t ZeroStomp::getSampleRate() {
+    return _sampleRate;
+};
+
 bool ZeroStomp::updateSampleRate() {
     if (!_active || _running) {
         return false;
@@ -385,6 +389,10 @@ bool ZeroStomp::setChannels(uint8_t value) {
     return true;
 };
 
+uint8_t ZeroStomp::getChannels() {
+    return _isStereo ? 2 : 1;
+};
+
 bool ZeroStomp::setBitsPerSample(uint8_t value) {
     if (_running) {
         return false;
@@ -397,6 +405,10 @@ bool ZeroStomp::setBitsPerSample(uint8_t value) {
         updateBitsPerSample();
     }
     return true;
+};
+
+uint8_t ZeroStomp::getBitsPerSample() {
+    return _bits_per_sample;
 };
 
 bool ZeroStomp::updateBitsPerSample() {
@@ -422,9 +434,17 @@ bool ZeroStomp::setBufferSize(size_t value) { // in bytes
     return true;
 };
 
+size_t ZeroStomp::getBufferSize() {
+    return true;
+};
+
 void ZeroStomp::setMix(uint8_t value) {
     _mix = value;
     updateMix();
+};
+
+uint8_t ZeroStomp::getMix() {
+    return _mix;
 };
 
 bool ZeroStomp::updateMix() {
@@ -475,6 +495,10 @@ bool ZeroStomp::updateMix() {
 void ZeroStomp::setLevel(uint8_t value) {
     _level = value;
     updateLevel();
+};
+
+uint8_t ZeroStomp::getLevel() {
+    return _level;
 };
 
 bool ZeroStomp::updateLevel() {

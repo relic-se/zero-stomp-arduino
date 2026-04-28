@@ -5,6 +5,11 @@ setBitsPerSample    KEYWORD2
 setBufferSize       KEYWORD2
 setMix              KEYWORD2
 setLevel            KEYWORD2
+getSampleRate       KEYWORD2
+getBitsPerSample    KEYWORD2
+getBufferSize       KEYWORD2
+getMix              KEYWORD2
+getLevel            KEYWORD2
 getExpression       KEYWORD2
 update              KEYWORD2
 

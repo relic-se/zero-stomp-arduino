@@ -93,12 +93,18 @@ public:
     bool begin();
 
     bool setSampleRate(uint32_t value);
+    uint32_t getSampleRate();
     bool setChannels(uint8_t value);
+    uint8_t getChannels();
     bool setBitsPerSample(uint8_t value);
+    uint8_t getBitsPerSample();
     bool setBufferSize(size_t value);
+    size_t getBufferSize();
 
     void setMix(uint8_t value);
+    uint8_t getMix();
     void setLevel(uint8_t value);
+    uint8_t getLevel();
 
     int getExpression();
     int getExpression(int max_value);
