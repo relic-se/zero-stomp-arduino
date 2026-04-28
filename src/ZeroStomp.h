@@ -257,40 +257,39 @@ inline float convertToFloat(int32_t sample) {
 };
 
 inline int16_t convertToInt(float sample) {
-    return round(ldexp(sample, SAMPLE_SHIFT));
+    return (int16_t)round(ldexp(sample, SAMPLE_SHIFT));
 };
 
-inline int16_t convertToInt(float value, int8_t shift) {
-    return round(ldexp(value, shift));
+inline int32_t convertToInt(float value, int8_t shift) {
+    return (int32_t)round(ldexp(value, shift));
 };
 
 inline float clip(float sample, float level = 1.0) {
     return min(max(sample, -level), level);
 };
 
-inline int16_t clip(int32_t sample, int16_t level = -1) {
-    if (level < 0) level = SAMPLE_MAX_VALUE;
+inline int16_t clip(int32_t sample, int16_t level = SAMPLE_MAX_VALUE) {
     return min(max(sample, -level), level);
 };
 
 inline int16_t scale(int16_t sample, int16_t value) {
-    return (sample * (int32_t)value) >> SAMPLE_SHIFT;
+    return (int16_t)((sample * (int32_t)value) >> SAMPLE_SHIFT);
 };
 
 inline int16_t scale(int16_t sample, int16_t value, int8_t shift) {
-    return (sample * (int32_t)value) >> shift;
+    return (int16_t)((sample * (int32_t)value) >> shift);
 };
 
 #define MIX_DOWN_RANGE (28000)
 #define MIX_DOWN_SCALE(x) (0xfffffff / (32768 * x - MIX_DOWN_RANGE))
 
-static int16_t mixDown(int32_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
+static int16_t mixDown(int16_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
     if (sample < -MIX_DOWN_RANGE) {
         sample = (((sample + MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) - MIX_DOWN_RANGE;
     } else if (sample > MIX_DOWN_RANGE) {
         sample = (((sample - MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) + MIX_DOWN_RANGE;
     }
-    return sample;
+    return (int16_t)sample;
 };
 
 static int16_t applyMix(int16_t dry, int16_t wet, int16_t mix) {

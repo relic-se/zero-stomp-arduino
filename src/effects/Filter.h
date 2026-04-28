@@ -34,8 +34,8 @@ static void fast_sincos(float theta, float *s, float *c) {
           c5x5 = -0.00171961 * x5;
 
     float evens = c4x4 + c2x2 + c0, odds = c5x5 + c3x3 + c1x;
-    *s = evens - odds;
     *c = evens + odds;
+    *s = evens - odds;
 };
 
 static bool float_equal_or_update(float *cached, float value) {
@@ -46,20 +46,6 @@ static bool float_equal_or_update(float *cached, float value) {
     }
     return true;
 };
-
-static int16_t sat16(int32_t n, int rshift) {
-    if (n < 0) {
-        n = n + (~(0xFFFFFFFFUL << rshift));
-    }
-    n = n >> rshift;
-    if (n > 32767) {
-        return 32767;
-    }
-    if (n < -32768) {
-        return -32768;
-    }
-    return n;
-}
 
 class Filter : public Effect
 {
@@ -77,13 +63,13 @@ public:
     void reset();
 
 protected:
-    int16_t processSample(int16_t input);
+    int32_t processSample(int32_t input);
 
 private:
     FilterMode _mode;
     float _W0, _Q;
     int32_t _a1, _a2, _b0, _b1, _b2;
-    int16_t _x[2], _y[2];
+    int32_t _x[2], _y[2];
 
 };
 

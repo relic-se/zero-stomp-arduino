@@ -66,28 +66,41 @@ void Filter::update() {
     );
 };
 
+static int32_t biquad_scale_arg_float(float arg) {
+    return (int32_t)round(ldexp(arg, BIQUAD_SHIFT));
+}
+
 void Filter::assign(float a1, float a2, float b0, float b1, float b2) {
-    _a1 = convertToInt(a1, BIQUAD_SHIFT);
-    _a2 = convertToInt(a2, BIQUAD_SHIFT);
-    _b0 = convertToInt(b0, BIQUAD_SHIFT);
-    _b1 = convertToInt(b1, BIQUAD_SHIFT);
-    _b2 = convertToInt(b2, BIQUAD_SHIFT);
+    _a1 = biquad_scale_arg_float(a1);
+    _a2 = biquad_scale_arg_float(a2);
+    _b0 = biquad_scale_arg_float(b0);
+    _b1 = biquad_scale_arg_float(b1);
+    _b2 = biquad_scale_arg_float(b2);
 };
 
 void Filter::process(int16_t *l, int16_t *r) {
-    *l = processSample(*l);
-    if (_isStereo) {
-        *r = processSample(*r);
+    *l = (int16_t)processSample((int32_t)*l);
+    if (_isStereo && r != nullptr) {
+        *r = (int16_t)processSample((int32_t)*r);
     }
 };
 
-int16_t Filter::processSample(int16_t input) {
-    int32_t x0 = _x[0];
-    int32_t x1 = _x[1];
-    int32_t y0 = _y[0];
-    int32_t y1 = _y[1];
+static int16_t sat16(int32_t n, int rshift) {
+    if (n < 0) {
+        n = n + (~(0xFFFFFFFFUL << rshift));
+    }
+    n = n >> rshift;
+    if (n > 32767) {
+        return 32767;
+    }
+    if (n < -32767) {
+        return -32767;
+    }
+    return n;
+}
 
-    int16_t output = sat16(_b0 * input + _b1 * _x[0] + _b2 * _x[1] - _a1 * _y[0] - _a2 * _y[1] + (1 << (BIQUAD_SHIFT - 1)), BIQUAD_SHIFT);
+int32_t Filter::processSample(int32_t input) {
+    int32_t output = sat16(_b0 * input + _b1 * _x[0] + _b2 * _x[1] - _a1 * _y[0] - _a2 * _y[1] + (1 << (BIQUAD_SHIFT - 1)), BIQUAD_SHIFT);
 
     _x[1] = _x[0];
     _x[0] = input;
@@ -98,6 +111,6 @@ int16_t Filter::processSample(int16_t input) {
 };
 
 void Filter::reset() {
-    memset(_x, 0, 2 * sizeof(int16_t));
-    memset(_y, 0, 2 * sizeof(int16_t));
+    memset(_x, 0, 2 * sizeof(int32_t));
+    memset(_y, 0, 2 * sizeof(int32_t));
 };
