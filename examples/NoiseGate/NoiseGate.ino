@@ -57,6 +57,6 @@ void updateControl(size_t samples) {
   #endif
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   gate.process(l, r);
 }

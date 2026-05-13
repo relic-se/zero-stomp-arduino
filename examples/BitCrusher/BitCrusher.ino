@@ -35,7 +35,7 @@ void updateControl(size_t samples) {
   zeroStomp.setLevel(level.get() >> 4);
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Apply 16-bit mask to audio samples
   *l &= bitmask;
   *r &= bitmask;

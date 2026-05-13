@@ -18,7 +18,7 @@
 #define PIN_I2S_DIN 5
 
 #define DEFAULT_SAMPLE_RATE 48000
-#define BITS_PER_SAMPLE 16
+#define BITS_PER_SAMPLE 32
 #define DEFAULT_CHANNELS 2
 #define DEFAULT_BUFFER_SIZE 512
 
@@ -194,7 +194,7 @@ private:
 
 // User Functions
 void updateControl(size_t samples);
-void updateAudio(int16_t *l, int16_t *r);
+void updateAudio(int32_t *l, int32_t *r);
 
 extern ZeroStomp zeroStomp;
 

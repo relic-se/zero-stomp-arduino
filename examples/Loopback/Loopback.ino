@@ -21,6 +21,6 @@ void updateControl(size_t samples) {
   // Control updates go here
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Audio processing goes here
 }

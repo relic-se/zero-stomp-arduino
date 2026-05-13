@@ -30,7 +30,7 @@ void Pitch::setChannels(uint8_t value) {
     if (_buffer) reset();
 };
 
-void Pitch::process(int16_t *l, int16_t *r) {
+void Pitch::process(int32_t *l, int32_t *r) {
     *l = processChannel(*l, 0);
     if (_isStereo && r != nullptr) {
         *r = processChannel(*r, 1);

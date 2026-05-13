@@ -49,7 +49,7 @@ void Envelope::setFall(float value) {
     _fall = convertToInt(value);
 };
 
-void Envelope::process(int16_t *l, int16_t *r) {
+void Envelope::process(int32_t *l, int32_t *r) {
     _did_attack = _did_release = false;
 
     int16_t sample = *l;

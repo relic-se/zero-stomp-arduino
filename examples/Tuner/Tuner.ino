@@ -96,7 +96,7 @@ void updateControl(size_t samples) {
   }
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Check to see if envelope is active
   envelope.process(l, r);
   if (!envelope.isActive()) return;

@@ -64,7 +64,7 @@ void updateControl(size_t samples) {
   }
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Update the state of the envelope (audio is not altered)
   envelope.process(l, r);
 

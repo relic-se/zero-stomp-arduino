@@ -43,7 +43,7 @@ void MultiTapDelay::setTaps(size_t count, const Tap **taps) {
     updateTapOffsets();
 };
 
-void MultiTapDelay::process(int16_t *l, int16_t *r) {
+void MultiTapDelay::process(int32_t *l, int32_t *r) {
     *l = processChannel(*l, 0);
     if (_isStereo && r != nullptr) {
         *r = processChannel(*r, 1);

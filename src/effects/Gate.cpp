@@ -36,7 +36,7 @@ void Gate::applyScale(bool value) {
     _scale = value;
 };
 
-void Gate::process(int16_t *l, int16_t *r) {
+void Gate::process(int32_t *l, int32_t *r) {
     // Update envelope and set timer if state changed
     envelope.process(l, r);
 

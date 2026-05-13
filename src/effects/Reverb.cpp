@@ -47,7 +47,7 @@ void Reverb::setChannels(uint8_t value) {
     _model.setstereo(value == 2);
 };
 
-void Reverb::process(int16_t *l, int16_t *r) {
+void Reverb::process(int32_t *l, int32_t *r) {
     float fl = convertToFloat(*l), fr = 0;
     if (_model.getstereo()) {
         fr = convertToFloat(*r);

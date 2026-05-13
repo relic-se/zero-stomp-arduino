@@ -32,7 +32,7 @@ void updateControl(size_t samples) {
   zeroStomp.setLevel(knobLevel.get(255));
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Apply gain to signal
   *l = scale(*l, current_gain, 6);
   *r = scale(*r, current_gain, 6);

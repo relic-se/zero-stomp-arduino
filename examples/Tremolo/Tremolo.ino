@@ -60,7 +60,7 @@ void updateControl(size_t samples) {
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * level) : 0);
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Level controlled by DSP
   //*l = scale(*l, level);
   //*r = scale(*r, level);

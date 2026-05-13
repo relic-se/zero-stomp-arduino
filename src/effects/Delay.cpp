@@ -41,7 +41,7 @@ void Delay::setChannels(uint8_t value) {
     reset();
 };
 
-void Delay::process(int16_t *l, int16_t *r) {
+void Delay::process(int32_t *l, int32_t *r) {
     *l = processChannel(*l, 0);
     if (_isStereo && r != nullptr) {
         *r = processChannel(*r, 1);

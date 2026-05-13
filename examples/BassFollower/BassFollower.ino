@@ -43,7 +43,7 @@ void updateControl(size_t samples) {
   zeroStomp.setLevel(level.get(255));
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   filter.process(l, r);
   pitch.process(l, r);
 }

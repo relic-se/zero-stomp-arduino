@@ -397,7 +397,7 @@ bool ZeroStomp::setBitsPerSample(uint8_t value) {
     if (_running) {
         return false;
     }
-    if (value != 16) {
+    if (value != BITS_PER_SAMPLE) {
         return false;
     }
     _bits_per_sample = value;
@@ -564,15 +564,15 @@ void ZeroStomp::update() {
 
     // Fill buffer
     size_t count = 0;
-    int16_t l, r;
+    int32_t l, r;
     while (count++ < _buffer_size && _i2s.available()) {
-        _i2s.read16(&l, &r);
+        _i2s.read32(&l, &r);
         if (_isStereo) {
             updateAudio(&l, &r);
         } else {
             updateAudio(&l, nullptr);
         }
-        _i2s.write16(l, r);
+        _i2s.write32(l, r);
     }
     _control_timer += count;
 };

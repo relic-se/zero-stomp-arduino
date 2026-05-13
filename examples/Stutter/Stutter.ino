@@ -85,7 +85,7 @@ void updateControl(size_t samples) {
   zeroStomp.setLed(!zeroStomp.isBypassed() ? (MAX_LED * current_state) : 0);
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   // Update envelope
   envelope.process(l, r);
 

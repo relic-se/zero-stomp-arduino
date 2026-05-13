@@ -78,7 +78,7 @@ void Filter::assign(float a1, float a2, float b0, float b1, float b2) {
     _b2 = biquad_scale_arg_float(b2);
 };
 
-void Filter::process(int16_t *l, int16_t *r) {
+void Filter::process(int32_t *l, int32_t *r) {
     *l = (int16_t)processSample((int32_t)*l);
     if (_isStereo && r != nullptr) {
         *r = (int16_t)processSample((int32_t)*r);

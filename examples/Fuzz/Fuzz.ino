@@ -36,7 +36,7 @@ int32_t fuzz(int32_t sample) {
   return map(sample, -threshold, threshold, -MAX_LEVEL, MAX_LEVEL);
 }
 
-void updateAudio(int16_t *l, int16_t *r) {
+void updateAudio(int32_t *l, int32_t *r) {
   *l = fuzz(*l);
   *r = fuzz(*r);
 }
