@@ -71,7 +71,7 @@ int32_t Delay::processChannel(int32_t sample, uint8_t channel) {
         echo = mixDown(echo, MIX_DOWN_SCALE(2));
 
         // Update echo buffer with hard clip
-        _buffer[index] = (sample_t)clip(echo);
+        _buffer[index] = clip(echo);
     }
 
     // Mix initial echo value with dry signal and return
@@ -83,7 +83,7 @@ void Delay::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (sample_t *)malloc(_size * (_isStereo + 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(sample_t));
+    _buffer = (int32_t *)malloc(_size * (_isStereo + 1) * sizeof(int32_t));
+    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(int32_t));
     _pos = 0;
 };

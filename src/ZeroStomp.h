@@ -78,12 +78,6 @@
 #include <I2S.h>
 #include <Adafruit_SSD1306.h>
 
-#if BITS_PER_SAMPLE == 16
-typedef int16_t sample_t;
-#else
-typedef int32_t sample_t;
-#endif
-
 typedef void (*BypassChangeCallback)(bool);
 typedef void (*ClickCallback)(uint8_t);
 class ZeroStomp

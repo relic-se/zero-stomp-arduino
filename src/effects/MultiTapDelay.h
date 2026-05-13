@@ -49,7 +49,7 @@ private:
     size_t _sample_rate;
     int16_t _decay;
 
-    sample_t *_buffer;
+    int32_t *_buffer;
     size_t _max_size, _size, _pos;
 
     const Tap **_taps = nullptr;

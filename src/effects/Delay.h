@@ -31,7 +31,7 @@ protected:
     void reset();
 
 private:
-    sample_t *_buffer;
+    int32_t *_buffer;
     size_t _size, _sampleRate;
     size_t _pos, _rate;
     int16_t _decay;

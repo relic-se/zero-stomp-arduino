@@ -32,7 +32,7 @@ protected:
     void reset();
 
 private:
-    sample_t *_buffer;
+    int32_t *_buffer;
     float _max_time, _time;
     size_t _size, _sampleRate, _pos;
     size_t _offset, _current_offset, _step; // << CHORUS_SHIFT

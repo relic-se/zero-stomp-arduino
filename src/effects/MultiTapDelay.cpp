@@ -77,7 +77,7 @@ int32_t MultiTapDelay::processChannel(int32_t sample, uint8_t channel) {
     echo = mixDown(echo, MIX_DOWN_SCALE(2));
 
     // Update buffer with hard clip
-    _buffer[_pos + _max_size * channel] = (sample_t)clip(echo);
+    _buffer[_pos + _max_size * channel] = clip(echo);
 
     // Mix with dry signal and return
     return applyMix(sample, output, _mix);
@@ -91,8 +91,8 @@ void MultiTapDelay::reset() {
 
     updateSize();
 
-    _buffer = (sample_t *)malloc(_max_size * (_isStereo + 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _max_size * (_isStereo + 1) * sizeof(sample_t));
+    _buffer = (int32_t *)malloc(_max_size * (_isStereo + 1) * sizeof(int32_t));
+    memset((void *)_buffer, 0, _max_size * (_isStereo + 1) * sizeof(int32_t));
 
     _pos = 0;
 };

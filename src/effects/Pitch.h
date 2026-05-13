@@ -34,9 +34,9 @@ private:
     float _shift;
     size_t _window, _write;
     size_t _read, _rate; // << PITCH_SHIFT
-    sample_t *_buffer;
+    int32_t *_buffer;
     size_t _overlapSize, _overlapIndex;
-    sample_t *_overlapBuffer;
+    int32_t *_overlapBuffer;
 
 };
 

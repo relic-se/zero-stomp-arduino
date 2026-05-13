@@ -53,10 +53,10 @@ int32_t Pitch::processChannel(int32_t sample, uint8_t channel) {
         _buffer[_write + _window * channel] = _overlapBuffer[_overlapIndex + _overlapSize * channel];
 
         // Save current sample in overlap
-        _overlapBuffer[_overlapIndex + _overlapSize * channel] = (sample_t)clip(sample);
+        _overlapBuffer[_overlapIndex + _overlapSize * channel] = clip(sample);
     } else {
         // Write sample to buffer
-        _buffer[_write + _window * channel] = (sample_t)clip(sample);
+        _buffer[_write + _window * channel] = clip(sample);
     }
 
     // Determine how far we are into the overlap
@@ -84,8 +84,8 @@ void Pitch::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (sample_t *)malloc(_window * (_isStereo + 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _window * (_isStereo + 1) * sizeof(sample_t));
+    _buffer = (int32_t *)malloc(_window * (_isStereo + 1) * sizeof(int32_t));
+    memset((void *)_buffer, 0, _window * (_isStereo + 1) * sizeof(int32_t));
 
     // Reset last write buffer
     if (_overlapBuffer) {
@@ -93,8 +93,8 @@ void Pitch::reset() {
         _overlapBuffer = nullptr;
     }
     if (_overlapSize) {
-        _overlapBuffer = (sample_t *)malloc(_overlapSize * (_isStereo + 1) * sizeof(sample_t));
-        memset((void *)_overlapBuffer, 0, _overlapSize * (_isStereo + 1) * sizeof(sample_t));
+        _overlapBuffer = (int32_t *)malloc(_overlapSize * (_isStereo + 1) * sizeof(int32_t));
+        memset((void *)_overlapBuffer, 0, _overlapSize * (_isStereo + 1) * sizeof(int32_t));
     }
 
     // Reset buffer pointers

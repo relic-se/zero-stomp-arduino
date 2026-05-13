@@ -66,7 +66,7 @@ void Chorus::process(int32_t *l, int32_t *r) {
 
 int32_t Chorus::processChannel(int32_t sample, uint8_t channel) {
     // Update current position of buffer
-    _buffer[_pos + _size * channel] = (sample_t)clip(sample);
+    _buffer[_pos + _size * channel] = clip(sample);
 
     int32_t output = 0;
     int32_t pos = (int32_t)_pos << CHORUS_SHIFT;
@@ -97,7 +97,7 @@ void Chorus::reset() {
         free(_buffer);
         _buffer = nullptr;
     }
-    _buffer = (sample_t *)malloc(_size * (_isStereo + 1) * sizeof(sample_t));
-    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(sample_t));
+    _buffer = (int32_t *)malloc(_size * (_isStereo + 1) * sizeof(int32_t));
+    memset((void *)_buffer, 0, _size * (_isStereo + 1) * sizeof(int32_t));
     _pos = 0;
 };
