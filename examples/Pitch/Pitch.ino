@@ -27,7 +27,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   effect.setShift(shift.get(-SEMITONES, SEMITONES));
 
   // Update mix and output level through codec
@@ -35,6 +35,6 @@ void updateControl(uint32_t samples) {
   zeroStomp.setLevel(level.get(255));
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   effect.process(l, r);
 }

@@ -41,9 +41,9 @@ void Delay::setChannels(uint8_t value) {
     reset();
 };
 
-void Delay::process(int32_t *l, int32_t *r) {
+void Delay::process(int16_t *l, int16_t *r) {
     *l = processChannel(*l, 0);
-    if (_isStereo) {
+    if (_isStereo && r != nullptr) {
         *r = processChannel(*r, 1);
     }
     _pos = (_pos + _rate) % (_size << DELAY_SHIFT);
@@ -65,7 +65,7 @@ int32_t Delay::processChannel(int32_t sample, uint8_t channel) {
         echo = (int32_t)_buffer[index];
 
         // Apply decay to echo and add current sample
-        echo = scale<int16_t>(echo, _decay) + sample;
+        echo = scale(echo, _decay) + sample;
 
         // Apply dynamic range compression
         echo = mixDown(echo, MIX_DOWN_SCALE(2));
@@ -75,7 +75,7 @@ int32_t Delay::processChannel(int32_t sample, uint8_t channel) {
     }
 
     // Mix initial echo value with dry signal and return
-    return applyMix<int16_t>(sample, output, _mix);
+    return applyMix(sample, output, _mix);
 };
 
 void Delay::reset() {

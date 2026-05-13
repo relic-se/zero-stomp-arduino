@@ -39,7 +39,7 @@ void setup(void) {
   }
 }
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   // Update noise gate settings
   gate.setThreshold(mapFloat(pow(threshold.getFloat(), 3), 0.0, 1.0, MIN_THRESHOLD, MAX_THRESHOLD));
   gate.setAttackTime(attack.getFloat(MIN_ATTACK_TIME, MAX_ATTACK_TIME));
@@ -57,6 +57,6 @@ void updateControl(uint32_t samples) {
   #endif
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   gate.process(l, r);
 }

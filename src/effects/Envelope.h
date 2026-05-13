@@ -37,7 +37,7 @@ public:
     void setRise(float value);
     void setFall(float value);
 
-    void process(int32_t *l, int32_t *r = nullptr);
+    void process(int16_t *l, int16_t *r = nullptr);
     float get();
     int32_t get_scaled();
 

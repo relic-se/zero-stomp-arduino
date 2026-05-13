@@ -32,7 +32,7 @@ void Reverb::setWidth(float value) {
 
 void Reverb::setMix(int16_t value) {
     Effect::setMix(value);
-    float mix = convert<int16_t>(value);
+    float mix = convertToFloat(value);
     mix *= 2.0;
     _model.setdry(min(2.0 - mix, 1.0));
     _model.setwet(min(mix, 1.0));
@@ -47,14 +47,14 @@ void Reverb::setChannels(uint8_t value) {
     _model.setstereo(value == 2);
 };
 
-void Reverb::process(int32_t *l, int32_t *r) {
-    float fl = convert(*l), fr = 0;
+void Reverb::process(int16_t *l, int16_t *r) {
+    float fl = convertToFloat(*l), fr = 0;
     if (_model.getstereo()) {
-        fr = convert(*r);
+        fr = convertToFloat(*r);
     }
     _model.processreplace(&fl, &fr, &fl, &fr, 1, 0);
-    *l = convert(fl);
+    *l = convertToInt(fl);
     if (_model.getstereo()) {
-        *r = convert(fr);
+        *r = convertToInt(fr);
     }
 };

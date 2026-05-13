@@ -11,7 +11,7 @@
 class Effect
 {
 public:
-    Effect(int16_t mix = MAX_VALUE(int16_t), uint8_t channels = DEFAULT_CHANNELS) {
+    Effect(int16_t mix = MAX_LEVEL, uint8_t channels = DEFAULT_CHANNELS) {
         setMix(mix);
         setChannels(channels);
     }
@@ -24,7 +24,7 @@ public:
         _mix = value;
     }
 
-    virtual void process(int32_t *l, int32_t *r = nullptr) = 0;
+    virtual void process(int16_t *l, int16_t *r = nullptr) = 0;
 
 protected:
     bool _isStereo;

@@ -42,7 +42,7 @@ public:
     int getNoteNum();
     void getNoteName(char *buffer, size_t size);
 
-    void process(int32_t *l, int32_t *r = nullptr);
+    void process(int16_t *l, int16_t *r = nullptr);
     bool ready();
     void flush();
 

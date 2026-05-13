@@ -24,6 +24,7 @@
 
 #define MIN_LEVEL 0
 #define MAX_LEVEL ((1 << (BITS_PER_SAMPLE - 1)) - 1)
+#define MID_LEVEL ((MAX_LEVEL - MIN_LEVEL) >> 1)
 
 // Codec
 
@@ -93,12 +94,18 @@ public:
     bool begin();
 
     bool setSampleRate(uint32_t value);
+    uint32_t getSampleRate();
     bool setChannels(uint8_t value);
+    uint8_t getChannels();
     bool setBitsPerSample(uint8_t value);
+    uint8_t getBitsPerSample();
     bool setBufferSize(size_t value);
+    size_t getBufferSize();
 
     void setMix(uint8_t value);
+    uint8_t getMix();
     void setLevel(uint8_t value);
+    uint8_t getLevel();
 
     int getExpression();
     int getExpression(int max_value);
@@ -112,7 +119,7 @@ public:
     void setTitle(const char c[], bool update = true);
 
     void update();
-    void updateControls(uint32_t samples);
+    void updateControls(size_t samples);
 
     // Switch Functions
     bool isBypassed();
@@ -152,7 +159,7 @@ protected:
 private:
     WM8960 _codec;
     I2S _i2s;
-    uint32_t _sampleRate;
+    size_t _sampleRate;
     bool _isStereo;
     uint8_t _bits_per_sample;
     bool _active = false;
@@ -171,9 +178,8 @@ private:
     uint8_t _mix = 255;
     uint8_t _level = 255;
 
-    uint32_t *_buffer;
     size_t _buffer_size;
-    uint32_t _control_timer = 0;
+    size_t _control_timer = 0;
 
     const char *_title;
     size_t _title_len = 0;
@@ -187,8 +193,8 @@ private:
 };
 
 // User Functions
-void updateControl(uint32_t samples);
-void updateAudio(int32_t *l, int32_t *r);
+void updateControl(size_t samples);
+void updateAudio(int16_t *l, int16_t *r);
 
 extern ZeroStomp zeroStomp;
 
@@ -211,19 +217,12 @@ static void control_tick(size_t sample_rate, size_t samples) {
 
 // Global Helper Functions
 
-#define SHIFT(T) (sizeof(T) * 8 - 1)
-#define MAX_VALUE(T) ((1 << SHIFT(T)) - 1)
-#define MID_VALUE(T) (1 << (SHIFT(T) - 1))
-
-#define USHIFT(T) (sizeof(T) * 8)
-#define UMAX_VALUE(T) ((1 << USHIFT(T)) - 1)
-#define UMID_VALUE(T) (1 << (USHIFT(T) - 1))
-
-#define SAMPLE_SHIFT (BITS_PER_SAMPLE - 1)
-#define SAMPLE_MAX_VALUE ((1 << SAMPLE_SHIFT) - 1)
-
 static float dbToLinear(float value) {
     return exp(value * 0.11512925464970228420089957273422);
+};
+
+static float mapFloat(float x, float in_min, float in_max, float out_min, float out_max, float scale) {
+    return pow((x - in_min) / (in_max - in_min), scale) * (out_max - out_min) + out_min;
 };
 
 static float mapFloat(float x, float in_min, float in_max, float out_min, float out_max) {
@@ -238,6 +237,10 @@ static int mapControl(int value, int max_value) {
     return mapControl(value, 0, max_value);
 };
 
+static float mapControlFloat(int value, float min_value, float max_value, float scale) {
+    return mapFloat(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value, scale);
+};
+
 static float mapControlFloat(int value, float min_value, float max_value) {
     return mapFloat(min(max(value, CONTROL_MIN), CONTROL_MAX), CONTROL_MIN, CONTROL_MAX, min_value, max_value);
 };
@@ -246,20 +249,15 @@ static float mapControlFloat(int value, float max_value) {
     return mapControlFloat(value, 0.0, max_value);
 };
 
-inline float convert(int32_t sample) {
-    return ldexp(sample, -SAMPLE_SHIFT);
+inline float convertToFloat(int32_t sample) {
+    return ldexp(sample, -15);
 };
 
-inline int32_t convert(float sample) {
-    return (int32_t)round(ldexp(sample, SAMPLE_SHIFT));
+inline int16_t convertToInt(float sample) {
+    return (int16_t)round(ldexp(sample, 15));
 };
 
-template <typename T>
-inline T convert(float value) {
-    return (T)round(ldexp(value, SHIFT(T)));
-};
-
-inline int32_t convert(float value, int8_t shift) {
+inline int32_t convertToInt(float value, int8_t shift) {
     return (int32_t)round(ldexp(value, shift));
 };
 
@@ -267,73 +265,42 @@ inline float clip(float sample, float level = 1.0) {
     return min(max(sample, -level), level);
 };
 
-inline int32_t clip(int32_t sample, int32_t level = -1) {
-    if (level < 0) level = SAMPLE_MAX_VALUE;
+inline int16_t clip(int32_t sample, int16_t level = MAX_LEVEL) {
     return min(max(sample, -level), level);
 };
 
-template <typename T>
-inline int32_t scale(int32_t sample, T value) {
-    return (sample * (int32_t)value) >> SHIFT(T);
+inline int16_t scale(int16_t sample, int16_t value) {
+    return (int16_t)((sample * (int32_t)value) >> 15);
 };
 
-inline int32_t scale(int32_t sample, int32_t value, int8_t shift) {
-    return (sample * value) >> shift;
-};
-
-#define MIX_DOWN_RANGE_F (0.85)
-#define MIX_DOWN_SCALE_F(x) (1.0 / (x - MIX_DOWN_RANGE_F))
-
-static float mixDown(float sample, float scale = MIX_DOWN_SCALE_F(2.0)) {
-    if (sample < -MIX_DOWN_RANGE_F) {
-        sample = ((sample + MIX_DOWN_RANGE_F) * scale) - MIX_DOWN_RANGE_F;
-    } else if (sample > MIX_DOWN_RANGE_F) {
-        sample = ((sample - MIX_DOWN_RANGE_F) * scale) + MIX_DOWN_RANGE_F;
-    }
-    return sample;
+inline int16_t scale(int16_t sample, int16_t value, int8_t shift) {
+    return (int16_t)((sample * (int32_t)value) >> shift);
 };
 
 #define MIX_DOWN_RANGE (28000)
 #define MIX_DOWN_SCALE(x) (0xfffffff / (32768 * x - MIX_DOWN_RANGE))
 
-static int16_t mixDown(int32_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
+static int16_t mixDown(int16_t sample, int32_t scale = MIX_DOWN_SCALE(2)) {
     if (sample < -MIX_DOWN_RANGE) {
         sample = (((sample + MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) - MIX_DOWN_RANGE;
     } else if (sample > MIX_DOWN_RANGE) {
         sample = (((sample - MIX_DOWN_RANGE) * scale) >> (sizeof(int16_t) * 8)) + MIX_DOWN_RANGE;
     }
-    return sample;
+    return (int16_t)sample;
 };
 
-static float applyMix(float dry, float wet, float mix) {
-    if (mix >= 1.0) return wet;
-    if (mix <= 0.0) return dry;
+static int16_t applyMix(int16_t dry, int16_t wet, int16_t mix) {
     return mixDown(
-        (float)(dry * (mix <= 0.5 ? 1.0 : ((1.0 - mix) * 2.0))
-        + wet * (mix >= 0.5 ? 1.0 : (mix * 2.0)))
-    );
-};
-
-template <typename T>
-static int32_t applyMix(int32_t dry, int32_t wet, T mix) {
-    return mixDown(
-        scale<T>(dry, mix <= MID_VALUE(T) ? MAX_VALUE(T) : ((MAX_VALUE(T) - mix) << 1))
-        + scale<T>(wet, mix >= MID_VALUE(T) ? MAX_VALUE(T) : mix << 1),
+        scale(dry, mix <= MID_LEVEL ? MAX_LEVEL : ((MAX_LEVEL - mix) << 1))
+        + scale(wet, mix >= MID_LEVEL ? MAX_LEVEL : mix << 1),
         MIX_DOWN_SCALE(2)
     );
 };
 
-static float applyLinearMix(float dry, float wet, float mix) {
-    if (mix >= 1.0) return wet;
-    if (mix <= 0.0) return dry;
-    return mixDown((float)(dry * (1.0 - mix) + wet * mix));
-};
-
-template <typename T>
-static int32_t applyLinearMix(int32_t dry, int32_t wet, T mix) {
+static int16_t applyLinearMix(int16_t dry, int16_t wet, int16_t mix) {
     return mixDown(
-        scale<T>(dry, MAX_VALUE(T) - mix)
-        + scale<T>(wet, mix),
+        scale(dry, MAX_LEVEL - mix)
+        + scale(wet, mix),
         MIX_DOWN_SCALE(2)
     );
 };

@@ -14,7 +14,7 @@ Envelope::Envelope(float attack, float release, float rise, float fall, uint8_t 
 };
 
 void Envelope::setAttackLevel(float value) {
-    _attack = (int16_t)(value * MAX_VALUE(int16_t));
+    _attack = convertToInt(value);
 };
 
 void Envelope::setAttackCallback(EnvelopeAttackCallback cb) {
@@ -22,7 +22,7 @@ void Envelope::setAttackCallback(EnvelopeAttackCallback cb) {
 };
 
 void Envelope::setReleaseLevel(float value) {
-    _release = (int16_t)(value * MAX_VALUE(int16_t));
+    _release = convertToInt(value);
 };
 
 void Envelope::setReleaseCallback(EnvelopeAttackCallback cb) {
@@ -42,24 +42,24 @@ bool Envelope::didRelease() {
 };
 
 void Envelope::setRise(float value) {
-    _rise = (int16_t)(value * MAX_VALUE(int16_t));
+    _rise = convertToInt(value);
 };
 
 void Envelope::setFall(float value) {
-    _fall = (int16_t)(value * MAX_VALUE(int16_t));
+    _fall = convertToInt(value);
 };
 
-void Envelope::process(int32_t *l, int32_t *r) {
+void Envelope::process(int16_t *l, int16_t *r) {
     _did_attack = _did_release = false;
 
-    int32_t sample = *l;
+    int16_t sample = *l;
     if (_isStereo && r != nullptr) {
         sample += *r;
         // No need for dynamic compression
     }
 
     int16_t mix = (_accum < sample ? _rise : _fall);
-    _accum = applyLinearMix<int16_t>(_accum, max(sample, 0), mix);
+    _accum = applyLinearMix(_accum, max(sample, 0), mix);
 
     if (!_active && _accum > _attack) {
         _active = true;
@@ -73,7 +73,7 @@ void Envelope::process(int32_t *l, int32_t *r) {
 };
 
 float Envelope::get() {
-    return convert(_accum); // Convert to float
+    return convertToFloat(_accum); // Convert to float
 };
 
 int32_t Envelope::get_scaled() {

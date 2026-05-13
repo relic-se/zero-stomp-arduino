@@ -19,7 +19,7 @@ class Reverb : public Effect
 {
 
 public:
-    Reverb(ReverbMode mode = NORMAL, float room_size = initialroom, float damping = initialdamp, float width = initialwidth, int16_t mix = MAX_VALUE(int16_t), size_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS);
+    Reverb(ReverbMode mode = NORMAL, float room_size = initialroom, float damping = initialdamp, float width = initialwidth, int16_t mix = MAX_LEVEL, size_t sample_rate = DEFAULT_SAMPLE_RATE, uint8_t channels = DEFAULT_CHANNELS);
 
     void setMode(ReverbMode value);
     void setRoomSize(float value);
@@ -29,7 +29,7 @@ public:
     void setSampleRate(size_t value);
     void setChannels(uint8_t value) override;
 
-    void process(int32_t *l, int32_t *r = nullptr);
+    void process(int16_t *l, int16_t *r = nullptr);
 
 private:
     revmodel _model;

@@ -72,7 +72,7 @@ void setup(void) {
 
 size_t pattern = -1;
 
-void updateControl(uint32_t samples) {
+void updateControl(size_t samples) {
   zeroStomp.setMix(knobMix.get(255));
   effect.setDecay(mapControl(knobDecay.get() + zeroStomp.getExpression(), MIN_LEVEL, MAX_LEVEL));
 
@@ -89,6 +89,6 @@ void updateControl(uint32_t samples) {
   }
 }
 
-void updateAudio(int32_t *l, int32_t *r) {
+void updateAudio(int16_t *l, int16_t *r) {
   effect.process(l, r);
 }

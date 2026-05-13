@@ -29,16 +29,16 @@ Detect::Detect(size_t size, size_t sample_rate, uint8_t channels) :
     #endif
 };
 
-void Detect::process(int32_t *l, int32_t *r) {
+void Detect::process(int16_t *l, int16_t *r) {
     if (_pos >= _size) return;
 
     int32_t sample = *l;
-    if (_isStereo) {
+    if (_isStereo && r != nullptr) {
         sample += *r;
         sample = mixDown(sample, MIX_DOWN_SCALE(2));
     }
 
-    _real[_pos] = convert(sample);
+    _real[_pos] = convertToFloat(sample);
     _imag[_pos++] = 0.0;
 };
 
